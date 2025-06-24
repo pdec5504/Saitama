@@ -30,5 +30,5 @@ app.get('/routines/:routineId/exercises', (req, res) => {
 });
 
 app.listen(4000, () => {
-    console.log("Server is running on port 4000");
+    console.log("Exercises server is running on port 4000");
 })

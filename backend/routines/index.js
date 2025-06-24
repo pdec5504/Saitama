@@ -7,6 +7,7 @@ const app = express();
 app.use(express.json());
 
 const routines = {}
+// counter para controlar os IDs das rotinas
 // let counter = 0;
 
 app.get('/routines', (req, res) => {
@@ -29,6 +30,6 @@ app.post('/routines', async (req, res) => {
 })
 
 app.listen(3000, () => {
-    console.log('Server is running on port 3000');
+    console.log('Routine server is running on port 3000');
 });
 
