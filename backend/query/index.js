@@ -23,12 +23,38 @@ const functions = {
 };
 
 app.get('/routines', (req, res) => {
-    res.status(200).send(base)
+    
+    const routinesToDisplay = {};
+
+    for(const routineId in base){
+        const originalRoutine = base[routineId];
+        const numberedExercises = originalRoutine.exercises.map((exercise, index) => {
+            return {
+                order: index + 1,
+                name: exercise.name,
+                reps: exercise.reps,
+                sets: exercise.sets
+            }
+        });
+
+        routinesToDisplay[routineId] = {
+            id: originalRoutine.id,
+            name: originalRoutine.name,
+            weekDay: originalRoutine.weekDay,
+            exercises: numberedExercises
+        }
+    }
+    res.status(200).send(routinesToDisplay)
 });
 
 app.post('/events', (req, res) => {
     const event = req.body;
-    console.log("Processing event:", event.type);
+    // console.log("Processing event:", event.type);
+    console.log("-------------------------------------------");
+    console.log("Evento Recebido no Serviço de Consulta:");
+    console.log("--> Tipo do Evento Recebido:", `'${event.type}'`);
+    console.log("--> Handlers Disponíveis:", Object.keys(functions));
+    console.log("-------------------------------------------");
 
     try{
         const handler = functions[event.type];
