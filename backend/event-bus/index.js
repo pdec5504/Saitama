@@ -13,6 +13,9 @@ app.post('/events', (req, res) => {
     axios.post('http://localhost:3000/events', event).catch(err => {})
     // send the event to Exercises service
     axios.post('http://localhost:4000/events', event).catch(err => {})
+    // send the event to Query service
+    axios.post('http://localhost:6000/events', event).catch(err => {})
+    
     res.status(200).send({ status: 'OK' });
 });
 
