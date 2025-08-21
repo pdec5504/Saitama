@@ -34,6 +34,16 @@ const functions = {
         } else {
             console.warn(`Query: Routine ${exercise.routineId} not found for exercise ${exercise.name}. Event ignored.`);
         }
+    },
+    RoutineAnalyzed: (analysis) => {
+        const { routineId, classification } = analysis;
+        const routine = base[analysis.routineId];
+
+        if (routine){
+            // routine.classification = analysis.classification;
+            base[routineId] = { ...routine, classification: classification};
+            console.log(`Query: Routine ${analysis.routineId} classified as ${analysis.classification}`);
+        }
     }
 };
 
