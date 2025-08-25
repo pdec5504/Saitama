@@ -65,11 +65,11 @@ app.post('/routines', async (req, res) => {
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
 
     try{
-        console.log("--- DEBUG DE CONEXÃO (Publisher) ---");
-        console.log("Host:", process.env.RABBITMQ_HOST);
-        console.log("User:", process.env.RABBITMQ_USER);
-        console.log("Password:", process.env.RABBITMQ_PASSWORD);
-        console.log("------------------------------------");
+        // console.log("--- DEBUG DE CONEXÃO (Publisher) ---");
+        // console.log("Host:", process.env.RABBITMQ_HOST);
+        // console.log("User:", process.env.RABBITMQ_USER);
+        // console.log("Password:", process.env.RABBITMQ_PASSWORD);
+        // console.log("------------------------------------");
         const connection = await amqp.connect(rabbitMQUrl);
         const channel = await connection.createChannel();
         const exchange = 'event_exchange';
@@ -93,11 +93,11 @@ async function startConsumer(){
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
 
     try{
-        console.log("--- DEBUG DE CONEXÃO (Consumer) ---");
-        console.log("Host:", process.env.RABBITMQ_HOST);
-        console.log("User:", process.env.RABBITMQ_USER);
-        console.log("Password:", process.env.RABBITMQ_PASSWORD);
-        console.log("------------------------------------");
+        // console.log("--- DEBUG DE CONEXÃO (Consumer) ---");
+        // console.log("Host:", process.env.RABBITMQ_HOST);
+        // console.log("User:", process.env.RABBITMQ_USER);
+        // console.log("Password:", process.env.RABBITMQ_PASSWORD);
+        // console.log("------------------------------------");
         const connection = await amqp.connect(rabbitMQUrl);
         const channel = await connection.createChannel();
         const exchange = 'event_exchange';
