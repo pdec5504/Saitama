@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-// const axios = require('axios');
 const amqp = require('amqplib');
 
 const app = express();
@@ -11,10 +10,15 @@ app.use(express.json());
 
 const base = {}; //base consulta
 
+let routineCounter = 0;
+
 const functions = {
     RoutineCreated: (routine) => {
-        base[routine.id] = { ...routine, exercises: [] };
-        console.log(`Query: Routine ${routine.id} created`);
+        const routineLabel = `${String.fromCharCode(65 + routineCounter)}`
+        routineCounter++;
+
+        base[routine.id] = { ...routine, label: routineLabel, exercises: [] };
+        console.log(`Query: Routine ${routine.id} created and labeled as ${routineLabel}`);
     },
     ExerciseAdded: (exercise) => {
         const routine = base[exercise.routineId];
@@ -52,21 +56,6 @@ app.get('/routines', (req, res) => {
     res.status(200).send(base);
 });
 
-//old logic with axios
-// app.post('/events', (req, res) => {
-//     const event = req.body;
-//     console.log("Processing event:", event.type);
-//     try {
-//         const handler = functions[event.type];
-//         if (handler) {
-//             handler(event.data);
-//         }
-//     }
-//     catch (error) {
-//         console.error("Error processing event:", error);
-//     }
-//     res.status(200).send({ status: 'ok' });
-// });
 
 async function startConsumer(){
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
@@ -99,24 +88,6 @@ async function startConsumer(){
     }
 }
 
-// old logic 
-// app.listen(6000, async () => {
-//     console.log('Query server is running on port 6000');
-//     try {
-//         console.log('Synchronizing events...');
-//         const res = await axios.get('http://localhost:10000/events');
-//         for (const event of res.data) {
-//             console.log('Re-processing event:', event.type);
-//             const handler = functions[event.type];
-//             if (handler) {
-//                 handler(event.data);
-//             }
-//         }
-//         console.log("Synchronization complete.");
-//     } catch (error) {
-//         console.error("Error during synchronization:", error.message);
-//     }
-// });
 
 app.listen(6000, () => {
     console.log('Query server is running on port 6000')
