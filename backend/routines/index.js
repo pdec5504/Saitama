@@ -3,16 +3,14 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
-// const axios = require('axios');
 const amqp = require('amqplib');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const routines = {}
-// counter para controlar os IDs das rotinas
-// let counter = 0;
+const routines = {};
+
 
 const functions = {
     ExerciseAdded: (exercise) => {
@@ -55,21 +53,11 @@ app.post('/routines', async (req, res) => {
         exercises: []
     };
     routines[routineId] = routine;
-    // send event to the event bus
-    // await axios.post('http://localhost:10000/events', {
-    //     type: 'RoutineCreated',
-    //     data: routine
-    // });
 
     // connect to RabbitMQ server
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
 
     try{
-        // console.log("--- DEBUG DE CONEXÃO (Publisher) ---");
-        // console.log("Host:", process.env.RABBITMQ_HOST);
-        // console.log("User:", process.env.RABBITMQ_USER);
-        // console.log("Password:", process.env.RABBITMQ_PASSWORD);
-        // console.log("------------------------------------");
         const connection = await amqp.connect(rabbitMQUrl);
         const channel = await connection.createChannel();
         const exchange = 'event_exchange';
@@ -89,15 +77,82 @@ app.post('/routines', async (req, res) => {
     res.status(201).send(routines[routineId]);
 });
 
+//routine edit endpoint
+app.put('/routines/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, weekDay } = req.body;
+
+    const existingRoutine = routines[id];
+    if(!existingRoutine){
+        return res.status(404).send({ message: "Routine not found" });
+    }
+    
+    //update data 
+    existingRoutine.name = name
+    existingRoutine.weekDay = weekDay
+
+    //publish 'RoutineUpdated' event
+    try{
+        const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
+        const connection = await amqp.connect(rabbitMQUrl);
+        const channel = await connection.createChannel();
+        const exchange = 'event_exchange';
+        
+        const event = {
+            type: 'RoutineUpdated',
+            data: existingRoutine
+        };
+
+        await channel.assertExchange(exchange, 'fanout', { durable: false });
+        channel.publish(exchange, '', Buffer.from(JSON.stringify(event)));
+        console.log(`Publisher (Routines): Event [${event.type}] published.`);
+
+        await channel.close();
+        await connection.close();
+    } catch (error){
+        console.error('Error publishing event "RoutineUpdated":', error)
+    }
+
+    res.status(200).send(existingRoutine);
+})
+
+// delete routine endpoint
+app.delete('/routines/:id', async (req, res) => {
+    const { id } = req.params;
+
+    if(!routines[id]){
+        return res.status(404).send({ message: "Routine not found" });
+    }
+
+    delete routines[id];
+
+    try{
+        const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
+        const connection = await amqp.connect(rabbitMQUrl);
+        const channel = await connection.createChannel();
+        const exchange = 'event_exchange';
+
+        const event = {
+            type: 'RoutineDeleted',
+            data: { id: id }
+        };
+
+        await channel.assertExchange(exchange, 'fanout', { durable: false });
+        channel.publish(exchange, '', Buffer.from(JSON.stringify(event)));
+        console.log(`Publisher (Routines): Event [${event.type}] published.`);
+
+        await channel.close();
+        await connection.close();
+    }catch (error){
+        console.error('Error publishing event "RoutineDeleted":', error)
+    }
+    res.status(204).send();
+})
+
 async function startConsumer(){
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
 
     try{
-        // console.log("--- DEBUG DE CONEXÃO (Consumer) ---");
-        // console.log("Host:", process.env.RABBITMQ_HOST);
-        // console.log("User:", process.env.RABBITMQ_USER);
-        // console.log("Password:", process.env.RABBITMQ_PASSWORD);
-        // console.log("------------------------------------");
         const connection = await amqp.connect(rabbitMQUrl);
         const channel = await connection.createChannel();
         const exchange = 'event_exchange';
@@ -124,22 +179,6 @@ async function startConsumer(){
     }
 }
 
-// old logic
-// app.post('/events', (req, res) => {
-//     const event = req.body;
-//     console.log('Event received:', event.type);
-
-//     try {
-//         if(functions[event.type]){
-//             functions[event.type](event.data);
-//         }else{
-//             console.log("Event type not handled:", event.type);
-//         }
-//     } catch (error) {
-//         console.error('Error handling event:', error);
-//     }
-//     res.status(200).send({ status: 'OK' });
-// });
 
 app.listen(3000, () => {
     console.log('Routines server is running on port 3000');

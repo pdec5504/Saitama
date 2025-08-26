@@ -10,15 +10,19 @@ app.use(express.json());
 
 const base = {}; //base consulta
 
-let routineCounter = 0;
+// let routineCounter = 0;
 
 const functions = {
     RoutineCreated: (routine) => {
-        const routineLabel = `${String.fromCharCode(65 + routineCounter)}`
-        routineCounter++;
+        // add labels to routines if needed (A, B, C, ...)
+        // const routineLabel = `${String.fromCharCode(65 + routineCounter)}`
+        // routineCounter++;
 
-        base[routine.id] = { ...routine, label: routineLabel, exercises: [] };
-        console.log(`Query: Routine ${routine.id} created and labeled as ${routineLabel}`);
+        base[routine.id] = { ...routine, exercises: [] };
+        console.log(`Query: Routine ${routine.id} created.`);
+        // add labels to routines if needed (A, B, C, ...)
+        // base[routine.id] = { ...routine, label: routineLabel, exercises: [] };
+        // console.log(`Query: Routine ${routine.id} created and labeled as ${routineLabel}`);
     },
     ExerciseAdded: (exercise) => {
         const routine = base[exercise.routineId];
@@ -49,6 +53,16 @@ const functions = {
             base[routineId] = { ...routine, classification: classification};
             console.log(`Query: Routine ${analysis.routineId} classified as ${analysis.classification}`);
         }
+    },
+
+    RoutineUpdated: (routine) => {
+        base[routine.id] = routine;
+        console.log(`Query: Routine ${routine.id} updated.`);
+    },
+
+    RoutineDeleted: (routine) => {
+        delete base[routine.id]
+        console.log(`Query: Routine ${routine.id} deleted.`);
     }
 };
 
