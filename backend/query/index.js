@@ -84,7 +84,11 @@ const functions = {
     ExerciseDeleted: (data) => {
         const routine = base[data.routineId];
         if (routine && Array.isArray(routine.exercises)){
-            routine.exercises = routine.exercises.filter(ex => ex.originalId !== data.id);
+            const remaningExercises = routine.exercises.filter(ex => ex.originalId !== data.id);
+            const reorderedExercises = remaningExercises.map((exercise, index) => {
+                return { ...exercise, order: index + 1};
+            });
+            routine.exercises = reorderedExercises;
             console.log(`Query: Exercise ${data.id} in routine ${data.routineId} deleted.`);
         }
     }
