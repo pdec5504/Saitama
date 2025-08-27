@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-// const axios = require('axios');
 const amqp = require('amqplib');
 
 const app = express();
@@ -13,20 +12,20 @@ const routinesToAnalyze = {};
 
 const analyseAndClassify = async (routineId) => {
     const routine = routinesToAnalyze[routineId];
-
-    if(!routine || !routine.exercises || routine.exercises.length === 0){
-        console.log(`Analysis: Routine ${routineId} don't have exercises to analyze.`)
-        return;
-    } 
-
-    const reps = routine.exercises.map(ex => parseInt(ex.reps, 10));
-
-    const minReps = Math.min(...reps);
-    const maxReps = Math.max(...reps);
-
+    if(!routine) return;
     let classification = "General Training"; //default
+    let reps = [];
+    // if(!routine || !routine.exercises || routine.exercises.length === 0){
+    //     console.log(`Analysis: Routine ${routineId} don't have exercises to analyze.`)
+    //     return;
+    // } 
+    if(routine.exercises && routine.exercises.length > 0){
 
-    if(minReps <= 6 && maxReps >= 8){
+        reps = routine.exercises.map(ex => parseInt(ex.reps, 10));
+        const minReps = Math.min(...reps);
+        const maxReps = Math.max(...reps);
+
+        if(minReps <= 6 && maxReps >= 8){
         classification = "Hybrid Training (Strength/ Hypertrophy)";
     }
     else{
@@ -43,8 +42,7 @@ const analyseAndClassify = async (routineId) => {
             classification = "Hybrid Training (Strength/ Hypertrophy)";
         }
     }
-
-
+    };
     console.log(`${routineId} Routine Analyses: [${reps.join(', ')}] reps -> Classification: ${classification}`);
 
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
@@ -74,18 +72,6 @@ const analyseAndClassify = async (routineId) => {
 };
 
 
-//     try{
-//         await axios.post("http://localhost:10000/events", {
-//             type: "RoutineAnalyzed",
-//             data:{
-//                 routineId: routine.id,
-//                 classification: classification
-//             }
-//         });
-//     } catch(error){
-//         console.error("Error to send analysis event: ", error.message);
-//     }
-// };
 
 const functions = {
 
@@ -100,21 +86,29 @@ const functions = {
             routine.exercises.push(exercise);
             analyseAndClassify(exercise.routineId);
         }
-    }
+    },
 
+    ExerciseUpdated: (exercise) => {
+        const routine = routinesToAnalyze[exercise.routineId];
+        if(routine){
+            const index = routine.exercises.findIndex(ex => ex.id === exercise.id);
+            if(index !== -1){
+                routine.exercises[index] = exercise;
+                analyseAndClassify(exercise.routineId);
+            }
+        }
+    },
+
+    ExerciseDeleted: (data) => {
+        const routine = routinesToAnalyze[data.routineId];
+        if (routine){
+            routine.exercises = routine.exercises.filter(ex => ex.id !== data.id);
+            analyseAndClassify(data.routineId);
+        }
+    }
 };
 
-// old logic
-// app.post("/events", (req, res) => {
-//     const { type, data } = req.body;
-//     console.log("Event received (Analysis):", type);
 
-//     if(functions[type]){
-//         functions[type](data);
-//     }
-
-//     res.status(200).send({ status: "OK" });
-// });
 
 async function startConsumer(){
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
@@ -132,7 +126,7 @@ async function startConsumer(){
         channel.consume(q.queue, (msg) => {
             if(msg.content){
                 const event = JSON.parse(msg.content.toString());
-                console.log(`Consumer (Analysis): Event received - ${event.type}`, event.type);
+                console.log(`Consumer (Analysis): Event received - ${event.type}`);
 
                 if(functions[event.type]){
                     functions[event.type](event.data);

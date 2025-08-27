@@ -29,6 +29,26 @@ const functions = {
         }else{
             console.warn(`Routine ${exercise.routineId} not found for exercise ${exercise.name}.`);
         }
+    },
+
+    ExerciseUpdated: (exercise) => {
+        const routine = routines[exercise.routineId];
+        if (routine){
+            const index = routine.exercises.findIndex(ex => ex.id === exercise.id);
+            if(index !== -1){
+                routine.exercises[index] = exercise;
+                console.log(`Query: Exercise ${exercise.id} in routine ${exercise.routineId}
+                    updated.`);
+            }
+        }
+    },
+
+    ExerciseDeleted: (data) => {
+        const routine = routines[data.routineId];
+        if (routine){
+            routine.exercises = routine.exercises.filter(ex => ex.id !== data.id);
+            console.log(`Query: Exercise ${data.id} in routine ${data.routineId} deleted.`);
+        }
     }
 }
 

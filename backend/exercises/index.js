@@ -3,8 +3,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
-// const axios = require('axios');
 const amqp = require('amqplib');
+const e = require('express');
 
 
 const app = express();
@@ -25,18 +25,6 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
         id: exerciseId, name, reps, sets, routineId });
     exercisesByRoutineId[routineId] = routineExercises;
 
-    // console.log(`Exercise ${name} added to routine ${routineId}. Exercise ID: ${exerciseId}`);
-    // send event to the event bus (old logic using axios)
-    // axios.post('http://localhost:10000/events',{
-    //     type: 'ExerciseAdded',
-    //     data: {
-    //         id: exerciseId,
-    //         name,
-    //         reps,
-    //         sets,
-    //         routineId
-    //     }
-    // })
 
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
     try{
@@ -75,11 +63,80 @@ app.get('/routines/:routineId/exercises', (req, res) => {
     res.send(exercisesByRoutineId[routineId] || []);
 });
 
-//old logic using event bus
-// app.post('/events', (req, res) => {
-//     res.status(200).send({ status: 'OK' });
-//     console.log('Event received:', req.body);
-// });
+// edit exercise endpoint
+app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
+    const { routineId, exerciseId } = req.params;
+    const { name, reps, sets} = req.body;
+
+    const routineExercises = exercisesByRoutineId[routineId];
+    if(!routineExercises){
+        return res.status(404).send({ message: 'Routine not found'});
+    }
+
+    const exerciseToUpdate = routineExercises.find(ex => ex.id === exerciseId);
+    if(!exerciseToUpdate){
+        return res.status(404).send({ message: 'Exercise not found'});
+    }
+
+    exerciseToUpdate.name = name || exerciseToUpdate.name;
+    exerciseToUpdate.reps = reps || exerciseToUpdate.reps;
+    exerciseToUpdate.sets = sets || exerciseToUpdate.sets;
+
+    const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
+    try{
+        const connection = await amqp.connect(rabbitMQUrl);
+        const channel = await connection.createChannel();
+        const exchange = 'event_exchange';
+        const event = {
+            type: 'ExerciseUpdated',
+            data: exerciseToUpdate
+        };
+        await channel.assertExchange(exchange, 'fanout', { durable: false })
+        channel.publish(exchange, '', Buffer.from(JSON.stringify(event)));
+        console.log(`Publisher (Exercises): Event [${event.type}] sent to RabbitMQ.`);
+        await channel.close();
+        await connection.close();
+    }catch (error){
+        console.error("Error to publish event 'ExerciseUpdated' to RabbitMQ:", error);
+    }
+    res.status(200).send(exerciseToUpdate);
+})
+
+//delete exercise endpoint
+app.delete('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
+    const { routineId, exerciseId } = req.params;
+
+    const routineExercises = exercisesByRoutineId[routineId];
+    if(!routineExercises){
+        return res.status(404).send({ message: 'Routine not found'});
+    }
+
+    const exerciseIndex = routineExercises.findIndex(ex => ex.id === exerciseId);
+    if(exerciseIndex === -1){
+        return res.status(404).send({ message: 'Exercise not found'});
+    }
+
+    exercisesByRoutineId[routineId].splice(exerciseIndex, 1);
+
+    const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
+    try{
+        const connection = await amqp.connect(rabbitMQUrl);
+        const channel = await connection.createChannel();
+        const exchange = 'event_exchange';
+        const event = {
+            type: 'ExerciseDeleted',
+            data: { id: exerciseId, routineId: routineId}
+        };
+        await channel.assertExchange(exchange, 'fanout', { durable: false })
+        channel.publish(exchange, '', Buffer.from(JSON.stringify(event)));
+        console.log(`Publisher (Exercises): Event [${event.type}] sent to RabbitMQ.`);
+        await channel.close();
+        await connection.close();
+    }catch (error){
+        console.error("Error to publish event 'ExerciseDeleted' to RabbitMQ:", error);
+    }
+    res.status(204).send();
+})
 
 app.listen(4000, () => {
     console.log("Exercises server is running on port 4000");

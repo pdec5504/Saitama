@@ -46,7 +46,7 @@ const functions = {
     },
     RoutineAnalyzed: (analysis) => {
         const { routineId, classification } = analysis;
-        const routine = base[analysis.routineId];
+        const routine = base[routineId];
 
         if (routine){
             // routine.classification = analysis.classification;
@@ -56,13 +56,37 @@ const functions = {
     },
 
     RoutineUpdated: (routine) => {
-        base[routine.id] = routine;
-        console.log(`Query: Routine ${routine.id} updated.`);
+        const existingRoutine = base[routine.id];
+        if (existingRoutine){
+            const preservedExercises = existingRoutine.exercises;
+            base[routine.id] = { ...existingRoutine, ...routine, exercises: preservedExercises};
+            console.log(`Query: Routine ${routine.id} updated.`);
+        }
     },
 
-    RoutineDeleted: (routine) => {
-        delete base[routine.id]
-        console.log(`Query: Routine ${routine.id} deleted.`);
+    RoutineDeleted: (data) => {
+        delete base[data.id]
+        console.log(`Query: Routine ${data.id} deleted.`);
+    },
+
+    ExerciseUpdated: (exercise) => {
+        const routine = base[exercise.routineId];
+        if (routine){
+            const index = routine.exercises.findIndex(ex => ex.originalId === exercise.id);
+            if(index !== -1){
+                routine.exercises[index] = { ...routine.exercises[index], ...exercise};
+                console.log(`Query: Exercise ${exercise.id} in routine ${exercise.routineId}
+                    updated.`);
+            }
+        }
+    },
+
+    ExerciseDeleted: (data) => {
+        const routine = base[data.routineId];
+        if (routine && Array.isArray(routine.exercises)){
+            routine.exercises = routine.exercises.filter(ex => ex.originalId !== data.id);
+            console.log(`Query: Exercise ${data.id} in routine ${data.routineId} deleted.`);
+        }
     }
 };
 
