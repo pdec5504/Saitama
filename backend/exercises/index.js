@@ -14,6 +14,16 @@ app.use(cors());
 // in-memory storage for exercises
 const exercisesByRoutineId = {};
 
+const functions = {
+    RoutineDeleted: (data) => {
+        const { id } = data;
+        if (exercisesByRoutineId[id]){
+            delete exercisesByRoutineId[id];
+            console.log(`Consumer (Exercises): Exercises of routine ${id} deleted.`);
+        }
+    }
+};
+
 app.post('/routines/:routineId/exercises', async (req, res) => {
     const { routineId } = req.params;
     const { name, reps, sets } = req.body;
@@ -138,6 +148,33 @@ app.delete('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
     res.status(204).send();
 })
 
+async function startConsumer(){
+    const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
+    try{
+        const connection = await amqp.connect(rabbitMQUrl);
+        const channel = await connection.createChannel();
+        const exchange = 'event_exchange';
+        await channel.assertExchange(exchange, 'fanout', { durable:false });
+        const q = await channel.assertQueue('exercises_events', { durable: true });
+        console.log(`Consumer (exercises) waiting for events in queue: ${q.queue}`);
+        await channel.bindQueue(q.queue, exchange, '');
+        channel.consume(q.queue, (msg) => {
+            if (msg.content){
+                const event = JSON.parse(msg.content.toString());
+                console.log(`Consumer (Exercises): Event received - ${event.type}`);
+
+                if(functions[event.type]){
+                    functions[event.type](event.data);
+                }
+                channel.ack(msg);
+            }
+        });
+    } catch (error){
+        console.error('Error in Consumer (Exercises):', error.message);
+    }
+}
+
 app.listen(4000, () => {
     console.log("Exercises server is running on port 4000");
+    startConsumer();
 })
