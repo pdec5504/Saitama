@@ -126,6 +126,13 @@ const functions = {
             { $pull: { exercises: { id: data.id } } }
         );
         await analyseAndClassify(data.routineId);
+    },
+
+    RoutineDeleted: async (data) => {
+        const result = await collection.deleteOne({ _id: data.id });
+        if(result.deletedCount > 0){
+            console.log(`Analysis: Routine ${data.id} data deleted from databse.`);
+        }
     }
 };
 
