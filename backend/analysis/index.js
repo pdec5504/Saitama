@@ -3,15 +3,17 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const amqp = require('amqplib');
+const { MongoClient } = require('mongodb');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const routinesToAnalyze = {};
+// const routinesToAnalyze = {};
+let collection;
 
 const analyseAndClassify = async (routineId) => {
-    const routine = routinesToAnalyze[routineId];
+    const routine = await collection.findOne({ _id: routineId});
     if(!routine) return;
     let classification = "General Training"; //default
     let reps = [];
@@ -75,36 +77,55 @@ const analyseAndClassify = async (routineId) => {
 
 const functions = {
 
-    RoutineCreated: (routine) => {
-        routinesToAnalyze[routine.id] = { ...routine, exercises: []};
+    RoutineCreated: async (routine) => {
+        // routinesToAnalyze[routine.id] = { ...routine, exercises: []};
+        await collection.insertOne({ _id: routine.id, ...routine, exercises: []});
         console.log(`Analysis: Routine ${routine.id} registred to future analysis.`);
     },
 
-    ExerciseAdded: (exercise) => {
-        const routine = routinesToAnalyze[exercise.routineId];
-        if(routine){
-            routine.exercises.push(exercise);
-            analyseAndClassify(exercise.routineId);
-        }
+    ExerciseAdded: async (exercise) => {
+        // const routine = routinesToAnalyze[exercise.routineId];
+        // if(routine){
+        //     routine.exercises.push(exercise);
+        //     analyseAndClassify(exercise.routineId);
+        // }
+
+        await collection.updateOne(
+            { _id: exercise.routineId },
+            { $push: { exercises: exercise } }
+        );
+        await analyseAndClassify(exercise.routineId);
     },
 
-    ExerciseUpdated: (exercise) => {
-        const routine = routinesToAnalyze[exercise.routineId];
-        if(routine){
-            const index = routine.exercises.findIndex(ex => ex.id === exercise.id);
-            if(index !== -1){
-                routine.exercises[index] = exercise;
-                analyseAndClassify(exercise.routineId);
-            }
-        }
+    ExerciseUpdated: async (exercise) => {
+        // const routine = routinesToAnalyze[exercise.routineId];
+        // if(routine){
+        //     const index = routine.exercises.findIndex(ex => ex.id === exercise.id);
+        //     if(index !== -1){
+        //         routine.exercises[index] = exercise;
+        //         analyseAndClassify(exercise.routineId);
+        //     }
+        // }
+
+        await collection.updateOne(
+            { _id: exercise.routineId, "exercises.id": exercise.id },
+            { $set: { "exercises.$": exercise } }
+        );
+        await analyseAndClassify(exercise.routineId);
     },
 
-    ExerciseDeleted: (data) => {
-        const routine = routinesToAnalyze[data.routineId];
-        if (routine){
-            routine.exercises = routine.exercises.filter(ex => ex.id !== data.id);
-            analyseAndClassify(data.routineId);
-        }
+    ExerciseDeleted: async (data) => {
+        // const routine = routinesToAnalyze[data.routineId];
+        // if (routine){
+        //     routine.exercises = routine.exercises.filter(ex => ex.id !== data.id);
+        //     analyseAndClassify(data.routineId);
+        // }
+
+        await collection.updateOne(
+            { _id: data.routineId },
+            { $pull: { exercises: { id: data.id } } }
+        );
+        await analyseAndClassify(data.routineId);
     }
 };
 
@@ -140,7 +161,21 @@ async function startConsumer(){
 
 }
 
-app.listen(7000, () => {
+app.listen(7000, async () => {
     console.log("Analysis server is running on port 7000.");
+
+    try{
+        const encodedPassword = encodeURIComponent(process.env.MONGO_PASSWORD);
+        const mongoUrl = `mongodb://${process.env.MONGO_USER}:${encodedPassword}@${process.env.MONGO_HOST}:27017`;
+        const client = new MongoClient(mongoUrl);
+        await client.connect();
+        const db = client.db(process.env.MONGO_DB_NAME);
+        collection = db.collection('analysis_routines');
+        console.log("Connected to MongoDB (Analysis).");
+    } catch(error){
+        console.error("Error connecting to MongoDB (Analysis): ", error.message);
+        process.exit(1);
+    }
+
     startConsumer();
 })
