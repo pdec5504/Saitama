@@ -76,6 +76,12 @@ app.post('/routines', async (req, res) => {
     // routines[routineId] = routine;
     await collection.insertOne(routine);
 
+    const eventData = {
+        id: routine._id,
+        name: routine.name,
+        weekDay: routine.weekDay
+    }
+
     // connect to RabbitMQ server
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
 
@@ -85,7 +91,7 @@ app.post('/routines', async (req, res) => {
         const exchange = 'event_exchange';
         const event = {
             type: 'RoutineCreated',
-            data: routine
+            data: eventData
         };
         await channel.assertExchange(exchange, 'fanout', { durable: false})
         channel.publish(exchange, '', Buffer.from(JSON.stringify(event)))

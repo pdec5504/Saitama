@@ -20,7 +20,12 @@ const functions = {
         // routineCounter++;
 
         // base[routine.id] = { ...routine, exercises: [] };
-        await collection.insertOne({ _id: routine.id, ...routine, exercises: []});
+        await collection.insertOne({
+            _id: routine.id,
+            name: routine.name,
+            weekDay: routine.weekDay,
+            exercises: []
+        });
         console.log(`Query: Routine ${routine.id} created.`);
         // add labels to routines if needed (A, B, C, ...)
         // base[routine.id] = { ...routine, label: routineLabel, exercises: [] };

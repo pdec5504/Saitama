@@ -17,10 +17,6 @@ const analyseAndClassify = async (routineId) => {
     if(!routine) return;
     let classification = "General Training"; //default
     let reps = [];
-    // if(!routine || !routine.exercises || routine.exercises.length === 0){
-    //     console.log(`Analysis: Routine ${routineId} don't have exercises to analyze.`)
-    //     return;
-    // } 
     if(routine.exercises && routine.exercises.length > 0){
 
         reps = routine.exercises.map(ex => parseInt(ex.reps, 10));
@@ -57,7 +53,7 @@ const analyseAndClassify = async (routineId) => {
         const analysisEvent = {
             type: 'RoutineAnalyzed',
             data: {
-                routineId: routine.id,
+                routineId: routine._id,
                 classification: classification
             }
         };
