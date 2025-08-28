@@ -66,18 +66,12 @@ const functions = {
         // }
     },
 
-    RoutineUpdated: async (routine) => {
-        // const existingRoutine = base[routine.id];
-        // if (existingRoutine){
-        //     const preservedExercises = existingRoutine.exercises;
-        //     base[routine.id] = { ...existingRoutine, ...routine, exercises: preservedExercises};
-        //     console.log(`Query: Routine ${routine.id} updated.`);
-        // }
+    RoutineUpdated: async (data) => {
         await collection.updateOne(
-            { _id: routine.id },
-            { $set: { name: routine.name, weekDay: routine.weekDay } }
+            { _id: data.id },
+            { $set: { name: data.name, weekDay: data.weekDay } }
         );
-        console.log(`Query: Routine ${routine.id} updated.`);
+        console.log(`Query: Routine ${data.id} updated.`);
 
     },
 

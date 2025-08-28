@@ -104,18 +104,15 @@ app.put('/routines/:id', async (req, res) => {
     const { id } = req.params;
     const { name, weekDay } = req.body;
 
-    // const existingRoutine = routines[id];
-    // if(!existingRoutine){
-    //     return res.status(404).send({ message: "Routine not found" });
-    // }
-    
-    // //update data 
-    // existingRoutine.name = name
-    // existingRoutine.weekDay = weekDay
-
     await collection.updateOne({ _id: id }, { $set: { name, weekDay } });
     const updatedRoutine = await collection.findOne({ _id: id });
     if (!updatedRoutine) return res.status(404).send({ message: "Routine not found" });
+
+    const eventData = {
+        id: updatedRoutine._id,
+        name: updatedRoutine.name,
+        weekDay: updatedRoutine.weekDay
+    };
 
     //publish 'RoutineUpdated' event
     try{
@@ -126,7 +123,7 @@ app.put('/routines/:id', async (req, res) => {
         
         const event = {
             type: 'RoutineUpdated',
-            data: updatedRoutine
+            data: eventData
         };
 
         await channel.assertExchange(exchange, 'fanout', { durable: false });
