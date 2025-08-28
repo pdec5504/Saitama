@@ -16,62 +16,39 @@ let collection; // MongoDB collection
 
 const functions = {
     ExerciseAdded: async (exercise) => {
-        // if(routines[exercise.routineId]){
-        //     if(!routines[exercise.routineId].exercises || !Array.isArray(routines[exercise.routineId].exercises)){
-        //         routines[exercise.routineId].exercises = [];
-        //     }
-        //     // add the exercise to the routine
-        //     routines[exercise.routineId].exercises.push({
-        //         id: exercise.id,
-        //         name: exercise.name,
-        //         reps: exercise.reps,
-        //         sets: exercise.sets
-        //     });
-        //     console.log(`Exercise ${exercise.name} added to routine ${exercise.routineId}.`);
-        // }else{
-        //     console.warn(`Routine ${exercise.routineId} not found for exercise ${exercise.name}.`);
-        // }
-
+        const simpleExercise = {
+            id: exercise.id,
+            name: exercise.name,
+            reps: exercise.reps,
+            sets: exercise.sets
+        };
         await collection.updateOne(
             { _id: exercise.routineId },
-            { $push: {exercises: exercise } }
+            { $push: {exercises: simpleExercise } }
         );
-        console.log(`Consumer (Routines): Exercise ${exercise.name} added to routine
-            ${exercise.routineId}.`);
+        console.log(`Consumer (Routines): Exercise ${exercise.name} added to routine ${exercise.routineId}.`);
     },
 
     ExerciseUpdated: async (exercise) => {
-        // const routine = routines[exercise.routineId];
-        // if (routine){
-        //     const index = routine.exercises.findIndex(ex => ex.id === exercise.id);
-        //     if(index !== -1){
-        //         routine.exercises[index] = exercise;
-        //         console.log(`Query: Exercise ${exercise.id} in routine ${exercise.routineId}
-        //             updated.`);
-        //     }
-        // }
-
+        const updatedExercise = {
+            id: exercise.id,
+            name: exercise.name,
+            reps: exercise.reps,
+            sets: exercise.sets
+        };
         await collection.updateOne(
             { _id: exercise.routineId, "exercises.id": exercise.id },
-            { $set: { "exercises.$": exercise}}
+            { $set: { "exercises.$": updatedExercise}}
         );
-        console.log(`Consumer (Routines): Exercise ${exercise.id} updated in routine 
-            ${exercise.routineId}.`)
+        console.log(`Consumer (Routines): Exercise ${exercise.id} updated in routine ${exercise.routineId}.`)
     },
 
     ExerciseDeleted: async (data) => {
-        // const routine = routines[data.routineId];
-        // if (routine){
-        //     routine.exercises = routine.exercises.filter(ex => ex.id !== data.id);
-        //     console.log(`Query: Exercise ${data.id} in routine ${data.routineId} deleted.`);
-        // }
-
         await collection.updateOne(
             { _id: data.routineId },
             { $pull: { exercises: { id: data.id } } }
         );
-        console.log(`Consumer (Routines): Exercise ${data.id} deleted from routine 
-            ${data.routineId}.`)
+        console.log(`Consumer (Routines): Exercise ${data.id} deleted from routine ${data.routineId}.`)
     }
 }
 
@@ -242,7 +219,7 @@ app.listen(3000, async () => {
         await client.connect();
         const db = client.db(process.env.MONGO_DB_NAME);
         collection = db.collection('routines');
-        console.log('Connected to MongoDB');
+        console.log('Connected to MongoDB (Routines)');
     }catch (error){
         console.error('Error connecting to MongoDB:', error);
         process.exit(1);
