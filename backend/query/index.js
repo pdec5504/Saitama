@@ -161,8 +161,8 @@ async function startConsumer(){
 }
 
 
-app.listen(6000, async () => {
-    console.log('Query server is running on port 6000');
+app.listen(6001, async () => {
+    console.log('Query server is running on port 6001');
     try{
         const encodedPassword = encodeURIComponent(process.env.MONGO_PASSWORD);
         const mongoUrl = `mongodb://${process.env.MONGO_USER}:${encodedPassword}@${process.env.MONGO_HOST}:27017`;
