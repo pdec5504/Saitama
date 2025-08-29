@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaPen, FaTrash, FaChevronUp, FaChevronDown } from "react-icons/fa";
+import { FaPen, FaTrash, FaChevronDown } from "react-icons/fa";
 
 function RoutineCard({ routine }){
     const [isExpanded, setIsExpanded] = useState(false);
@@ -16,7 +16,10 @@ function RoutineCard({ routine }){
                     <p style={{ margin: 0, color: '#666'}}>{routine.weekDay}</p>
                 </div>
                 <div style={{ fontSize: '20px', color: '#555' }}>
-                    {isExpanded ? <FaChevronUp/> : <FaChevronDown/>}
+                    <FaChevronDown style={{
+                        transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.3s ease-in-out'
+                    }}></FaChevronDown>
                 </div>
                 {/* <span style={{ fontSize: '24px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s'}}>▼</span> */}
             </div>
