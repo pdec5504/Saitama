@@ -186,6 +186,7 @@ async function startConsumer(){
         const exchange = 'event_exchange';
         await channel.assertExchange(exchange, 'fanout', { durable:false });
         const q = await channel.assertQueue('exercises_events', { durable: true });
+        channel.prefetch(1);
         console.log(`Consumer (exercises) waiting for events in queue: ${q.queue}`);
         await channel.bindQueue(q.queue, exchange, '');
         channel.consume(q.queue, (msg) => {

@@ -9,17 +9,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// const base = {}; //base consulta
+// const base = {};
 let collection;
 
 
 const functions = {
     RoutineCreated: async (routine) => {
-        // add labels to routines if needed (A, B, C, ...)
-        // const routineLabel = `${String.fromCharCode(65 + routineCounter)}`
-        // routineCounter++;
-
-        // base[routine.id] = { ...routine, exercises: [] };
         await collection.insertOne({
             _id: routine.id,
             name: routine.name,
@@ -27,9 +22,7 @@ const functions = {
             exercises: []
         });
         console.log(`Query: Routine ${routine.id} created.`);
-        // add labels to routines if needed (A, B, C, ...)
-        // base[routine.id] = { ...routine, label: routineLabel, exercises: [] };
-        // console.log(`Query: Routine ${routine.id} created and labeled as ${routineLabel}`);
+       
     },
     ExerciseAdded: async (exercise) => {
         const routine = await collection.findOne({ _id: exercise.routineId });
@@ -45,7 +38,6 @@ const functions = {
                 sets: exercise.sets
             };
 
-            // routine.exercises.push(exerciseToDisplay);
             await collection.updateOne(
                 { _id: exercise.routineId },
                 { $push: { exercises: exerciseToDisplay } }
@@ -64,11 +56,6 @@ const functions = {
         );
         console.log(`Query: Routine ${analysis.routineId} classified as ${analysis.classification}`);
 
-
-        // if (routine){
-        //     // routine.classification = analysis.classification;
-        //     base[routineId] = { ...routine, classification: classification};
-        // }
     },
 
     RoutineUpdated: async (data) => {
@@ -90,7 +77,6 @@ const functions = {
         if (routine){
             const index = routine.exercises.findIndex(ex => ex.originalId === exercise.id);
             if(index !== -1){
-                // routine.exercises[index] = { ...routine.exercises[index], ...exercise};
                 const updatedExercise = { ...routine.exercises[index], ...exercise };
                 await collection.updateOne(
                     { _id: exercise.routineId, "exercises.originalId": exercise.id },
@@ -108,7 +94,6 @@ const functions = {
             const reorderedExercises = remaningExercises.map((exercise, index) => {
                 return { ...exercise, order: index + 1};
             });
-            // routine.exercises = reorderedExercises;
             await collection.updateOne(
                 { _id: data.routineId },
                 { $set: { exercises: reorderedExercises } }
@@ -135,17 +120,23 @@ async function startConsumer(){
         await channel.assertExchange(exchange, 'fanout', { durable:false})
 
         const q = await channel.assertQueue('query_events', { durable: true})
+        channel.prefetch(1);
         console.log(`Consumer (Query) waiting for events in queue: ${q.queue}`);
 
         await channel.bindQueue(q.queue, exchange, '');
 
-        channel.consume(q.queue, (msg) => {
+        channel.consume(q.queue, async (msg) => {
             if(msg.content){
                 const event = JSON.parse(msg.content.toString());
                 console.log(`Consumer (Query): Event received - ${event.type}`)
 
                 if(functions[event.type]){
-                    functions[event.type](event.data)
+                    try{
+                        await functions[event.type](event.data)
+                    } catch(error){
+                        console.error(`Error processing event ${event.type}:`, error);
+                    }
+                    
                 }
                 channel.ack(msg);
             }
