@@ -77,12 +77,26 @@ const functions = {
         if (routine){
             const index = routine.exercises.findIndex(ex => ex.originalId === exercise.id);
             if(index !== -1){
-                const updatedExercise = { ...routine.exercises[index], ...exercise };
+                const existingOrder = routine.exercises[index].order;
+                const updatedExercise = {
+                    originalId: exercise.id,
+                    order: existingOrder,
+                    name: exercise.name,
+                    reps: exercise.reps,
+                    sets: exercise.sets
+                    
+                };
                 await collection.updateOne(
                     { _id: exercise.routineId, "exercises.originalId": exercise.id },
                     { $set: { "exercises.$": updatedExercise } }
-                )
-                console.log(`Query: Exercise ${exercise.id} in routine ${exercise.routineId} updated.`);
+                );
+                console.log(`Query: Exercise #${existingOrder} in routine ${exercise.routineId} updated.`);
+                // const updatedExercise = { ...routine.exercises[index], ...exercise };
+                // await collection.updateOne(
+                //     { _id: exercise.routineId, "exercises.originalId": exercise.id },
+                //     { $set: { "exercises.$": updatedExercise } }
+                // )
+                // console.log(`Query: Exercise ${exercise.id} in routine ${exercise.routineId} updated.`);
             }
         }
     },
