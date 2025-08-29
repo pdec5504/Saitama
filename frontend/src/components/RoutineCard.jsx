@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FaPen, FaTrash, FaChevronUp, FaChevronDown } from "react-icons/fa";
 
 function RoutineCard({ routine }){
     const [isExpanded, setIsExpanded] = useState(false);
@@ -14,7 +15,10 @@ function RoutineCard({ routine }){
                     <h3>{routine.name}</h3>
                     <p style={{ margin: 0, color: '#666'}}>{routine.weekDay}</p>
                 </div>
-                <span style={{ fontSize: '24px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s'}}>▼</span>
+                <div style={{ fontSize: '20px', color: '#555' }}>
+                    {isExpanded ? <FaChevronUp/> : <FaChevronDown/>}
+                </div>
+                {/* <span style={{ fontSize: '24px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s'}}>▼</span> */}
             </div>
             {/* if isExpanded true */}
             {isExpanded && (
@@ -27,8 +31,12 @@ function RoutineCard({ routine }){
                                 <li key={ex.originalId} style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <span>{ex.order}. {ex.name} - {ex.sets}x{ex.reps}</span>
                                     <div>
-                                        <button style={{ marginRight: '5px'}}>✏️</button>
-                                        <button>🗑️</button>
+                                        <button style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>
+                                            <FaPen color="#555"/>
+                                        </button>
+                                        <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>
+                                            <FaTrash color="#c0392b" />
+                                        </button>
                                     </div>
                                 </li>
                             ))}
