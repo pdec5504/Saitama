@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaPen, FaTrash, FaChevronDown } from "react-icons/fa";
+import { FaPen, FaTrash, FaChevronDown, FaPlus } from "react-icons/fa";
 import './RoutineCard.css';
 
 function RoutineCard({ routine }){
@@ -53,8 +53,8 @@ function RoutineCard({ routine }){
                         <p>Nenhum exercício adicionado.</p>
                     )}
                     </div>
-                    <button style={{ width: '100%', padding: '10px', marginTop: '10px', background: '#f7f7f7', border: '1px dashed #ccc', borderRadius: '4px' }}>
-                        + Adicionar Exercício
+                    <button style={{ width: '100%', padding: '10px', marginTop: '10px', background: '#f7f7f7', border: '1px dashed #ccc', borderRadius: '4px' , cursor: 'pointer'}}>
+                        <FaPlus color="#555"/>
                     </button>
                 </div>
             </div>

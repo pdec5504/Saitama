@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import RoutineCard from './RoutineCard';
+import { FaPlus } from "react-icons/fa";
 
 // const RoutineCard = ({ routine }) => (
 //     <div style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '16px', marginBottom: '10px'}}>
@@ -31,9 +32,18 @@ function RoutineList(){
             {Object.values(routines).map(routine => (
                 <RoutineCard key={routine._id} routine={routine} />
             ))}
-            <div style={{ border: '1px dashed #ccc', borderRadius: '8px', padding: '25px', marginBottom: '10px', textAlign: 'center', cursor: 'pointer' }}>
-                <span style={{ fontSize: '24px'}}>+</span>
-            </div>
+            <button style={{
+                width: '100%',
+                padding: '15px',
+                marginTop: '10px',
+                background: '#f7f7f7',
+                border: '1px dashed #ccc',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '20px',
+            }}>
+                <FaPlus color='#555'/>
+            </button>
         </div>
     );
 }
