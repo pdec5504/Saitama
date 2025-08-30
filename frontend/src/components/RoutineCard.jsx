@@ -53,7 +53,7 @@ function RoutineCard({ routine }){
                         <p>Nenhum exercício adicionado.</p>
                     )}
                     </div>
-                    <button style={{ width: '100%', padding: '10px', marginTop: '10px', background: '#f7f7f7', border: '1px dashed #ccc', borderRadius: '4px' , cursor: 'pointer'}}>
+                    <button title="Adicionar exercício" style={{ width: '100%', padding: '10px', marginTop: '10px', background: '#f7f7f7', border: '1px dashed #ccc', borderRadius: '4px' , cursor: 'pointer'}}>
                         <FaPlus color="#555"/>
                     </button>
                 </div>

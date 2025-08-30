@@ -3,12 +3,6 @@ import axios from 'axios';
 import RoutineCard from './RoutineCard';
 import { FaPlus } from "react-icons/fa";
 
-// const RoutineCard = ({ routine }) => (
-//     <div style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '16px', marginBottom: '10px'}}>
-//         <h3>{routine.name}</h3>
-//         <p><strong>Dia: </strong>{routine.weekDay}</p>
-//     </div>
-// );
 
 function RoutineList(){
     const [routines, setRoutines] = useState({});
@@ -32,7 +26,7 @@ function RoutineList(){
             {Object.values(routines).map(routine => (
                 <RoutineCard key={routine._id} routine={routine} />
             ))}
-            <button style={{
+            <button title= "Adicionar rotina" style={{
                 width: '100%',
                 padding: '15px',
                 marginTop: '10px',
