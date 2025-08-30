@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaPen, FaTrash, FaChevronDown } from "react-icons/fa";
+import './RoutineCard.css';
 
 function RoutineCard({ routine }){
     const [isExpanded, setIsExpanded] = useState(false);
@@ -21,10 +22,8 @@ function RoutineCard({ routine }){
                         transition: 'transform 0.3s ease-in-out'
                     }}></FaChevronDown>
                 </div>
-                {/* <span style={{ fontSize: '24px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s'}}>▼</span> */}
             </div>
-            {/* if isExpanded true */}
-            {isExpanded && (
+            <div className={`expandable-content ${isExpanded ? 'expanded' : ''}`}>
                 <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '15px'}}>
                     <p><strong>Classificação: </strong>{routine.classification || 'Aguardando análise'}</p>
                     <h4>Exercícios: </h4>
@@ -51,7 +50,8 @@ function RoutineCard({ routine }){
                         + Adicionar Exercício
                     </button>
                 </div>
-            )}
+             {/* )} */}
+            </div>
         </div>
     );
 }
