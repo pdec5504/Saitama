@@ -27,10 +27,17 @@ function RoutineCard({ routine }){
                 <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '15px'}}>
                     <p><strong>Classificação: </strong>{routine.classification || 'Aguardando análise'}</p>
                     <h4>Exercícios: </h4>
-                    {routine.exercises && routine.exercises.length > 0 ? (
-                        <ul style={{ paddingLeft: '20px', listStyle: 'none' }}>
-                            {routine.exercises.map(ex => (
-                                <li key={ex.originalId} style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                    {(routine.exercises && routine.exercises.length > 0) ? (
+                            routine.exercises.map(ex => (
+                                <div key={ex.originalId} style={{ 
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: '6px',
+                                    padding: '10px 15px',
+                                    marginBottom: '10px', 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between', 
+                                    alignItems: 'center' }}>
                                     <span>{ex.order}. {ex.name} - {ex.sets}x{ex.reps}</span>
                                     <div>
                                         <button style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>
@@ -40,17 +47,16 @@ function RoutineCard({ routine }){
                                             <FaTrash color="#c0392b" />
                                         </button>
                                     </div>
-                                </li>
-                            ))}
-                        </ul>
+                                </div>
+                            ))
                     ):(
                         <p>Nenhum exercício adicionado.</p>
                     )}
+                    </div>
                     <button style={{ width: '100%', padding: '10px', marginTop: '10px', background: '#f7f7f7', border: '1px dashed #ccc', borderRadius: '4px' }}>
                         + Adicionar Exercício
                     </button>
                 </div>
-             {/* )} */}
             </div>
         </div>
     );
