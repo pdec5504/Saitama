@@ -2,6 +2,8 @@ import { useState } from "react";
 import { FaPen, FaTrash, FaChevronDown, FaPlus } from "react-icons/fa";
 import './RoutineCard.css';
 import AddExerciseForm from './AddExerciseForm'; 
+import axios from "axios";
+import toast from 'react-hot-toast';
 
 function RoutineCard({ routine, onDataChange }){
     const [isExpanded, setIsExpanded] = useState(false);
@@ -10,6 +12,19 @@ function RoutineCard({ routine, onDataChange }){
     const handleToggleExpand = () => {
         setIsExpanded(!isExpanded);
     };
+
+    const handleDeleteExercise = async (exerciseId) => {
+        if (window.confirm("Tem certeza que deseja apagar esse exercício?")) {
+            try{
+                await axios.delete(`http://localhost:4001/routines/${routine._id}/exercises/${exerciseId}`);
+                toast.success("Exercício apagado com sucesso!")
+                onDataChange();
+            }catch(error){
+                console.error("Error deleting exercise:", error);
+                toast.error("Não foi possível apagar o exercício. Tente novamente.");
+            }
+        }
+    }
 
     return(
         <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '16px', marginBottom: '15px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}}>
@@ -42,10 +57,12 @@ function RoutineCard({ routine, onDataChange }){
                                     alignItems: 'center' }}>
                                     <span>{ex.order}. {ex.name} - {ex.sets}x{ex.reps}</span>
                                     <div>
-                                        <button style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>
+                                        <button title="Editar Exercício" style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>
                                             <FaPen color="#555"/>
                                         </button>
-                                        <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>
+                                        <button title="Apagar Exercício"
+                                        onClick={() => handleDeleteExercise(ex.originalId)}
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>
                                             <FaTrash color="#c0392b" />
                                         </button>
                                     </div>
