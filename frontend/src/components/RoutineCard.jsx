@@ -18,7 +18,9 @@ function RoutineCard({ routine, onDataChange }){
             try{
                 await axios.delete(`http://localhost:4001/routines/${routine._id}/exercises/${exerciseId}`);
                 toast.success("Exercício apagado com sucesso!")
-                onDataChange();
+                setTimeout(() => {
+                    onDataChange();
+                }, 1000);
             }catch(error){
                 console.error("Error deleting exercise:", error);
                 toast.error("Não foi possível apagar o exercício. Tente novamente.");

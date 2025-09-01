@@ -21,8 +21,9 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
                 weekDay: weekDay
             });
             toast.success("Rotina adicionada com sucesso!")
-
-            onRoutineAdded();
+            setTimeout(() => {
+                onRoutineAdded();
+            })
         } catch(error){
             console.error("Error adding routine:", error);
             toast.error("Não foi possível adicionar a rotina. Tente novamente.");
