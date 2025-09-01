@@ -45,7 +45,11 @@ function RoutineList(){
         <div>
             <h2>Rotinas</h2>
             {Object.values(routines).map(routine => (
-                <RoutineCard key={routine._id} routine={routine} />
+                <RoutineCard 
+                key={routine._id} 
+                routine={routine} 
+                onDataChange={fetchRoutines}
+                />
             ))}
 
             {isAdding ? (

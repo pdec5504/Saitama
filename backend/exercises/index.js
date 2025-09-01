@@ -205,8 +205,8 @@ async function startConsumer(){
     }
 }
 
-app.listen(4000, async () => {
-    console.log("Exercises server is running on port 4000");
+app.listen(4001, async () => {
+    console.log("Exercises server is running on port 4001");
 
     try{
         const encodedPassword = encodeURIComponent(process.env.MONGO_PASSWORD);
