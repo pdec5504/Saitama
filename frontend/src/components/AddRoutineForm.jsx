@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 function AddRoutineForm({ onRoutineAdded, onCancel}) {
     const [name, setName] = useState('')
@@ -9,7 +10,8 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
         event.preventDefault();
 
         if (!name.trim()) {
-            alert("Insira um nome para a rotina!")
+            // alert("Insira um nome para a rotina!")
+            toast.error("Insira um nome para a rotina!");
             return;
         }
 
@@ -18,11 +20,12 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
                 name: name,
                 weekDay: weekDay
             });
+            toast.success("Rotina adicionada com sucesso!")
 
             onRoutineAdded();
         } catch(error){
             console.error("Error adding routine:", error);
-            alert("Não foi possível adicionar a rotina. Tente novamente.");
+            toast.error("Não foi possível adicionar a rotina. Tente novamente.");
         }
     };
 
