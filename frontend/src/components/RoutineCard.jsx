@@ -3,7 +3,6 @@ import { FaPen, FaTrash, FaChevronDown, FaPlus } from "react-icons/fa";
 import './RoutineCard.css';
 import AddExerciseForm from './AddExerciseForm'; 
 import EditExerciseForm from "./EditExerciseForm";
-import EditRoutineForm from "./EditRoutineForm";
 import axios from "axios";
 import toast from 'react-hot-toast';
 

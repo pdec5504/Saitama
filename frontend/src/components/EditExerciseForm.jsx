@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import './EditExerciseForm.css';
 
 function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
     const [name, setName] = useState(exercise.name);
@@ -22,25 +23,27 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
     };
 
     return(
-        <form onSubmit={handleSubmit} style={{ width: '100%'}}>
+        <form onSubmit={handleSubmit} className='edit-exercise-form-container'>
             <div style={{ display: 'flex', gap: '10px', aignItems: 'center'}}>
                 <input 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                style={{ flex: 3, padding: '8px', boxSizing: 'border-box' }} 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className='name-input' 
                 />
                 <input value={sets}
-                onChange={(e) => setSets(e.target.value)}
-                type='number'
-                style={{ flex: 1, padding: '8px', boxSizing: 'border-box' }} 
+                    onChange={(e) => setSets(e.target.value)}
+                    type='number'
+                    placeholder='Séries'
+                    className='sets-reps-input'
                 />
                 <input value={reps}
-                onChange={(e) => setReps(e.target.value)}
-                type='number'
-                style={{ flex: 1, padding: '8px', boxSizing: 'border-box' }}
+                    onChange={(e) => setReps(e.target.value)}
+                    type='number'
+                    placeholder='Repetições'
+                    className='sets-reps-input'
                 />
-                <button type='submit' style={{ padding: '8px 12px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Salvar</button>
-                <button type='button' onClick={onCancel} style={{ padding: '8px 12px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
+                <button type='submit' className='save-button'>Salvar</button>
+                <button type='button' onClick={onCancel} className='cancel-button'>Cancelar</button>
             </div>
         </form>
     );
