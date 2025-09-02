@@ -5,7 +5,7 @@ import AddExerciseForm from './AddExerciseForm';
 import axios from "axios";
 import toast from 'react-hot-toast';
 
-function RoutineCard({ routine, onDataChange }){
+function RoutineCard({ routine, onDataChange, onDelete }){
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingExercise, setIsAddingExercise] = useState(false);
     
@@ -28,6 +28,13 @@ function RoutineCard({ routine, onDataChange }){
         }
     }
 
+    const handleDeleteClick = (event) => {
+        event.stopPropagation();
+        if (window.confirm("Tem certeza que deseja apagar essa rotina?")) {
+            onDelete();
+        }
+    }
+
     return(
         <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '16px', marginBottom: '15px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}}>
             <div onClick={handleToggleExpand} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between'}}>
@@ -35,11 +42,18 @@ function RoutineCard({ routine, onDataChange }){
                     <h3>{routine.name}</h3>
                     <p style={{ margin: 0, color: '#666'}}>{routine.weekDay}</p>
                 </div>
-                <div style={{ fontSize: '20px', color: '#555' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px'}}>
+                    <button title="Apagar Rotina"
+                    onClick={handleDeleteClick}
+                    style={{background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}>
+                        <FaTrash color="#c0392b"/>
+                    </button>
+                    <div style={{ fontSize: '20px', color: '#555' }}>
                     <FaChevronDown style={{
                         transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                         transition: 'transform 0.3s ease-in-out'
                     }}></FaChevronDown>
+                </div>
                 </div>
             </div>
             <div className={`expandable-content ${isExpanded ? 'expanded' : ''}`}>

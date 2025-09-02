@@ -3,6 +3,7 @@ import axios from 'axios';
 import RoutineCard from './RoutineCard';
 import AddRoutineForm from './AddRoutineForm';
 import { FaPlus } from "react-icons/fa";
+import toast from 'react-hot-toast';
 
 
 function RoutineList(){
@@ -41,6 +42,17 @@ function RoutineList(){
         setIsAdding(false);
     }
 
+    const handleDeleteRoutine = async (routineId) => {
+        try{
+            await axios.delete(`http://localhost:3001/routines/${routineId}`);
+            toast.success('Rotina apagada com sucesso!');
+            fetchRoutines();
+        }catch(error) {
+            console.error("Error deleting routine:", error);
+            toast.error('Não foi possível apagar a rotina. Tente novamente.');
+        }
+    }
+
     return(
         <div>
             <h2>Rotinas</h2>
@@ -49,6 +61,7 @@ function RoutineList(){
                 key={routine._id} 
                 routine={routine} 
                 onDataChange={fetchRoutines}
+                onDelete={() => handleDeleteRoutine(routine._id)}
                 />
             ))}
 
