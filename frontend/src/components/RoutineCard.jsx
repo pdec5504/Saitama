@@ -2,12 +2,15 @@ import { useState } from "react";
 import { FaPen, FaTrash, FaChevronDown, FaPlus } from "react-icons/fa";
 import './RoutineCard.css';
 import AddExerciseForm from './AddExerciseForm'; 
+import EditExerciseForm from "./EditExerciseForm";
 import axios from "axios";
 import toast from 'react-hot-toast';
 
 function RoutineCard({ routine, onDataChange, onDelete }){
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingExercise, setIsAddingExercise] = useState(false);
+
+    const [editingExerciseId, setEditingExerciseId] = useState(null);
     
     const handleToggleExpand = () => {
         setIsExpanded(!isExpanded);
@@ -27,6 +30,13 @@ function RoutineCard({ routine, onDataChange, onDelete }){
             }
         }
     }
+
+    const handleUpdateExercise = () => {
+        setTimeout(() => {
+            onDataChange()
+            setEditingExerciseId(null);
+        }, 1000);
+    };
 
     const handleDeleteClick = (event) => {
         event.stopPropagation();
@@ -71,9 +81,20 @@ function RoutineCard({ routine, onDataChange, onDelete }){
                                     display: 'flex', 
                                     justifyContent: 'space-between', 
                                     alignItems: 'center' }}>
+                                    {editingExerciseId === ex.originalId ? (
+                                        <EditExerciseForm
+                                        exercise={ex}
+                                        routineId={routine._id}
+                                        onSave={handleUpdateExercise}
+                                        onCancel={() => setEditingExerciseId(null)}
+                                        />
+                                    ):(
+                                        <>
                                     <span>{ex.order}. {ex.name} - {ex.sets}x{ex.reps}</span>
                                     <div>
-                                        <button title="Editar Exercício" style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>
+                                        <button title="Editar Exercício"
+                                        onClick={() => setEditingExerciseId(ex.originalId)}
+                                         style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>
                                             <FaPen color="#555"/>
                                         </button>
                                         <button title="Apagar Exercício"
@@ -82,6 +103,8 @@ function RoutineCard({ routine, onDataChange, onDelete }){
                                             <FaTrash color="#c0392b" />
                                         </button>
                                     </div>
+                                        </>
+                                    )}
                                 </div>
                             ))
                     ):(
