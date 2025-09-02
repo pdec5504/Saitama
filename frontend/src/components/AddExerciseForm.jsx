@@ -22,7 +22,9 @@ function AddExerciseForm({ routineId, onExerciseAdded, onCancel}){
             });
 
             toast.success("Exercício adicionado com sucesso!");
-            onExerciseAdded();
+            setTimeout(() => {
+                onExerciseAdded();
+            }, 1000);
         } catch (error){
             console.error("Error adding exercise:", error);
             toast.error("Não foi possível adicionar o exercício Tente novamente.");
