@@ -14,8 +14,10 @@ function RoutineList(){
         try{
             const res = await axios.get('http://localhost:6001/routines');
             setRoutines(res.data)
+            return true;
         } catch(error){
             console.error("Error fetching routines:", error);
+            return false;
         }
     }
 
@@ -35,6 +37,14 @@ function RoutineList(){
     // call function on first time render
     useEffect(() => {
         fetchRoutines();
+
+        const intervalId = setInterval(async () => {
+            const success = await fetchRoutines();
+            if (success) {
+                clearInterval(intervalId);
+            }
+        }, 3000);
+        return () => clearInterval(intervalId);
     }, []);
 
     const handleRoutineAdded = () => {
