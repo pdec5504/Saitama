@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import RoutineCard from './RoutineCard';
 import AddRoutineForm from './AddRoutineForm';
+import EditRoutineForm from './EditRoutineForm';
 import { FaPlus } from "react-icons/fa";
 import toast from 'react-hot-toast';
 
@@ -9,6 +10,7 @@ import toast from 'react-hot-toast';
 function RoutineList(){
     const [routines, setRoutines] = useState({});
     const [isAdding, setIsAdding] = useState(false);
+    const [editingRoutineId, setEditingRoutineId] = useState(null);
 
     const fetchRoutines = async () => {
         try{
@@ -20,19 +22,6 @@ function RoutineList(){
             return false;
         }
     }
-
-    // useEffect(() => {
-    //     const fetchRoutines = async () => {
-    //         try{
-    //             const res = await axios.get('http://localhost:6001/routines');
-    //             setRoutines(res.data);
-    //             console.log("Data received:", res.data);
-    //         }catch(error){
-    //             console.error("Error fetching routines:", error);
-    //         }
-    //     };
-    //     fetchRoutines();
-    // }, []);
 
     // call function on first time render
     useEffect(() => {
@@ -63,16 +52,32 @@ function RoutineList(){
         }
     }
 
+    const handleRoutineUpdated = () => {
+        fetchRoutines();
+        setEditingRoutineId(null);
+    }
+
     return(
         <div>
             <h2>Rotinas</h2>
             {Object.values(routines).map(routine => (
-                <RoutineCard 
-                key={routine._id} 
-                routine={routine} 
-                onDataChange={fetchRoutines}
-                onDelete={() => handleDeleteRoutine(routine._id)}
-                />
+                <div key={routine._id}>
+                    {editingRoutineId === routine._id ? (
+                        <EditRoutineForm
+                        routine={routine}
+                        onSave={handleRoutineUpdated}
+                        onCancel={() => setEditingRoutineId(null)}
+                        />
+                    ):(
+                        <RoutineCard 
+                        key={routine._id} 
+                        routine={routine} 
+                        onDataChange={fetchRoutines}
+                        onDelete={() => handleDeleteRoutine(routine._id)}
+                        onEdit={() => setEditingRoutineId(routine._id)}
+                        />
+                    )}
+                </div>
             ))}
 
             {isAdding ? (

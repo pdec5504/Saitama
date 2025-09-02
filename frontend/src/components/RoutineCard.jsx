@@ -3,10 +3,11 @@ import { FaPen, FaTrash, FaChevronDown, FaPlus } from "react-icons/fa";
 import './RoutineCard.css';
 import AddExerciseForm from './AddExerciseForm'; 
 import EditExerciseForm from "./EditExerciseForm";
+import EditRoutineForm from "./EditRoutineForm";
 import axios from "axios";
 import toast from 'react-hot-toast';
 
-function RoutineCard({ routine, onDataChange, onDelete }){
+function RoutineCard({ routine, onDataChange, onDelete, onEdit }){
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingExercise, setIsAddingExercise] = useState(false);
 
@@ -38,6 +39,11 @@ function RoutineCard({ routine, onDataChange, onDelete }){
         }, 1000);
     };
 
+    const handleEditClick = (event) => {
+        event.stopPropagation();
+        onEdit();
+    }
+
     const handleDeleteClick = (event) => {
         event.stopPropagation();
         if (window.confirm("Tem certeza que deseja apagar essa rotina?")) {
@@ -53,6 +59,11 @@ function RoutineCard({ routine, onDataChange, onDelete }){
                     <p style={{ margin: 0, color: '#666'}}>{routine.weekDay}</p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px'}}>
+                    <button title="Editar Rotina" 
+                    onClick={handleEditClick}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}>
+                        <FaPen color="#555"/>
+                    </button>
                     <button title="Apagar Rotina"
                     onClick={handleDeleteClick}
                     style={{background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}>
