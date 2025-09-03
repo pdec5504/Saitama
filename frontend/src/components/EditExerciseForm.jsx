@@ -23,13 +23,13 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
     };
 
     return(
-        <form onSubmit={handleSubmit} className='edit-exercise-form-container'>
-            <div style={{ display: 'flex', gap: '10px', aignItems: 'center'}}>
-                <input 
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className='name-input' 
-                />
+        <form onSubmit={handleSubmit} className='edit-exercise-form'>
+          <input 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className='name-input'
+          />
+            <div className='sets-reps-group'>
                 <input value={sets}
                     onChange={(e) => setSets(e.target.value)}
                     type='number'
@@ -42,9 +42,11 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
                     placeholder='Repetições'
                     className='sets-reps-input'
                 />
-                <button type='submit' className='save-button'>Salvar</button>
-                <button type='button' onClick={onCancel} className='cancel-button'>Cancelar</button>
             </div>
+            
+                <button type='submit' className="save-button">Salvar</button>
+                <button type='button' onClick={onCancel} className="cancel-button">Cancelar</button>
+            
         </form>
     );
 }

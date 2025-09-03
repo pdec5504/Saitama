@@ -82,16 +82,21 @@ function RoutineCard({ routine, onDataChange, onDelete, onEdit }){
                     <h4>Exercícios: </h4>
                     <div>
                     {(routine.exercises && routine.exercises.length > 0) ? (
-                            routine.exercises.map(ex => (
-                                <div key={ex.originalId} style={{ 
+                            routine.exercises.map(ex => {
+                                const isEditing = editingExerciseId === ex.originalId;
+                                const exerciseContainerStyle={
                                     border: '1px solid #e0e0e0',
                                     borderRadius: '6px',
                                     padding: '10px 15px',
-                                    marginBottom: '10px', 
-                                    display: 'flex', 
-                                    justifyContent: 'space-between', 
-                                    alignItems: 'center' }}>
-                                    {editingExerciseId === ex.originalId ? (
+                                    marginBottom: '10px',
+                                    display: isEditing ? 'block' : 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                };
+
+                                return(
+                                <div key={ex.originalId} style={exerciseContainerStyle}>
+                                    {isEditing ? (
                                         <EditExerciseForm
                                         exercise={ex}
                                         routineId={routine._id}
@@ -116,7 +121,8 @@ function RoutineCard({ routine, onDataChange, onDelete, onEdit }){
                                         </>
                                     )}
                                 </div>
-                            ))
+                                )
+                            })
                     ):(
                         <p>Nenhum exercício adicionado.</p>
                     )}
