@@ -6,15 +6,15 @@ import EditExerciseForm from "./EditExerciseForm";
 import axios from "axios";
 import toast from 'react-hot-toast';
 
-function RoutineCard({ routine, onDataChange, onDelete, onEdit }){
-    const [isExpanded, setIsExpanded] = useState(false);
+function RoutineCard({ routine, onDataChange, onDelete, onEdit, isExpanded, onToggleExpand }){
+    // const [isExpanded, setIsExpanded] = useState(false);
     const [isAddingExercise, setIsAddingExercise] = useState(false);
 
     const [editingExerciseId, setEditingExerciseId] = useState(null);
     
-    const handleToggleExpand = () => {
-        setIsExpanded(!isExpanded);
-    };
+    // const handleToggleExpand = () => {
+    //     setIsExpanded(!isExpanded);
+    // };
 
     const handleDeleteExercise = async (exerciseId) => {
         if (window.confirm("Tem certeza que deseja apagar esse exercício?")) {
@@ -52,7 +52,7 @@ function RoutineCard({ routine, onDataChange, onDelete, onEdit }){
 
     return(
         <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '16px', marginBottom: '15px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}}>
-            <div onClick={handleToggleExpand} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between'}}>
+            <div onClick={onToggleExpand} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between'}}>
                 <div>
                     <h3>{routine.name}</h3>
                     <p style={{ margin: 0, color: '#666'}}>{routine.weekDay}</p>

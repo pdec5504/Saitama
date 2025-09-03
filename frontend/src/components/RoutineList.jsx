@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 function RoutineList(){
     const [routines, setRoutines] = useState({});
     const [isAdding, setIsAdding] = useState(false);
+    const [activeRoutineId, setActiveRoutineId] = useState(null);
     const [editingRoutineId, setEditingRoutineId] = useState(null);
 
     const fetchRoutines = async () => {
@@ -52,6 +53,10 @@ function RoutineList(){
         }
     }
 
+    const handleToggleExpand = (routineId) => {
+        setActiveRoutineId(activeRoutineId === routineId ? null : routineId);
+    };
+
     const handleRoutineUpdated = () => {
         fetchRoutines();
         setEditingRoutineId(null);
@@ -75,6 +80,8 @@ function RoutineList(){
                         onDataChange={fetchRoutines}
                         onDelete={() => handleDeleteRoutine(routine._id)}
                         onEdit={() => setEditingRoutineId(routine._id)}
+                        isExpanded={activeRoutineId === routine._id}
+                        onToggleExpand={() => handleToggleExpand(routine._id)}
                         />
                     )}
                 </div>
