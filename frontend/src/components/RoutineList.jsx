@@ -98,6 +98,17 @@ function RoutineList(){
         setEditingRoutineId(null);
     }
 
+    const handleSubMenuSave = () => {
+        fetchRoutines();
+        // Após salvar, volta para o modo 'expandido' da rotina atual
+        setActiveState(prevState => ({ ...prevState, mode: 'expand', exerciseId: null }));
+    };
+
+    const handleSubMenuCancel = () => {
+        // Ao cancelar, também volta para o modo 'expandido'
+        setActiveState(prevState => ({ ...prevState, mode: 'expand', exerciseId: null }));
+    };
+
     return(
         <div>
             <h2>Rotinas</h2>
@@ -113,7 +124,7 @@ function RoutineList(){
                         <RoutineCard 
                         key={routine._id} 
                         routine={routine} 
-                        onDataChange={handleUpdateAndClose}
+                        onDataChange={handleSubMenuSave}
                         onDelete={() => handleDeleteRoutine(routine._id)}
                         onEdit={() => setActiveState({ routineId: routine._id, mode: 'edit_routine' })}
                         isExpanded={activeState.routineId === routine._id }
@@ -121,7 +132,7 @@ function RoutineList(){
                         activeSubMenu={activeState.routineId === routine._id ? activeState : { mode: null }}
                         onAddExercise={() => setActiveState({ routineId: routine._id, mode: 'add_exercise' })}
                         onEditExercise={(exerciseId) => setActiveState({ routineId: routine._id, mode: 'edit_exercise', exerciseId })}
-                        onCancelSubMenu={handleCancel}
+                        onCancelSubMenu={handleSubMenuCancel}
                         />
                     )}
                 </div>
