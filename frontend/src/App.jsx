@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
-import axios from 'axios'
-import RoutineList from './components/RoutineList';
+import { Routes, Route } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import RoutineDetailPage from './pages/RoutineDetailPage';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -9,7 +9,12 @@ function App() {
       <Toaster position="top-right" toastOptions={{ duration: 3000}}/>
       <h1>Saitama Workout App</h1>
       <hr />
-      <RoutineList />
+
+      <Routes>
+        <Route path='/' element={<HomePage/>}/>
+
+        <Route path='/routines/:id' element={<RoutineDetailPage/>}/>
+      </Routes>
     </div>
   );
 }

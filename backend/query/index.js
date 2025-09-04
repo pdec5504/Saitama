@@ -122,6 +122,16 @@ app.get('/routines', async (req, res) => {
     res.status(200).send(routines);
 });
 
+app.get('/routines/:id', async (req, res) => {
+    const { id } = req.params;
+    const routine= await collection.findOne({ _id: id });
+    if (routine) {
+        res.send(routine);
+    }else{
+        res.status(404).send({ message: 'Routine not found.'});
+    }
+});
+
 
 async function startConsumer(){
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
