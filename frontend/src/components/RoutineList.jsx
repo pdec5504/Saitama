@@ -9,9 +9,11 @@ import toast from 'react-hot-toast';
 
 function RoutineList(){
     const [routines, setRoutines] = useState({});
-    const [isAdding, setIsAdding] = useState(false);
-    const [activeRoutineId, setActiveRoutineId] = useState(null);
-    const [editingRoutineId, setEditingRoutineId] = useState(null);
+    const [isAddingRoutine, setIsAddingRoutine] = useState(false);
+    // const [activeRoutineId, setActiveRoutineId] = useState(null);
+    // const [editingRoutineId, setEditingRoutineId] = useState(null);
+
+    const [activeState, setActiveState] = useState({routineId: null, mode: null, exerciseId: null });
 
     const fetchRoutines = async () => {
         try{
@@ -37,6 +39,17 @@ function RoutineList(){
         return () => clearInterval(intervalId);
     }, []);
 
+    const handleUpdateAndClose = () => {
+        fetchRoutines();
+        setActiveState({ routineId: null, mode: null, exerciseId: null });
+        setIsAddingRoutine(false);
+    };
+
+    const handleCancel = () => {
+        setActiveState({routineId: null, mode: null, exerciseId: null})
+    }
+
+
     const handleRoutineAdded = () => {
         fetchRoutines();
         setIsAdding(false);
@@ -54,7 +67,11 @@ function RoutineList(){
     }
 
     const handleToggleExpand = (routineId) => {
-        setActiveRoutineId(activeRoutineId === routineId ? null : routineId);
+        setActiveState(prevState =>
+        (prevState.routineId === routineId && prevState.mode === 'expand')
+        ?{ routineId: null, mode: null }
+        :{ routineId, mode: 'expand' }
+        );
     };
 
     const handleRoutineUpdated = () => {
@@ -67,34 +84,38 @@ function RoutineList(){
             <h2>Rotinas</h2>
             {Object.values(routines).map(routine => (
                 <div key={routine._id}>
-                    {editingRoutineId === routine._id ? (
+                    {activeState.mode === 'edit_routine' && activeState.routineId === routine._id ? (
                         <EditRoutineForm
                         routine={routine}
-                        onSave={handleRoutineUpdated}
-                        onCancel={() => setEditingRoutineId(null)}
+                        onSave={handleUpdateAndClose}
+                        onCancel={handleCancel}
                         />
                     ):(
                         <RoutineCard 
                         key={routine._id} 
                         routine={routine} 
-                        onDataChange={fetchRoutines}
+                        onDataChange={handleUpdateAndClose}
                         onDelete={() => handleDeleteRoutine(routine._id)}
-                        onEdit={() => setEditingRoutineId(routine._id)}
-                        isExpanded={activeRoutineId === routine._id}
+                        onEdit={() => setActiveState({ routineId: routine._id, mode: 'edit_routine' })}
+                        isExpanded={activeState.routineId === routine._id }
                         onToggleExpand={() => handleToggleExpand(routine._id)}
+                        activeSubMenu={activeState.routineId === routine._id ? activeState : { mode: null }}
+                        onAddExercise={() => setActiveState({ routineId: routine._id, mode: 'add_exercise' })}
+                        onEditExercise={(exerciseId) => setActiveState({ routineId: routine._id, mode: 'edit_exercise', exerciseId })}
+                        onCancelSubMenu={handleCancel}
                         />
                     )}
                 </div>
             ))}
 
-            {isAdding ? (
+            {isAddingRoutine ? (
                 <AddRoutineForm
-                onRoutineAdded={handleRoutineAdded}
-                onCancel={() => setIsAdding(false)}
+                onRoutineAdded={handleUpdateAndClose}
+                onCancel={() => setIsAddingRoutine(false)}
                 />
             ):(
                 <button title='Adicionar Rotina'
-                onClick={() => setIsAdding(true)}
+                onClick={() => setIsAddingRoutine(true)}
                 style={{
                     width: '100%', 
                     padding: '15px', 
