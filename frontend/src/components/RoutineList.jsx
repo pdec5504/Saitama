@@ -10,9 +10,6 @@ import toast from 'react-hot-toast';
 function RoutineList(){
     const [routines, setRoutines] = useState({});
     const [isAddingRoutine, setIsAddingRoutine] = useState(false);
-    // const [activeRoutineId, setActiveRoutineId] = useState(null);
-    // const [editingRoutineId, setEditingRoutineId] = useState(null);
-
     const [activeState, setActiveState] = useState({routineId: null, mode: null, exerciseId: null });
 
     const fetchRoutines = async () => {
@@ -49,12 +46,6 @@ function RoutineList(){
         setActiveState({routineId: null, mode: null, exerciseId: null})
     }
 
-
-    const handleRoutineAdded = () => {
-        fetchRoutines();
-        setIsAdding(false);
-    }
-
     const handleDeleteRoutine = async (routineId) => {
         try{
             await axios.delete(`http://localhost:3001/routines/${routineId}`);
@@ -75,22 +66,9 @@ function RoutineList(){
         );
     };
 
-    const handleSetEditingRoutine = (routineId) => {
-        setIsAddingRoutine(false);
-        setActiveState({ routineId, mode: 'edit_routine' });
-    };
-
-    const handleSetAddingExercise = (routineId) => {
-        setActiveState({ routineId, mode: 'add_exercise' });
-    };
-
-    const handleSetEditingExercise = (routineId, exerciseId) => {
-        setActiveState({ routineId, mode: 'edit_exercise', exerciseId });
-    };
-
     const handleShowAddRoutineForm = () => {
-        setActiveState({ routineId: null, mode: null }); // Fecha qualquer card ativo
-        setIsAddingRoutine(true); // Mostra o formulário de adicionar rotina
+        setActiveState({ routineId: null, mode: null }); 
+        setIsAddingRoutine(true); 
     };
 
     const handleRoutineUpdated = () => {
@@ -100,12 +78,10 @@ function RoutineList(){
 
     const handleSubMenuSave = () => {
         fetchRoutines();
-        // Após salvar, volta para o modo 'expandido' da rotina atual
         setActiveState(prevState => ({ ...prevState, mode: 'expand', exerciseId: null }));
     };
 
     const handleSubMenuCancel = () => {
-        // Ao cancelar, também volta para o modo 'expandido'
         setActiveState(prevState => ({ ...prevState, mode: 'expand', exerciseId: null }));
     };
 

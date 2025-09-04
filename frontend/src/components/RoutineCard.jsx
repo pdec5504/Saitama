@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { FaPen, FaTrash, FaChevronDown, FaPlus } from "react-icons/fa";
 import './RoutineCard.css';
 import AddExerciseForm from './AddExerciseForm'; 
@@ -7,14 +6,6 @@ import axios from "axios";
 import toast from 'react-hot-toast';
 
 function RoutineCard({ routine, onDataChange, onDelete, onEdit, isExpanded, onToggleExpand, activeSubMenu, onAddExercise, onEditExercise, onCancelSubMenu }){
-    // const [isExpanded, setIsExpanded] = useState(false);
-    const [isAddingExercise, setIsAddingExercise] = useState(false);
-
-    const [editingExerciseId, setEditingExerciseId] = useState(null);
-    
-    // const handleToggleExpand = () => {
-    //     setIsExpanded(!isExpanded);
-    // };
 
     const handleDeleteExercise = async (exerciseId) => {
         if (window.confirm("Tem certeza que deseja apagar esse exercício?")) {
@@ -31,12 +22,6 @@ function RoutineCard({ routine, onDataChange, onDelete, onEdit, isExpanded, onTo
         }
     }
 
-    // const handleUpdateExercise = () => {
-    //     setTimeout(() => {
-    //         onDataChange()
-    //         setEditingExerciseId(null);
-    //     }, 1000);
-    // };
 
     const handleEditClick = (event) => {
         event.stopPropagation();
