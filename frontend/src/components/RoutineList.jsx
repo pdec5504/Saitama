@@ -67,11 +67,30 @@ function RoutineList(){
     }
 
     const handleToggleExpand = (routineId) => {
+        setIsAddingRoutine(false);
         setActiveState(prevState =>
         (prevState.routineId === routineId && prevState.mode === 'expand')
         ?{ routineId: null, mode: null }
         :{ routineId, mode: 'expand' }
         );
+    };
+
+    const handleSetEditingRoutine = (routineId) => {
+        setIsAddingRoutine(false);
+        setActiveState({ routineId, mode: 'edit_routine' });
+    };
+
+    const handleSetAddingExercise = (routineId) => {
+        setActiveState({ routineId, mode: 'add_exercise' });
+    };
+
+    const handleSetEditingExercise = (routineId, exerciseId) => {
+        setActiveState({ routineId, mode: 'edit_exercise', exerciseId });
+    };
+
+    const handleShowAddRoutineForm = () => {
+        setActiveState({ routineId: null, mode: null }); // Fecha qualquer card ativo
+        setIsAddingRoutine(true); // Mostra o formulário de adicionar rotina
     };
 
     const handleRoutineUpdated = () => {
@@ -115,7 +134,7 @@ function RoutineList(){
                 />
             ):(
                 <button title='Adicionar Rotina'
-                onClick={() => setIsAddingRoutine(true)}
+                onClick={handleShowAddRoutineForm}
                 style={{
                     width: '100%', 
                     padding: '15px', 
