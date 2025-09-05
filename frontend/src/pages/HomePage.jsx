@@ -1,23 +1,25 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import RoutineCard from '../components/RoutineCard';
 import AddRoutineForm from '../components/AddRoutineForm';
 import EditRoutineForm from '../components/EditRoutineForm';
 import { FaPlus, FaPen } from "react-icons/fa";
 import toast from 'react-hot-toast';
 import AnimatedPage from '../components/AnimatedPage';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableRoutineCard } from '../components/SortableRoutineCard';
 
 
 function HomePage(){
-    const [routines, setRoutines] = useState({});
+    const [routines, setRoutines] = useState([]);
     const [isAddingRoutine, setIsAddingRoutine] = useState(false);
-    const [activeState, setActiveState] = useState({routineId: null, mode: null, exerciseId: null });
+    const [editingRoutineId, setEditingRoutineId] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
 
     const fetchRoutines = async () => {
         try{
             const res = await axios.get('http://localhost:6001/routines');
-            setRoutines(res.data)
+            setRoutines(Object.values(res.data || {}))
             return true;
         } catch(error){
             console.error("Error fetching routines:", error);
@@ -28,7 +30,6 @@ function HomePage(){
     // call function on first time render
     useEffect(() => {
         fetchRoutines();
-
         const intervalId = setInterval(async () => {
             const success = await fetchRoutines();
             if (success) {
@@ -38,15 +39,36 @@ function HomePage(){
         return () => clearInterval(intervalId);
     }, []);
 
-    const handleUpdateAndClose = () => {
+    function handleDragEnd(event) {
+        const { active, over } = event;
+        if (active.id !== over.id) {
+            setRoutines((items) => {
+                const oldIndex = items.findIndex(item => item._id === active.id);
+                const newIndex = items.findIndex(item => item._id === over.id);
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
+    }
+    
+    const handleRoutineUpdated = () => {
         fetchRoutines();
-        setActiveState({ routineId: null, mode: null, exerciseId: null });
+        setEditingRoutineId(null);
+    }
+
+    const handleRoutineAdded = () => {
+        fetchRoutines();
         setIsAddingRoutine(false);
     };
 
-    const handleCancel = () => {
-        setActiveState({routineId: null, mode: null, exerciseId: null})
-    }
+    // const handleUpdateAndClose = () => {
+    //     fetchRoutines();
+    //     setActiveState({ routineId: null, mode: null, exerciseId: null });
+    //     setIsAddingRoutine(false);
+    // };
+
+    // const handleCancel = () => {
+    //     setActiveState({routineId: null, mode: null, exerciseId: null})
+    // }
 
     const handleDeleteRoutine = async (routineId) => {
         try{
@@ -68,20 +90,16 @@ function HomePage(){
     //     );
     // };
 
-    const handleShowAddRoutineForm = () => {
-        setActiveState({ routineId: null, mode: null }); 
-        setIsAddingRoutine(true); 
-    };
+    // const handleShowAddRoutineForm = () => {
+    //     setActiveState({ routineId: null, mode: null }); 
+    //     setIsAddingRoutine(true); 
+    // };
 
-    // const handleRoutineUpdated = () => {
+
+    // const handleSubMenuSave = () => {
     //     fetchRoutines();
-    //     setEditingRoutineId(null);
-    // }
-
-    const handleSubMenuSave = () => {
-        fetchRoutines();
-        setActiveState(prevState => ({ ...prevState, mode: 'expand', exerciseId: null }));
-    };
+    //     setActiveState(prevState => ({ ...prevState, mode: 'expand', exerciseId: null }));
+    // };
 
     // const handleSubMenuCancel = () => {
     //     setActiveState(prevState => ({ ...prevState, mode: 'expand', exerciseId: null }));
@@ -99,7 +117,37 @@ function HomePage(){
                     <FaPen/>
                 </button>
             </div>
-            {Object.values(routines).map(routine => (
+            <DndContext
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
+                <SortableContext
+                    items={routines.map(r => r._id)}
+                    strategy={verticalListSortingStrategy}
+                >
+                    {routines.map(routine => (
+                        <div key={routine._id}>
+                            {editingRoutineId === routine._id ? (
+                                <EditRoutineForm
+                                routine={routine}
+                                onSave={handleRoutineUpdated}
+                                onCancel={() => setEditingRoutineId(null)}
+                                />
+                            ):(
+                                <SortableRoutineCard
+                                id={routine._id}
+                                routine={routine}
+                                onDelete={() => handleDeleteRoutine(routine._id)}
+                                onEdit={() => setEditingRoutineId(routine._id)}
+                                isEditMode={isEditMode}
+                                />
+                            )}
+                        </div>
+                    ))}
+                </SortableContext>
+            </DndContext>
+            
+            {/* {Object.values(routines).map(routine => (
                 <div key={routine._id}>
                     {activeState.mode === 'edit_routine' && activeState.routineId === routine._id ? (
                         <EditRoutineForm
@@ -124,16 +172,16 @@ function HomePage(){
                         />
                     )}
                 </div>
-            ))}
+            ))} */}
 
             {isAddingRoutine ? (
                 <AddRoutineForm
-                onRoutineAdded={handleUpdateAndClose}
+                onRoutineAdded={handleRoutineAdded}
                 onCancel={() => setIsAddingRoutine(false)}
                 />
             ):(
                 <button title='Adicionar Rotina'
-                onClick={handleShowAddRoutineForm}
+                onClick={() => setIsAddingRoutine(true)}
                 style={{
                     width: '100%', 
                     padding: '15px', 
