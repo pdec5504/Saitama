@@ -62,7 +62,7 @@ function RoutineDetailPage() {
 
     return (
     <div>
-      <Link to="/">&larr; Voltar para todas as rotinas</Link>
+      <Link to="/">&larr; Voltar para as rotinas</Link>
       <h2 style={{ marginTop: '20px' }}>{routine.name}</h2>
       <p><strong>Dia:</strong> {routine.weekDay}</p>
       <p><strong>Classificação:</strong> {routine.classification || 'Aguardando análise'}</p>
