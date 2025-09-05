@@ -3,7 +3,7 @@ import axios from 'axios';
 import RoutineCard from '../components/RoutineCard';
 import AddRoutineForm from '../components/AddRoutineForm';
 import EditRoutineForm from '../components/EditRoutineForm';
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaPen } from "react-icons/fa";
 import toast from 'react-hot-toast';
 import AnimatedPage from '../components/AnimatedPage';
 
@@ -12,6 +12,7 @@ function HomePage(){
     const [routines, setRoutines] = useState({});
     const [isAddingRoutine, setIsAddingRoutine] = useState(false);
     const [activeState, setActiveState] = useState({routineId: null, mode: null, exerciseId: null });
+    const [isEditMode, setIsEditMode] = useState(false);
 
     const fetchRoutines = async () => {
         try{
@@ -58,38 +59,46 @@ function HomePage(){
         }
     }
 
-    const handleToggleExpand = (routineId) => {
-        setIsAddingRoutine(false);
-        setActiveState(prevState =>
-        (prevState.routineId === routineId && prevState.mode === 'expand')
-        ?{ routineId: null, mode: null }
-        :{ routineId, mode: 'expand' }
-        );
-    };
+    // const handleToggleExpand = (routineId) => {
+    //     setIsAddingRoutine(false);
+    //     setActiveState(prevState =>
+    //     (prevState.routineId === routineId && prevState.mode === 'expand')
+    //     ?{ routineId: null, mode: null }
+    //     :{ routineId, mode: 'expand' }
+    //     );
+    // };
 
     const handleShowAddRoutineForm = () => {
         setActiveState({ routineId: null, mode: null }); 
         setIsAddingRoutine(true); 
     };
 
-    const handleRoutineUpdated = () => {
-        fetchRoutines();
-        setEditingRoutineId(null);
-    }
+    // const handleRoutineUpdated = () => {
+    //     fetchRoutines();
+    //     setEditingRoutineId(null);
+    // }
 
     const handleSubMenuSave = () => {
         fetchRoutines();
         setActiveState(prevState => ({ ...prevState, mode: 'expand', exerciseId: null }));
     };
 
-    const handleSubMenuCancel = () => {
-        setActiveState(prevState => ({ ...prevState, mode: 'expand', exerciseId: null }));
-    };
+    // const handleSubMenuCancel = () => {
+    //     setActiveState(prevState => ({ ...prevState, mode: 'expand', exerciseId: null }));
+    // };
 
     return(
     <AnimatedPage>
         <div>
-            <h2>Rotinas</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2>Rotinas</h2>
+                <button 
+                title='Ativar Modo de Edição'
+                onClick={() => setIsEditMode(!isEditMode)}
+                style={{ padding: '8px 12px', background: isEditMode ? '#077bff' : '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
+                    <FaPen/>
+                </button>
+            </div>
             {Object.values(routines).map(routine => (
                 <div key={routine._id}>
                     {activeState.mode === 'edit_routine' && activeState.routineId === routine._id ? (
@@ -105,12 +114,13 @@ function HomePage(){
                         onDataChange={handleSubMenuSave}
                         onDelete={() => handleDeleteRoutine(routine._id)}
                         onEdit={() => setActiveState({ routineId: routine._id, mode: 'edit_routine' })}
-                        isExpanded={activeState.routineId === routine._id }
-                        onToggleExpand={() => handleToggleExpand(routine._id)}
-                        activeSubMenu={activeState.routineId === routine._id ? activeState : { mode: null }}
-                        onAddExercise={() => setActiveState({ routineId: routine._id, mode: 'add_exercise' })}
-                        onEditExercise={(exerciseId) => setActiveState({ routineId: routine._id, mode: 'edit_exercise', exerciseId })}
-                        onCancelSubMenu={handleSubMenuCancel}
+                        isEditMode={isEditMode}
+                        // isExpanded={activeState.routineId === routine._id }
+                        // onToggleExpand={() => handleToggleExpand(routine._id)}
+                        // activeSubMenu={activeState.routineId === routine._id ? activeState : { mode: null }}
+                        // onAddExercise={() => setActiveState({ routineId: routine._id, mode: 'add_exercise' })}
+                        // onEditExercise={(exerciseId) => setActiveState({ routineId: routine._id, mode: 'edit_exercise', exerciseId })}
+                        // onCancelSubMenu={handleSubMenuCancel}
                         />
                     )}
                 </div>

@@ -2,7 +2,7 @@ import { FaPen, FaTrash } from "react-icons/fa";
 import './RoutineCard.css';
 import { Link } from 'react-router-dom';
 
-function RoutineCard({ routine, onDelete, onEdit }){
+function RoutineCard({ routine, onDelete, onEdit, isEditMode }){
     const handleEditClick = (event) => { event.stopPropagation(); onEdit();}
     const handleDeleteClick = (event) => {
         event.stopPropagation(); 
@@ -18,12 +18,14 @@ function RoutineCard({ routine, onDelete, onEdit }){
                     <p style={{ margin: 0, color: '#666' }}>{routine.weekDay}</p>
                 </div>
             </Link>
-            <div style={{position: 'absolute', top: '50%', right: '15px', transform: 'translateY(-50%)', display: 'flex', gap: '10px'}}>
-                <button title="Editar Rotina" onClick={handleEditClick} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}><FaPen color="#555" /></button>
-                <button title="Apagar Rotina" onClick={handleDeleteClick} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}><FaTrash color="#c0392b" /></button>
-            </div>
+            {isEditMode && (
+                <div style={{position: 'absolute', top: '50%', right: '15px', transform: 'translateY(-50%)', display: 'flex', gap: '10px'}}>
+                    <button title="Editar Rotina" onClick={handleEditClick} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}><FaPen color="#555" /></button>
+                    <button title="Apagar Rotina" onClick={handleDeleteClick} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}><FaTrash color="#c0392b" /></button>
+                </div>
+            )}
         </div>
-    )    
+    );    
 }
 
 export default RoutineCard;
