@@ -5,6 +5,7 @@ import AddRoutineForm from '../components/AddRoutineForm';
 import EditRoutineForm from '../components/EditRoutineForm';
 import { FaPlus } from "react-icons/fa";
 import toast from 'react-hot-toast';
+import AnimatedPage from '../components/AnimatedPage';
 
 
 function HomePage(){
@@ -86,6 +87,7 @@ function HomePage(){
     };
 
     return(
+    <AnimatedPage>
         <div>
             <h2>Rotinas</h2>
             {Object.values(routines).map(routine => (
@@ -136,6 +138,7 @@ function HomePage(){
                 </button>
             )}
         </div>
+    </AnimatedPage>
     );
 }
 
