@@ -124,11 +124,15 @@ app.get('/routines', async (req, res) => {
 
 app.get('/routines/:id', async (req, res) => {
     const { id } = req.params;
-    const routine= await collection.findOne({ _id: id });
-    if (routine) {
-        res.send(routine);
-    }else{
-        res.status(404).send({ message: 'Routine not found.'});
+    try{
+        const routine= await collection.findOne({ _id: id });
+        if (routine) {
+            res.send(routine);
+        }else{
+            res.status(404).send({ message: 'Routine not found.'});
+        }
+    }catch(error){
+        res.status(500).send({message: 'Error searching for routine.'})
     }
 });
 
