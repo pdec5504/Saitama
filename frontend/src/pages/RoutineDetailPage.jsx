@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom'; // Hook para ler parâmetros da URL
+import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-
 import AddExerciseForm from '../components/AddExerciseForm';
 import EditExerciseForm from '../components/EditExerciseForm';
-
 import { FaPen, FaTrash, FaPlus } from "react-icons/fa";
 import toast from 'react-hot-toast';
 
@@ -15,6 +13,8 @@ function RoutineDetailPage() {
 
     const [isAddingExercise, setIsAddingExercise] = useState(false);
     const [editingExerciseId, setEditingExerciseId] = useState(null);
+
+    const [isExerciseEditMode, setExerciseEditMode] = useState(false);
 
     const fetchRoutine = async () => {
         try{
@@ -69,7 +69,16 @@ function RoutineDetailPage() {
 
       <hr />
 
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <h4>Exercícios:</h4>
+      <button 
+      title='Editar Exercícios'
+      onClick={() => setExerciseEditMode(!isExerciseEditMode)}
+      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>
+        <FaPen color={isExerciseEditMode ? '#007bff' : '#555'}/>
+      </button>
+    </div>
+
         <div>
           {(routine.exercises && routine.exercises.length > 0) ? (
             routine.exercises.map(ex => (
@@ -84,10 +93,12 @@ function RoutineDetailPage() {
                 ) : (
                   <div style={{ border: '1px solid #e0e0e0', borderRadius: '6px', padding: '10px 15px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span>{ex.order}. {ex.name} - {ex.sets}x{ex.reps}</span>
-                    <div>
-                      <button title="Editar Exercício" onClick={() => setEditingExerciseId(ex.originalId)} style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaPen color="#555" /></button>
-                      <button title="Apagar Exercício" onClick={() => handleDeleteExercise(ex.originalId)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaTrash color="#c0392b" /></button>
-                    </div>
+                    {isExerciseEditMode && (
+                        <div>
+                        <button title="Editar Exercício" onClick={() => setEditingExerciseId(ex.originalId)} style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaPen color="#555" /></button>
+                        <button title="Apagar Exercício" onClick={() => handleDeleteExercise(ex.originalId)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaTrash color="#c0392b" /></button>
+                        </div>
+                    )}
                   </div>
                 )}
               </div>
