@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import AddExerciseForm from '../components/AddExerciseForm';
 import EditExerciseForm from '../components/EditExerciseForm';
-import { FaPen, FaTrash, FaPlus } from "react-icons/fa";
+import { FaPen, FaTrash, FaPlus, FaArrowLeft } from "react-icons/fa";
 import toast from 'react-hot-toast';
 
 
@@ -62,7 +62,7 @@ function RoutineDetailPage() {
 
     return (
     <div>
-      <Link to="/">&larr; Voltar para as rotinas</Link>
+      <Link to="/"><FaArrowLeft color='#555' size={'25px'}/></Link>
       <h2 style={{ marginTop: '20px' }}>{routine.name}</h2>
       <p><strong>Dia:</strong> {routine.weekDay}</p>
       <p><strong>Classificação:</strong> {routine.classification || 'Aguardando análise'}</p>
