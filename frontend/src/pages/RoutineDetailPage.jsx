@@ -74,8 +74,8 @@ function RoutineDetailPage() {
       <button 
       title='Editar Exercícios'
       onClick={() => setExerciseEditMode(!isExerciseEditMode)}
-      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>
-        <FaPen color={isExerciseEditMode ? '#007bff' : '#555'}/>
+      style={{ padding: '8px 12px', background: isExerciseEditMode ? '#077bff' : '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
+        <FaPen/>
       </button>
     </div>
 
