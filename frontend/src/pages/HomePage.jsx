@@ -5,7 +5,7 @@ import EditRoutineForm from '../components/EditRoutineForm';
 import { FaPlus, FaPen } from "react-icons/fa";
 import toast from 'react-hot-toast';
 import AnimatedPage from '../components/AnimatedPage';
-import { DndContext, closestCenter } from '@dnd-kit/core';
+import { DndContext, closestCenter, useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableRoutineCard } from '../components/SortableRoutineCard';
 
@@ -15,6 +15,7 @@ function HomePage(){
     const [isAddingRoutine, setIsAddingRoutine] = useState(false);
     const [editingRoutineId, setEditingRoutineId] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    // const [isDragging, setIsDragging] = useState(false);
 
     const fetchRoutines = async () => {
         try{
@@ -39,8 +40,14 @@ function HomePage(){
         return () => clearInterval(intervalId);
     }, []);
 
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(KeyboardSensor)
+    );
+
     function handleDragEnd(event) {
         const { active, over } = event;
+        if(!over) return;
         if (active.id !== over.id) {
             setRoutines((items) => {
                 const oldIndex = items.findIndex(item => item._id === active.id);
@@ -60,15 +67,6 @@ function HomePage(){
         setIsAddingRoutine(false);
     };
 
-    // const handleUpdateAndClose = () => {
-    //     fetchRoutines();
-    //     setActiveState({ routineId: null, mode: null, exerciseId: null });
-    //     setIsAddingRoutine(false);
-    // };
-
-    // const handleCancel = () => {
-    //     setActiveState({routineId: null, mode: null, exerciseId: null})
-    // }
 
     const handleDeleteRoutine = async (routineId) => {
         try{
@@ -80,30 +78,6 @@ function HomePage(){
             toast.error('Não foi possível apagar a rotina. Tente novamente.');
         }
     }
-
-    // const handleToggleExpand = (routineId) => {
-    //     setIsAddingRoutine(false);
-    //     setActiveState(prevState =>
-    //     (prevState.routineId === routineId && prevState.mode === 'expand')
-    //     ?{ routineId: null, mode: null }
-    //     :{ routineId, mode: 'expand' }
-    //     );
-    // };
-
-    // const handleShowAddRoutineForm = () => {
-    //     setActiveState({ routineId: null, mode: null }); 
-    //     setIsAddingRoutine(true); 
-    // };
-
-
-    // const handleSubMenuSave = () => {
-    //     fetchRoutines();
-    //     setActiveState(prevState => ({ ...prevState, mode: 'expand', exerciseId: null }));
-    // };
-
-    // const handleSubMenuCancel = () => {
-    //     setActiveState(prevState => ({ ...prevState, mode: 'expand', exerciseId: null }));
-    // };
 
     return(
     <AnimatedPage>
@@ -118,6 +92,7 @@ function HomePage(){
                 </button>
             </div>
             <DndContext
+                sensors={sensors}
                 collisionDetection={closestCenter}
                 onDragEnd={handleDragEnd}
             >
@@ -137,6 +112,7 @@ function HomePage(){
                                 <SortableRoutineCard
                                 id={routine._id}
                                 routine={routine}
+                                // isDragging={isDragging}
                                 onDelete={() => handleDeleteRoutine(routine._id)}
                                 onEdit={() => setEditingRoutineId(routine._id)}
                                 isEditMode={isEditMode}
@@ -146,33 +122,6 @@ function HomePage(){
                     ))}
                 </SortableContext>
             </DndContext>
-            
-            {/* {Object.values(routines).map(routine => (
-                <div key={routine._id}>
-                    {activeState.mode === 'edit_routine' && activeState.routineId === routine._id ? (
-                        <EditRoutineForm
-                        routine={routine}
-                        onSave={handleUpdateAndClose}
-                        onCancel={handleCancel}
-                        />
-                    ):(
-                        <RoutineCard 
-                        key={routine._id} 
-                        routine={routine} 
-                        onDataChange={handleSubMenuSave}
-                        onDelete={() => handleDeleteRoutine(routine._id)}
-                        onEdit={() => setActiveState({ routineId: routine._id, mode: 'edit_routine' })}
-                        isEditMode={isEditMode}
-                        // isExpanded={activeState.routineId === routine._id }
-                        // onToggleExpand={() => handleToggleExpand(routine._id)}
-                        // activeSubMenu={activeState.routineId === routine._id ? activeState : { mode: null }}
-                        // onAddExercise={() => setActiveState({ routineId: routine._id, mode: 'add_exercise' })}
-                        // onEditExercise={(exerciseId) => setActiveState({ routineId: routine._id, mode: 'edit_exercise', exerciseId })}
-                        // onCancelSubMenu={handleSubMenuCancel}
-                        />
-                    )}
-                </div>
-            ))} */}
 
             {isAddingRoutine ? (
                 <AddRoutineForm
