@@ -182,20 +182,39 @@ app.delete('/routines/:id', async (req, res) => {
     const result = await collection.deleteOne({ _id: id });
     if (result.deletedCount === 0) return res.status(404).send({ message: "Routine not found" });
 
+    const remainingRoutines = await collection.find({}).sort({ order: 1}).toArray()
+    const bulkOps = remainingRoutines.map((routine, index) => ({
+        updateOne: {
+            filter: { _id: routine._id },
+            update: { $set: { order: index } }
+        }
+    }));
+    
+    if (bulkOps.length > 0) {
+        await collection.bulkWrite(bulkOps);
+    }
+
     try{
         const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
         const connection = await amqp.connect(rabbitMQUrl);
         const channel = await connection.createChannel();
         const exchange = 'event_exchange';
 
-        const event = {
+        const deleteEvent = {
             type: 'RoutineDeleted',
             data: { id: id }
         };
 
         await channel.assertExchange(exchange, 'fanout', { durable: false });
-        channel.publish(exchange, '', Buffer.from(JSON.stringify(event)));
-        console.log(`Publisher (Routines): Event [${event.type}] published.`);
+        channel.publish(exchange, '', Buffer.from(JSON.stringify(deleteEvent)));
+        console.log(`Publisher (Routines): Event [${deleteEvent.type}] published.`);
+
+        const reorderEvent = {
+            type: 'RoutinesReordered',
+            data: { orderedIds: remainingRoutines.map(r => r._id)}
+        }
+        channel.publish(exchange, '', Buffer.from(JSON.stringify(reorderEvent)));
+        console.log(`Publisher (Routines): Event [${reorderEvent.type}] published after deletion.`);
 
         await channel.close();
         await connection.close();
