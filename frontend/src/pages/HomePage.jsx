@@ -20,7 +20,9 @@ function HomePage(){
     const fetchRoutines = async () => {
         try{
             const res = await axios.get('http://localhost:6001/routines');
-            setRoutines(Object.values(res.data || {}))
+            const data = res.data || {};
+            const routinesArray = Array.isArray(data) ? data : Object.values(data);
+            setRoutines(routinesArray)
             return true;
         } catch(error){
             console.error("Error fetching routines:", error);
@@ -52,7 +54,14 @@ function HomePage(){
             setRoutines((items) => {
                 const oldIndex = items.findIndex(item => item._id === active.id);
                 const newIndex = items.findIndex(item => item._id === over.id);
-                return arrayMove(items, oldIndex, newIndex);
+                const newItems = arrayMove(items, oldIndex, newIndex);
+
+                const orderedIds = newItems.map(item => item._id)
+                axios.post('http://localhost:3001/routines/reorder', {orderedIds})
+                .then(() => toast.success("Ordem salva com sucesso!"))
+                .catch(() => toast.error("Não foi possível salvar as mudanças. Tente novamente."))
+
+                return newItems;
             });
         }
     }

@@ -53,33 +53,29 @@ const functions = {
 }
 
 app.get('/routines', async (req, res) => {
-    const routines = await collection.find({}).toArray();
+    const routines = await collection.find({}).sort({ order: 1 }).toArray();
     res.send(routines)
 })
 
 app.post('/routines', async (req, res) => {
     const routineId = uuidv4();
     const { name, weekDay } = req.body;
-    // esse jeito funciona sem a linha de cima
-    // const routine = {
-    //     id: routineId,
-    //     name: req.body.name,
-    //     weekDay: req.body.weekDay,
-    //     exercises: req.body.exercises || []
-    // };
+    const order = await collection.countDocuments();
     const routine = {
         _id: routineId,
         name,
         weekDay,
-        exercises: []
+        exercises: [],
+        order: order
     };
-    // routines[routineId] = routine;
+
     await collection.insertOne(routine);
 
     const eventData = {
         id: routine._id,
         name: routine.name,
-        weekDay: routine.weekDay
+        weekDay: routine.weekDay,
+        order: routine.order
     }
 
     // connect to RabbitMQ server
@@ -104,6 +100,40 @@ app.post('/routines', async (req, res) => {
 
     res.status(201).send(routine);
 });
+
+app.post('/routines/reorder', async (req, res) => {
+    const { orderedIds } = req.body;
+    if (!orderedIds || !Array.isArray(orderedIds)) {
+        return res.status(400).send({ message: 'Ordered IDs Array is necessary'})
+    }
+
+    const bulkOps = orderedIds.map((id, index) => ({
+        updateOne: {
+            filter: { _id: id },
+            update: { $set: { order: index } }
+        }
+    }));
+
+    if (bulkOps.length > 0) {
+        await collection.bulkWrite(bulkOps);
+    }
+
+    try{
+        const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
+        const connection = await amqp.connect(rabbitMQUrl);
+        const channel = await connection.createChannel();
+        const exchange = 'event_exchange';
+        const event = { type: 'RoutinesReordered', data: { orderedIds } };
+        await channel.assertExchange(exchange, 'fanout', { durable: false });
+        channel.publish(exchange, '', Buffer.from(JSON.stringify(event)));
+        await channel.close();
+        await connection.close();
+    } catch(error) {
+        console.error('Error publishing event "RoutinesReordered":', error)
+    }
+
+    res.status(200).send({message:"Order successfully updated."})
+})
 
 //routine edit endpoint
 app.put('/routines/:id', async (req, res) => {
@@ -148,12 +178,6 @@ app.put('/routines/:id', async (req, res) => {
 // delete routine endpoint
 app.delete('/routines/:id', async (req, res) => {
     const { id } = req.params;
-
-    // if(!routines[id]){
-    //     return res.status(404).send({ message: "Routine not found" });
-    // }
-
-    // delete routines[id];
 
     const result = await collection.deleteOne({ _id: id });
     if (result.deletedCount === 0) return res.status(404).send({ message: "Routine not found" });

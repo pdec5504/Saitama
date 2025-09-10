@@ -19,10 +19,24 @@ const functions = {
             _id: routine.id,
             name: routine.name,
             weekDay: routine.weekDay,
-            exercises: []
+            exercises: [],
+            order: routine.order
         });
         console.log(`Query: Routine ${routine.id} created.`);
        
+    },
+    RoutinesReordered: async (data) => {
+        const { orderedIds } = data;
+        const bulkOps = orderedIds.map((id, index) => ({
+            updateOne: {
+                filter: { _id: id },
+                update: { $set: { order: index } }
+            }
+        }));
+        if (bulkOps.length > 0) {
+            await collection.bulkWrite(bulkOps);
+        }
+        console.log("Query: Routines order updated on database.");
     },
     ExerciseAdded: async (exercise) => {
         const routine = await collection.findOne({ _id: exercise.routineId });
@@ -91,12 +105,6 @@ const functions = {
                     { $set: { "exercises.$": updatedExercise } }
                 );
                 console.log(`Query: Exercise #${existingOrder} in routine ${exercise.routineId} updated.`);
-                // const updatedExercise = { ...routine.exercises[index], ...exercise };
-                // await collection.updateOne(
-                //     { _id: exercise.routineId, "exercises.originalId": exercise.id },
-                //     { $set: { "exercises.$": updatedExercise } }
-                // )
-                // console.log(`Query: Exercise ${exercise.id} in routine ${exercise.routineId} updated.`);
             }
         }
     },
@@ -118,8 +126,12 @@ const functions = {
 };
 
 app.get('/routines', async (req, res) => {
-    const routines = await collection.find({}).toArray();
-    res.status(200).send(routines);
+    const routines = await collection.find({}).sort({ order: 1 }).toArray();
+    const routinesAsObject = routines.reduce((obj, item) => {
+        obj[item._id] = item
+        return obj;
+    }, {})
+    res.status(200).send(routinesAsObject);
 });
 
 app.get('/routines/:id', async (req, res) => {
