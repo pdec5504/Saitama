@@ -58,7 +58,7 @@ function AddExerciseForm({ routineId, onExerciseAdded, onCancel}){
             background: 'var(--color-surface)'
         }}>
             <form onSubmit={handleSubmit}>
-                <h5 style={{ marginTop: 0, marginBottom: '10px' }}>Adicionar Novo Exercício</h5>
+                <h3 style={{ marginTop: 0, marginBottom: '10px' }}>Novo Exercício</h3>
                 <input 
                 value={name}
                 onChange={(e) => setName(e.target.value)}

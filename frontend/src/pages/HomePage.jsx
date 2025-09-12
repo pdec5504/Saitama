@@ -123,13 +123,7 @@ function HomePage(){
                 </SortableContext>
             </DndContext>
 
-            {isAddingRoutine ? (
-                <AddRoutineForm
-                onRoutineAdded={handleRoutineAdded}
-                onCancel={() => setIsAddingRoutine(false)}
-                />
-            ):(
-                <button title='Adicionar Rotina'
+            <button title='Adicionar Rotina'
                 onClick={() => setIsAddingRoutine(true)}
                 style={{
                     width: '100%',
@@ -141,10 +135,16 @@ function HomePage(){
                     cursor: 'pointer',
                     fontSize: '20px'
                 }}>
-                    <FaPlus color='var(--color-text-secondary)'/>
-                </button>
-            )}
+                <FaPlus color='var(--color-text-secondary)'/>
+            </button>
         </div>
+
+        <Modal isOpen={isAddingRoutine} onClose={() => setIsAddingRoutine(false)}>
+            <AddRoutineForm
+                onRoutineAdded={handleUpdateAndCloseForms}
+                onCancel={() => setIsAddingRoutine(false)}
+            />
+        </Modal>
 
         <Modal isOpen={!!routineToEdit} onClose={() => setRoutineToEdit(null)}>
             {routineToEdit && (

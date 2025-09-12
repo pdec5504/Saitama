@@ -102,14 +102,7 @@ function RoutineDetailPage() {
             ))
           ):( <p>Nenhum exercício adicionado.</p> )}
         </div>
-        {isAddingExercise ? (
-                <AddExerciseForm
-                    routineId={routine._id}
-                    onExerciseAdded={handleUpdateAndCloseForms}
-                    onCancel={() => setIsAddingExercise(false)}
-                />
-            ) : (
-                <button
+            <button
                 title='Adicionar Exercício'
                 onClick={() => setIsAddingExercise(true)}
                 style={{
@@ -120,10 +113,18 @@ function RoutineDetailPage() {
                   border: '1px dashed var(--color-border)',
                   borderRadius: '4px',
                   cursor: 'pointer'
-                }}>
-                    <FaPlus color="var(--color-text-secondary)" />
-                </button>
-            )}
+              }}>
+                <FaPlus color="var(--color-text-secondary)" />
+              </button>
+            
+            <Modal isOpen={isAddingExercise} onClose={() => setIsAddingExercise(false)}>
+              <AddExerciseForm
+                  routineId={routine._id}
+                  onExerciseAdded={handleUpdateAndCloseForms}
+                  onCancel={() => setIsAddingExercise(false)}
+              />
+            </Modal>
+
             <Modal isOpen={!!exerciseToEdit} onClose={() => setExerciseToEdit(null)}>
               {exerciseToEdit && (
                 <EditExerciseForm 
