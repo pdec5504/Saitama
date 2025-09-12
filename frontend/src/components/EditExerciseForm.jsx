@@ -3,7 +3,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const buttonStyle = {
-    padding: '8px 12px',
+    padding: '12px 12px',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
@@ -12,7 +12,7 @@ const buttonStyle = {
 };
 
 const inputStyle = {
-    padding: '8px',
+    padding: '12px 8px',
     boxSizing: 'border-box',
     background: 'var(--color-background)',
     border: '1px solid var(--color-border)',
@@ -43,7 +43,7 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
     };
 
     return(
-        <form onSubmit={handleSubmit} style={{
+        <form onSubmit={handleSubmit} className="edit-exercise-form" style={{
             display: 'flex',
             gap: '10px',
             alignItems: 'center',
@@ -54,25 +54,26 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
               value={name}
               onChange={(e) => setName(e.target.value)}
               style={{...inputStyle, flexGrow: 1 }}
+              className="edit-exercise-name-input"
           />
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div className="edit-exercise-sets-reps-group" style={{ display: 'flex', gap: '10px' }}>
                 <input value={sets}
                     onChange={(e) => setSets(e.target.value)}
                     type='number'
                     placeholder='Séries'
-                    style={{ ...inputStyle, width: '70px' }}
+                    style={{ ...inputStyle, width: '80px' }}
                 />
                 <input value={reps}
                     onChange={(e) => setReps(e.target.value)}
                     type='number'
                     placeholder='Repetições'
-                    style={{ ...inputStyle, width: '70px' }}
+                    style={{ ...inputStyle, width: '80px' }}
                 />
             </div>
-            
+            <div className="edit-exercise-buttons-group"style={{ display: 'flex', gap: '10px' }}>
                 <button type='submit' style={{ ...buttonStyle, backgroundColor: 'var(--color-primary)'}}>Salvar</button>
                 <button type='button' onClick={onCancel} style={{ ...buttonStyle, backgroundColor: 'var(--color-secondary)' }}>Cancelar</button>
-            
+            </div>
         </form>
     );
 }

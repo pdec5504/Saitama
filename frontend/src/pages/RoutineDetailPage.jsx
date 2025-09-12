@@ -91,7 +91,7 @@ function RoutineDetailPage() {
                       onCancel={() => setEditingExerciseId(null)}
                     />
                 ) : (
-                  <div style={{ border: '1px solid #e0e0e0', borderRadius: '6px', padding: '10px 15px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '30px 20px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span>{ex.order}. {ex.name} - {ex.sets}x{ex.reps}</span>
                     {isExerciseEditMode && (
                         <div>

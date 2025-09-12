@@ -20,3 +20,27 @@ body {
   color: var(--color-text-primary);
   font-weight: 700;
 }
+
+@media (max-width: 600px) {
+  .edit-exercise-form {
+    flex-direction: column;
+    align-items: stretch;  
+  }
+
+  .edit-exercise-sets-reps-group {
+    width: 100%; 
+  }
+  
+  .edit-exercise-sets-reps-group input {
+    width: 50%; 
+  }
+  
+  .edit-exercise-buttons-group {
+    width: 100%;
+  }
+
+  .edit-exercise-buttons-group button {
+      flex-grow: 1;
+  }
+
+}
