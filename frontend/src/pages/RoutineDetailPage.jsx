@@ -116,8 +116,16 @@ function RoutineDetailPage() {
           <button
             title="Adicionar Exercício"
             onClick={() => setIsAddingExercise(true)}
-            style={{ width: '100%', padding: '10px', marginTop: '10px', background: '#f7f7f7', border: '1px dashed #ccc', borderRadius: '4px', cursor: 'pointer' }}>
-            <FaPlus color="#555" />
+            style={{ 
+              width: '100%',
+              padding: '10px',
+              marginTop: '10px',
+              background: 'var(--color-surface)', 
+              border: '1px dashed var(--color-border)', 
+              borderRadius: '4px',
+              cursor: 'pointer'      
+            }}>
+            <FaPlus color="var(--color-text-secondary)" />
           </button>
         )}
     </div>

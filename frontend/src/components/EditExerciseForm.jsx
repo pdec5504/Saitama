@@ -1,7 +1,25 @@
 import { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import './EditExerciseForm.css';
+
+const buttonStyle = {
+    padding: '8px 12px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    color: 'var(--color-text-primary)',
+    fontWeight: 'bold'
+};
+
+const inputStyle = {
+    padding: '8px',
+    boxSizing: 'border-box',
+    background: 'var(--color-background)',
+    border: '1px solid var(--color-border)',
+    color: 'var(--color-text-primary)',
+    borderRadius: '4px',
+    fontSize: '14px'
+};
 
 function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
     const [name, setName] = useState(exercise.name);
@@ -15,7 +33,9 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
         try{
             await axios.put(`http://localhost:4001/routines/${routineId}/exercises/${exercise.originalId}`, updatedData);
             toast.success('Exercício atualizado com sucesso!');
-            onSave();
+            setTimeout(() => {
+                onSave();
+            }, 1000)
         }catch(error){
             console.error("Error updating exercise:", error);
             toast.error("Não foi possível atualizar o exercício. Tente novamente.");
@@ -23,29 +43,35 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
     };
 
     return(
-        <form onSubmit={handleSubmit} className='edit-exercise-form'>
+        <form onSubmit={handleSubmit} style={{
+            display: 'flex',
+            gap: '10px',
+            alignItems: 'center',
+            width: '100%',
+            marginBottom: '10px'
+        }}>
           <input 
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className='name-input'
+              style={{...inputStyle, flexGrow: 1 }}
           />
-            <div className='sets-reps-group'>
+            <div style={{ display: 'flex', gap: '10px' }}>
                 <input value={sets}
                     onChange={(e) => setSets(e.target.value)}
                     type='number'
                     placeholder='Séries'
-                    className='sets-reps-input'
+                    style={{ ...inputStyle, width: '70px' }}
                 />
                 <input value={reps}
                     onChange={(e) => setReps(e.target.value)}
                     type='number'
                     placeholder='Repetições'
-                    className='sets-reps-input'
+                    style={{ ...inputStyle, width: '70px' }}
                 />
             </div>
             
-                <button type='submit' className="save-button">Salvar</button>
-                <button type='button' onClick={onCancel} className="cancel-button">Cancelar</button>
+                <button type='submit' style={{ ...buttonStyle, backgroundColor: 'var(--color-primary)'}}>Salvar</button>
+                <button type='button' onClick={onCancel} style={{ ...buttonStyle, backgroundColor: 'var(--color-secondary)' }}>Cancelar</button>
             
         </form>
     );

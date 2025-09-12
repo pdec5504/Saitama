@@ -2,6 +2,25 @@ import { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const buttonStyle = {
+    flex: 1,
+    padding: '8px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    color: 'var(--color-text-primary)',
+    fontWeight: 'bold'
+};
+
+const inputStyle = {
+    padding: '8px',
+    boxSizing: 'border-box',
+    background: 'var(--color-background)',
+    border: '1px solid var(--color-border)',
+    color: 'var(--color-text-primary)',
+    borderRadius: '4px'
+};
+
 function AddExerciseForm({ routineId, onExerciseAdded, onCancel}){
     const [name, setName] = useState('');
     const [sets, setSets] = useState('');
@@ -32,14 +51,19 @@ function AddExerciseForm({ routineId, onExerciseAdded, onCancel}){
     };
 
     return(
-        <div style={{ border: '1px solid #e0e0e0', borderRadius: '6px', padding: '15px', marginBottom: '10px', background: '#fafafa' }}>
+        <div style={{ border: '1px solid var(--color-border)',
+            borderRadius: '6px',
+            padding: '15px',
+            marginBottom: '10px',
+            background: 'var(--color-surface)'
+        }}>
             <form onSubmit={handleSubmit}>
                 <h5 style={{ marginTop: 0, marginBottom: '10px' }}>Adicionar Novo Exercício</h5>
                 <input 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder='Nome do exercício'
-                style={{ width: '100%', padding: '8px', boxSizing: 'border-box', marginBottom: '10px' }} 
+                style={{ ...inputStyle, width: '100%', marginBottom: '10px' }} 
                 />
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
                     <input
@@ -47,21 +71,21 @@ function AddExerciseForm({ routineId, onExerciseAdded, onCancel}){
                     onChange={(e) => setSets(e.target.value)}
                     placeholder='Séries'
                     type='number'
-                    style={{ width: '50%', padding: '8px', boxSizing: 'border-box'}} 
+                    style={{ ...inputStyle, width: '50%' }} 
                     />
                     <input 
                     value={reps}
                     onChange={(e) => setReps(e.target.value)}
                     placeholder='Repetições'
                     type='number'
-                    style={{ width: '50%', padding: '8px', boxSizing: 'border-box' }}
+                    style={{ ...inputStyle, width: '50%'  }}
                     />
                 </div>
                 <div style={{ display: 'flex', gap: '10px'}}>
-                    <button type='submit' style={{ flex: 1, padding: '8px', background: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
+                    <button type='submit' style={{ ...buttonStyle, background: 'var(--color-primary)'}}>
                         Adicionar
                     </button>
-                    <button type="button" onClick={onCancel} style={{ flex: 1, padding: '8px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                    <button type="button" onClick={onCancel} style={{ ...buttonStyle, background: 'var(--color-secondary)' }}>
                         Cancelar
                     </button>
                 </div>

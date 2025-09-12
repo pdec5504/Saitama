@@ -141,16 +141,16 @@ function HomePage(){
                 <button title='Adicionar Rotina'
                 onClick={() => setIsAddingRoutine(true)}
                 style={{
-                    width: '100%', 
-                    padding: '15px', 
-                    marginTop: '10px', 
-                    background: '#f7f7f7', 
-                    border: '1px dashed #ccc', 
-                    borderRadius: '8px', 
+                    width: '100%',
+                    padding: '15px',
+                    marginTop: '10px',
+                    background: 'var(--color-surface)',      
+                    border: '1px dashed var(--color-border)', 
+                    borderRadius: '8px',
                     cursor: 'pointer',
                     fontSize: '20px'
                 }}>
-                    <FaPlus color='#555'/>
+                    <FaPlus color='var(--color-text-secondary)'/>
                 </button>
             )}
         </div>

@@ -1,0 +1,19 @@
+:root {
+    --color-background: #1a1a1a;
+    --color-primary: #e53935;
+    --color-secondary: #6c757d;
+    --color-surface: #2c2c2e;
+    --color-border: #444;
+    --color-text-primary: #f0f0f0;
+    --color-text-secondary: #a0a0a0;
+}
+
+body {
+  margin: 0;
+  font-family: 'sans-serif';
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+
+}h1, h2, h3, h4, h5 {
+  color: var(--color-text-primary);
+}

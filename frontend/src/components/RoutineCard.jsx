@@ -1,6 +1,5 @@
 import { FaPen, FaTrash } from "react-icons/fa";
 import { RxDragHandleDots2 } from "react-icons/rx"
-import './RoutineCard.css';
 import { Link } from 'react-router-dom';
 
 function RoutineCard({ routine, onDelete, onEdit, isEditMode, isDragging, dragHandleProps }){
@@ -20,7 +19,7 @@ function RoutineCard({ routine, onDelete, onEdit, isEditMode, isDragging, dragHa
     const cardTextContent = (
         <>
             <h3>{routine.name}</h3>
-            <p style={{ margin: 0, color: '#666' }}>{routine.weekDay}</p>
+            <p style={{ margin: 0, color: 'var(--color-text-secondary)' }}>{routine.weekDay}</p>
         </>
     );
 
@@ -29,12 +28,13 @@ function RoutineCard({ routine, onDelete, onEdit, isEditMode, isDragging, dragHa
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            border: '1px solid #ddd',
+            border: '1px solid var(--color-border)',
             borderRadius: '8px',
             padding: '16px',
             marginBottom: '15px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            background: 'white'
+            background: 'var(--color-surface)',
+            color: 'var(--color-text-primary)'
         }}>
             {isEditMode && (
                 <div {...dragHandleProps} style={{ cursor: 'grab', display: 'flex', alignItems: 'center' }}>

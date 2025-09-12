@@ -2,6 +2,26 @@ import { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const buttonStyle = {
+    flex: 1,
+    padding: '10px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    color: 'var(--color-text-primary)',
+    fontWeight: 'bold'
+};
+
+const inputStyle = {
+    width: '100%',
+    padding: '8px',
+    boxSizing: 'border-box',
+    background: 'var(--color-background)',
+    border: '1px solid var(--color-border)',
+    color: 'var(--color-text-primary)',
+    borderRadius: '4px'
+};
+
 function EditRoutineForm({ routine, onSave, onCancel }){
     const [name, setName] = useState(routine.name);
     const [weekDay, setWeekDay] = useState(routine.weekDay);
@@ -13,7 +33,7 @@ function EditRoutineForm({ routine, onSave, onCancel }){
             toast.success('Rotina atualizada com sucesso!');
             setTimeout(() => {
                 onSave();
-            })
+            }, 1000)
         }catch(error){
             console.error("Error updating routine:", error);
             toast.error("Não foi possível atualizar a rotina. Tente novamente.");
@@ -21,7 +41,12 @@ function EditRoutineForm({ routine, onSave, onCancel }){
     };
 
     return(
-        <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '16px', marginBottom: '15px', background: '#f9f9f9' }}>
+        <div style={{ border: '1px solid var(--color-border)',
+            borderRadius: '8px',
+            padding: '16px',
+            marginBottom: '15px',
+            background: 'var(--color-surface)' 
+        }}>
             <form onSubmit={handleSubmit}>
                 <h3 style={{marginTop: 0}}>Editar Rotina</h3>
                 <div style={{ marginBottom: '10px'}}>
@@ -30,7 +55,7 @@ function EditRoutineForm({ routine, onSave, onCancel }){
                     id='routineName'
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    style={{ width: '100%', padding: '8px', boxSizing: 'border-box'}}
+                    style={inputStyle}
                     />
                 </div>
                 <div style={{ marginBottom: '15px'}}>
@@ -39,7 +64,7 @@ function EditRoutineForm({ routine, onSave, onCancel }){
                     id="weekDay"
                     value={weekDay}
                     onChange={(e) => setWeekDay(e.target.value)}
-                    style={{ width: '100%', padding: '8px'}}
+                    style={inputStyle}
                     >
                         <option>Segunda-feira</option>
                         <option>Terça-feira</option>
@@ -52,11 +77,11 @@ function EditRoutineForm({ routine, onSave, onCancel }){
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
                     <button type='submit'
-                    style={{ flex: 1, padding: '10px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                    style={{ ...buttonStyle, background: 'var(--color-primary)'}}>
                         Salvar
                     </button>
                     <button type='button' onClick={onCancel} 
-                    style={{ flex: 1, padding: '10px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                    style={{ ...buttonStyle, background: 'var(--color-secondary)' }}>
                         Cancelar
                     </button>
                 </div>

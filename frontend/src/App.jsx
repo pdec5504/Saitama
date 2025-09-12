@@ -8,10 +8,10 @@ function App() {
   const location = useLocation();
 
   return(
-    <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '800px', margin: 'auto'}}>
+    <div style={{ maxWidth: '800px', margin: '20px auto', padding: '0 20px'}}>
       <Toaster position="top-right" toastOptions={{ duration: 3000}}/>
       <h1>Saitama Workout App</h1>
-      <hr style={{ marginBottom: '20px'}} />
+      <hr style={{ marginBottom: '20px', borderColor: 'var(--color-border)'}} />
 
     <AnimatePresence mode='wait'>
       <Routes location={location} key={location.pathname}>
