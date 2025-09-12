@@ -96,7 +96,7 @@ function HomePage(){
                 <button 
                 title='Ativar Modo de Edição'
                 onClick={() => setIsEditMode(!isEditMode)}
-                style={{ padding: '8px 12px', background: isEditMode ? '#077bff' : '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
+                style={{ padding: '8px 12px', background: isEditMode ? '#e53935' : '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
                     <FaPen/>
                 </button>
             </div>
