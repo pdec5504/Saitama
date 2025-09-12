@@ -8,7 +8,8 @@ const buttonStyle = {
     borderRadius: '4px',
     cursor: 'pointer',
     color: 'var(--color-text-primary)',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    fontSize: '16px'
 };
 
 const inputStyle = {
@@ -18,7 +19,8 @@ const inputStyle = {
     border: '1px solid var(--color-border)',
     color: 'var(--color-text-primary)',
     borderRadius: '4px',
-    fontSize: '14px'
+    fontSize: '16px',
+    width: '100%'
 };
 
 function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
@@ -42,37 +44,35 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
         }
     };
 
-    return(
-        <form onSubmit={handleSubmit} className="edit-exercise-form" style={{
-            display: 'flex',
-            gap: '10px',
-            alignItems: 'center',
-            width: '100%',
-            marginBottom: '10px'
-        }}>
-          <input 
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={{...inputStyle, flexGrow: 1 }}
-              className="edit-exercise-name-input"
-          />
-            <div className="edit-exercise-sets-reps-group" style={{ display: 'flex', gap: '10px' }}>
-                <input value={sets}
-                    onChange={(e) => setSets(e.target.value)}
-                    type='number'
-                    placeholder='Séries'
-                    style={{ ...inputStyle, width: '80px' }}
+    return (
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <h3 style={{margin: 0, textAlign: 'center'}}>Editar Exercício</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    style={inputStyle}
+                    placeholder='Nome do Exercício'
                 />
-                <input value={reps}
-                    onChange={(e) => setReps(e.target.value)}
-                    type='number'
-                    placeholder='Repetições'
-                    style={{ ...inputStyle, width: '80px' }}
-                />
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <input value={sets}
+                        onChange={(e) => setSets(e.target.value)}
+                        type='number'
+                        placeholder='Séries'
+                        style={inputStyle}
+                    />
+                    <input value={reps}
+                        onChange={(e) => setReps(e.target.value)}
+                        type='number'
+                        placeholder='Repetições'
+                        style={inputStyle}
+                    />
+                </div>
             </div>
-            <div className="edit-exercise-buttons-group"style={{ display: 'flex', gap: '10px' }}>
-                <button type='submit' style={{ ...buttonStyle, backgroundColor: 'var(--color-primary)'}}>Salvar</button>
-                <button type='button' onClick={onCancel} style={{ ...buttonStyle, backgroundColor: 'var(--color-secondary)' }}>Cancelar</button>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+                <button type='submit' style={{ ...buttonStyle, backgroundColor: 'var(--color-primary)', flex: 1 }}>Salvar</button>
+                <button type='button' onClick={onCancel} style={{ ...buttonStyle, backgroundColor: 'var(--color-secondary)', flex: 1 }}>Cancelar</button>
             </div>
         </form>
     );
