@@ -9,7 +9,8 @@ const buttonStyle = {
     borderRadius: '4px',
     cursor: 'pointer',
     color: 'var(--color-text-primary)',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    fontSize: '16px'
 };
 
 const inputStyle = {
@@ -19,7 +20,8 @@ const inputStyle = {
     background: 'var(--color-background)',
     border: '1px solid var(--color-border)',
     color: 'var(--color-text-primary)',
-    borderRadius: '4px'
+    borderRadius: '4px',
+    fontSize: '16px'
 };
 
 function EditRoutineForm({ routine, onSave, onCancel }){
@@ -40,53 +42,50 @@ function EditRoutineForm({ routine, onSave, onCancel }){
         }
     };
 
-    return(
-        <div style={{ border: '1px solid var(--color-border)',
-            borderRadius: '8px',
-            padding: '16px',
-            marginBottom: '15px',
-            background: 'var(--color-surface)' 
-        }}>
-            <form onSubmit={handleSubmit}>
-                <h3 style={{marginTop: 0}}>Editar Rotina</h3>
-                <div style={{ marginBottom: '10px'}}>
-                    <label htmlFor="routineName" style={{display: 'block', marginBottom: '5px'}}>Nome do Treino</label>
+    return (
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <h3 style={{ marginTop: 0, textAlign: 'center' }}>Editar Rotina</h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div>
+                    <label htmlFor="routineName" style={{ display: 'block', marginBottom: '5px' }}>Nome do Treino</label>
                     <input type="text"
-                    id='routineName'
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    style={inputStyle}
+                        id='routineName'
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        style={inputStyle}
                     />
                 </div>
-                <div style={{ marginBottom: '15px'}}>
-                    <label htmlFor="weekDay" style={{display: 'block', marginBottom: '5px'}}>Dia da Semana</label>
-                    <select 
-                    id="weekDay"
-                    value={weekDay}
-                    onChange={(e) => setWeekDay(e.target.value)}
-                    style={inputStyle}
+                <div>
+                    <label htmlFor="weekDay" style={{ display: 'block', marginBottom: '5px' }}>Dia da Semana</label>
+                    <select
+                        id="weekDay"
+                        value={weekDay}
+                        onChange={(e) => setWeekDay(e.target.value)}
+                        style={inputStyle}
                     >
                         <option>Segunda-feira</option>
                         <option>Terça-feira</option>
                         <option>Quarta-feira</option>
                         <option>Quinta-feira</option>
                         <option>Sexta-feira</option>
-                        <option>Sexta-feira</option>
+                        <option>Sábado</option>
                         <option>Domingo</option>
                     </select>
                 </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <button type='submit'
-                    style={{ ...buttonStyle, background: 'var(--color-primary)'}}>
-                        Salvar
-                    </button>
-                    <button type='button' onClick={onCancel} 
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+                <button type='submit'
+                    style={{ ...buttonStyle, background: 'var(--color-primary)' }}>
+                    Salvar
+                </button>
+                <button type='button' onClick={onCancel}
                     style={{ ...buttonStyle, background: 'var(--color-secondary)' }}>
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
+                    Cancelar
+                </button>
+            </div>
+        </form>
     );
 }
 

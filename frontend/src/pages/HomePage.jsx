@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import AddRoutineForm from '../components/AddRoutineForm';
 import EditRoutineForm from '../components/EditRoutineForm';
+import Modal from '../components/Modal';
 import { FaPlus, FaPen } from "react-icons/fa";
 import toast from 'react-hot-toast';
 import AnimatedPage from '../components/AnimatedPage';
@@ -13,9 +14,8 @@ import { SortableRoutineCard } from '../components/SortableRoutineCard';
 function HomePage(){
     const [routines, setRoutines] = useState([]);
     const [isAddingRoutine, setIsAddingRoutine] = useState(false);
-    const [editingRoutineId, setEditingRoutineId] = useState(null);
+    const [routineToEdit, setRoutineToEdit] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
-    // const [isDragging, setIsDragging] = useState(false);
 
     const fetchRoutines = async () => {
         try{
@@ -58,7 +58,7 @@ function HomePage(){
 
                 const orderedIds = newItems.map(item => item._id)
                 axios.post('http://localhost:3001/routines/reorder', {orderedIds})
-                .then(() => toast.success("Ordem salva com sucesso!"))
+                // .then(() => toast.success("Ordem salva com sucesso!"))
                 .catch(() => toast.error("Não foi possível salvar as mudanças. Tente novamente."))
 
                 return newItems;
@@ -66,9 +66,10 @@ function HomePage(){
         }
     }
     
-    const handleRoutineUpdated = () => {
+    const handleUpdateAndCloseForms = () => {
         fetchRoutines();
-        setEditingRoutineId(null);
+        setRoutineToEdit(null);
+        setIsAddingRoutine(false);
     }
 
     const handleRoutineAdded = () => {
@@ -94,9 +95,9 @@ function HomePage(){
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2>Rotinas</h2>
                 <button 
-                title='Ativar Modo de Edição'
-                onClick={() => setIsEditMode(!isEditMode)}
-                style={{ padding: '8px 12px', background: isEditMode ? '#e53935' : '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
+                    title='Ativar Modo de Edição'
+                    onClick={() => setIsEditMode(!isEditMode)}
+                    style={{ padding: '8px 12px', background: isEditMode ? '#e53935' : '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
                     <FaPen/>
                 </button>
             </div>
@@ -110,24 +111,14 @@ function HomePage(){
                     strategy={verticalListSortingStrategy}
                 >
                     {routines.map(routine => (
-                        <div key={routine._id}>
-                            {editingRoutineId === routine._id ? (
-                                <EditRoutineForm
-                                routine={routine}
-                                onSave={handleRoutineUpdated}
-                                onCancel={() => setEditingRoutineId(null)}
-                                />
-                            ):(
-                                <SortableRoutineCard
-                                id={routine._id}
-                                routine={routine}
-                                // isDragging={isDragging}
-                                onDelete={() => handleDeleteRoutine(routine._id)}
-                                onEdit={() => setEditingRoutineId(routine._id)}
-                                isEditMode={isEditMode}
-                                />
-                            )}
-                        </div>
+                        <SortableRoutineCard
+                            key={routine._id}
+                            id={routine._id}
+                            routine={routine}
+                            onDelete={() => handleDeleteRoutine(routine._id)}
+                            onEdit={() => setRoutineToEdit(routine)}
+                            isEditMode={isEditMode}
+                        /> 
                     ))}
                 </SortableContext>
             </DndContext>
@@ -154,6 +145,16 @@ function HomePage(){
                 </button>
             )}
         </div>
+
+        <Modal isOpen={!!routineToEdit} onClose={() => setRoutineToEdit(null)}>
+            {routineToEdit && (
+                <EditRoutineForm
+                    routine={routineToEdit}
+                    onSave={handleUpdateAndCloseForms}
+                    onCancel={() => setRoutineToEdit(null)}
+                />
+            )}
+        </Modal>
     </AnimatedPage>
     );
 }
