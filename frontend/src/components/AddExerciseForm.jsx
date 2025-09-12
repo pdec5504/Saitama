@@ -51,14 +51,8 @@ function AddExerciseForm({ routineId, onExerciseAdded, onCancel}){
     };
 
     return(
-        <div style={{ border: '1px solid var(--color-border)',
-            borderRadius: '6px',
-            padding: '15px',
-            marginBottom: '10px',
-            background: 'var(--color-surface)'
-        }}>
             <form onSubmit={handleSubmit}>
-                <h3 style={{ marginTop: 0, marginBottom: '10px' }}>Novo Exercício</h3>
+                <h3 style={{ marginTop: 0, textAlign: 'center' }}>Novo Exercício</h3>
                 <input 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -90,7 +84,6 @@ function AddExerciseForm({ routineId, onExerciseAdded, onCancel}){
                     </button>
                 </div>
             </form>
-        </div>
     );
 }
 

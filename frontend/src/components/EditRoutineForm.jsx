@@ -43,11 +43,10 @@ function EditRoutineForm({ routine, onSave, onCancel }){
     };
 
     return (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <form onSubmit={handleSubmit}>
             <h3 style={{ marginTop: 0, textAlign: 'center' }}>Editar Rotina</h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div>
+
+            <div style={{ marginBottom: '10px' }}>
                     <label htmlFor="routineName" style={{ display: 'block', marginBottom: '5px' }}>Nome do Treino</label>
                     <input type="text"
                         id='routineName'
@@ -56,7 +55,7 @@ function EditRoutineForm({ routine, onSave, onCancel }){
                         style={inputStyle}
                     />
                 </div>
-                <div>
+                <div style={{ marginBottom: '15px' }}>    
                     <label htmlFor="weekDay" style={{ display: 'block', marginBottom: '5px' }}>Dia da Semana</label>
                     <select
                         id="weekDay"
@@ -73,18 +72,16 @@ function EditRoutineForm({ routine, onSave, onCancel }){
                         <option>Domingo</option>
                     </select>
                 </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px' }}>
-                <button type='submit'
-                    style={{ ...buttonStyle, background: 'var(--color-primary)' }}>
-                    Salvar
-                </button>
-                <button type='button' onClick={onCancel}
-                    style={{ ...buttonStyle, background: 'var(--color-secondary)' }}>
-                    Cancelar
-                </button>
-            </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <button type='submit'
+                            style={{ ...buttonStyle, background: 'var(--color-primary)' }}>
+                        Salvar
+                    </button>
+                    <button type='button' onClick={onCancel}
+                            style={{ ...buttonStyle, background: 'var(--color-secondary)' }}>
+                        Cancelar
+                    </button>
+                </div>
         </form>
     );
 }

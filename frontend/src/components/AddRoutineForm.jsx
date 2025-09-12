@@ -41,9 +41,9 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
     };
 
     return (
-        <div style={{ border: '1px solid var(--color-border)', borderRadius: '8px', padding: '16px', marginBottom: '15px', background: 'var(--color-surface)'}}>
             <form onSubmit={handleSubmit}>
-                <h3 style={{ marginTop: 0}}>Nova Rotina</h3>
+                <h3 style={{ marginTop: 0, textAlign: 'center' }}>Nova Rotina</h3>
+                
                 <div style={{ marginBottom: '10px'}}>
                     <label htmlFor="routineName" style={{display: 'block', marginBottom: '5px'}}>Nome do Treino</label>
                     <input type="text"
@@ -91,7 +91,6 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
                     </button>
                 </div>
             </form>
-        </div>
     );
 }
 
