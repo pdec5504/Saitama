@@ -6,6 +6,9 @@ import EditExerciseForm from '../components/EditExerciseForm';
 import Modal from '../components/Modal';
 import { FaPen, FaTrash, FaPlus, FaArrowLeft } from "react-icons/fa";
 import toast from 'react-hot-toast';
+import { DndContext, closestCenter, useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableExerciseCard } from '../components/SortableExerciseCard';
 
 
 function RoutineDetailPage() {
@@ -19,10 +22,15 @@ function RoutineDetailPage() {
     const fetchRoutine = async () => {
         try{
             const res = await axios.get(`http://localhost:6001/routines/${id}`);
+            if (res.data && res.data.exercises) {
+                res.data.exercises.sort((a, b) => a.order - b.order);
+            }
             setRoutine(res.data)
+            return true;
         } catch(error){
             console.error("Error searching for routine:", error)
             setRoutine(null);
+            return false;
         }
     };
     useEffect(() => {
@@ -35,6 +43,31 @@ function RoutineDetailPage() {
         }, 3000);
         return () => clearInterval(intervalId);
     }, [id]);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(KeyboardSensor)
+    );
+
+    function handleDragEnd(event) {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
+
+        setRoutine((prevRoutine) => {
+            const oldIndex = prevRoutine.exercises.findIndex(ex => ex.originalId === active.id);
+            const newIndex = prevRoutine.exercises.findIndex(ex => ex.originalId === over.id);
+            let reorderedExercises = arrayMove(prevRoutine.exercises, oldIndex, newIndex);
+            reorderedExercises = reorderedExercises.map((exercise, index) => {
+                return { ...exercise, order: index + 1 };
+            });
+            
+            const orderedIds = reorderedExercises.map(ex => ex.originalId);
+            axios.post(`http://localhost:4001/routines/${id}/exercises/reorder`, { orderedIds })
+                .catch(() => toast.error("Não foi possível salvar a nova ordem."));
+                
+            return { ...prevRoutine, exercises: reorderedExercises };
+        });
+    }
 
     const handleUpdateAndCloseForms = () => {
     fetchRoutine();
@@ -61,82 +94,77 @@ function RoutineDetailPage() {
     }
 
     return (
-    <div>
-      <Link to="/"><FaArrowLeft color='#555' size={'25px'}/></Link>
-      <h2 style={{ marginTop: '20px' }}>{routine.name}</h2>
-      <p><strong>Dia:</strong> {routine.weekDay}</p>
-      <p><strong>Classificação:</strong> {routine.classification || 'Aguardando análise'}</p>
-
-      <hr />
-
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <h4>Exercícios:</h4>
-      <button 
-      title='Editar Exercícios'
-      onClick={() => setExerciseEditMode(!isExerciseEditMode)}
-      style={{ padding: '8px 12px', background: isExerciseEditMode ? '#e53935' : '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
-        <FaPen/>
-      </button>
-    </div>
         <div>
-          {(routine.exercises && routine.exercises.length > 0) ? (
-            routine.exercises.map(ex => (
-              <div key={ex.originalId} style={{
-                background: 'var(--color-surface)', 
-                border: '1px solid var(--color-border)', 
-                borderRadius: '6px', 
-                padding: '30px 20px',
-                marginBottom: '10px', 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center' 
-              }}>
-                <span>{ex.order}. {ex.name} - {ex.sets}x{ex.reps}</span>
-                    {isExerciseEditMode && (
-                      <div>
-                        <button title="Editar Exercício" onClick={() => setExerciseToEdit(ex)} style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaPen color="#555" /></button>
-                        <button title="Apagar Exercício" onClick={() => handleDeleteExercise(ex.originalId)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaTrash color="#c0392b" /></button>
-                      </div>
-                    )}
-                </div>
-            ))
-          ):( <p>Nenhum exercício adicionado.</p> )}
-        </div>
+            <Link to="/"><FaArrowLeft color='var(--color-text-secondary)' size={'25px'} /></Link>
+            <h2 style={{ marginTop: '20px' }}>{routine.name}</h2>
+            <p><strong>Dia:</strong> {routine.weekDay}</p>
+            <p><strong>Classificação:</strong> <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{routine.classification || 'Aguardando análise'}</span></p>
+            <hr style={{ borderColor: 'var(--color-border)' }} />
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4>Exercícios:</h4>
+                <button 
+                    title='Editar Exercícios'
+                    onClick={() => setExerciseEditMode(!isExerciseEditMode)}
+                    style={{ padding: '8px 12px', background: isExerciseEditMode ? 'var(--color-primary)' : 'var(--color-secondary)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
+                    <FaPen/>
+                </button>
+            </div>
+
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={routine.exercises.map(ex => ex.originalId)} strategy={verticalListSortingStrategy}>
+                    <div>
+                        {(routine.exercises && routine.exercises.length > 0) ? (
+                            routine.exercises.map(ex => (
+                                <SortableExerciseCard
+                                    key={ex.originalId}
+                                    id={ex.originalId}
+                                    exercise={ex}
+                                    isEditMode={isExerciseEditMode}
+                                    onEdit={() => setExerciseToEdit(ex)}
+                                    onDelete={() => handleDeleteExercise(ex.originalId)}
+                                />
+                            ))
+                        ) : (<p>Nenhum exercício adicionado.</p>)}
+                    </div>
+                </SortableContext>
+            </DndContext>
+
             <button
-                title='Adicionar Exercício'
+                title="Adicionar Exercício"
                 onClick={() => setIsAddingExercise(true)}
                 style={{
-                  width: '100%',
-                  padding: '10px',
-                  marginTop: '10px',
-                  background: 'var(--color-surface)',
-                  border: '1px dashed var(--color-border)',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-              }}>
+                    width: '100%',
+                    padding: '10px',
+                    marginTop: '10px',
+                    background: 'var(--color-surface)',
+                    border: '1px dashed var(--color-border)',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                }}>
                 <FaPlus color="var(--color-text-secondary)" />
-              </button>
+            </button>
             
             <Modal isOpen={isAddingExercise} onClose={() => setIsAddingExercise(false)}>
-              <AddExerciseForm
-                  routineId={routine._id}
-                  onExerciseAdded={handleUpdateAndCloseForms}
-                  onCancel={() => setIsAddingExercise(false)}
-              />
+                <AddExerciseForm
+                    routineId={routine._id}
+                    onExerciseAdded={handleUpdateAndCloseForms}
+                    onCancel={() => setIsAddingExercise(false)}
+                />
             </Modal>
 
             <Modal isOpen={!!exerciseToEdit} onClose={() => setExerciseToEdit(null)}>
-              {exerciseToEdit && (
-                <EditExerciseForm 
-                    exercise={exerciseToEdit}
-                    routineId={routine._id}
-                    onSave={handleUpdateAndCloseForms}
-                    onCancel={() => setExerciseToEdit(null)}
-                />
-              )}
+                {exerciseToEdit && (
+                    <EditExerciseForm 
+                        exercise={exerciseToEdit}
+                        routineId={routine._id}
+                        onSave={handleUpdateAndCloseForms}
+                        onCancel={() => setExerciseToEdit(null)}
+                    />
+                )}
             </Modal>
-          </div>
-  );
+        </div>
+    );
 }
 
 export default RoutineDetailPage;

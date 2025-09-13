@@ -19,10 +19,6 @@ let collection;
 const functions = {
     RoutineDeleted: async (data) => {
         const { id } = data;
-        // if (exercisesByRoutineId[id]){
-        //     delete exercisesByRoutineId[id];
-        //     console.log(`Consumer (Exercises): Exercises of routine ${id} deleted.`);
-        // }
         await collection.deleteMany({ routineId: id });
         console.log(`Consumer (Exercises): Exercises of routine ${id} deleted.`);
     }
@@ -33,17 +29,16 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
     const { name, reps, sets } = req.body;
     const exerciseId = uuidv4();
 
-    // const routineExercises = exercisesByRoutineId[routineId] || [];
-    // routineExercises.push({
-    //     id: exerciseId, name, reps, sets, routineId });
-    // exercisesByRoutineId[routineId] = routineExercises;
+    // Adicionado: Contar exercícios existentes para definir a ordem
+    const order = await collection.countDocuments({ routineId });
 
     const newExercise = {
         _id: exerciseId,
         name,
         reps,
         sets,
-        routineId
+        routineId,
+        order // Adicionado: Salvar o campo 'order' na criação
     };
 
     await collection.insertOne(newExercise);
@@ -61,7 +56,8 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
                 name,
                 reps,
                 sets,
-                routineId
+                routineId,
+                order
             }
         };
 
@@ -79,8 +75,7 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
 
 app.get('/routines/:routineId/exercises', async (req, res) => {
     const { routineId } = req.params;
-    const exercises = await collection.find({ routineId:routineId }).toArray();
-    // console.log(`GET request /routines/${routineId}/exercises received`);
+    const exercises = await collection.find({ routineId:routineId }).sort({order: 1}).toArray();
     res.send(exercises || []);
 });
 
@@ -88,20 +83,6 @@ app.get('/routines/:routineId/exercises', async (req, res) => {
 app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
     const { exerciseId } = req.params;
     const { name, reps, sets} = req.body;
-
-    // const routineExercises = exercisesByRoutineId[routineId];
-    // if(!routineExercises){
-    //     return res.status(404).send({ message: 'Routine not found'});
-    // }
-
-    // const exerciseToUpdate = routineExercises.find(ex => ex.id === exerciseId);
-    // if(!exerciseToUpdate){
-    //     return res.status(404).send({ message: 'Exercise not found'});
-    // }
-
-    // exerciseToUpdate.name = name || exerciseToUpdate.name;
-    // exerciseToUpdate.reps = reps || exerciseToUpdate.reps;
-    // exerciseToUpdate.sets = sets || exerciseToUpdate.sets;
 
     const result = await collection.updateOne(
         { _id: exerciseId },
@@ -116,7 +97,8 @@ app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
         name: updatedExercise.name,
         reps: updatedExercise.reps,
         sets: updatedExercise.sets,
-        routineId: updatedExercise.routineId
+        routineId: updatedExercise.routineId,
+        order: updatedExercise.order
     };
 
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
@@ -143,18 +125,6 @@ app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
 app.delete('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
     const { routineId, exerciseId } = req.params;
 
-    // const routineExercises = exercisesByRoutineId[routineId];
-    // if(!routineExercises){
-    //     return res.status(404).send({ message: 'Routine not found'});
-    // }
-
-    // const exerciseIndex = routineExercises.findIndex(ex => ex.id === exerciseId);
-    // if(exerciseIndex === -1){
-    //     return res.status(404).send({ message: 'Exercise not found'});
-    // }
-
-    // exercisesByRoutineId[routineId].splice(exerciseIndex, 1);
-
     const result = await collection.deleteOne({ _id: exerciseId });
     if(result.deletedCount === 0) return res.status(404).send({ message: 'Exercise not found'});
 
@@ -177,6 +147,48 @@ app.delete('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
     }
     res.status(204).send();
 })
+
+app.post('/routines/:routineId/exercises/reorder', async (req, res) => {
+    const { routineId } = req.params;
+    const { orderedIds } = req.body;
+
+    if (!orderedIds || !Array.isArray(orderedIds)) {
+        return res.status(400).send({ message: 'Array with ordered IDs required.' });
+    }
+
+    try {
+        const bulkOps = orderedIds.map((id, index) => ({
+            updateOne: {
+                filter: { _id: id, routineId: routineId },
+                update: { $set: { order: index } }
+            }
+        }));
+
+        if (bulkOps.length > 0) {
+            await collection.bulkWrite(bulkOps);
+        }
+
+        const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
+        const connection = await amqp.connect(rabbitMQUrl);
+        const channel = await connection.createChannel();
+        const exchange = 'event_exchange';
+        const event = {
+            type: 'ExercisesReordered',
+            data: { routineId, orderedIds }
+        };
+        
+        await channel.assertExchange(exchange, 'fanout', { durable: false });
+        channel.publish(exchange, '', Buffer.from(JSON.stringify(event)));
+        
+        await channel.close();
+        await connection.close();
+
+        res.status(200).send({ message: "Ordem dos exercícios atualizada com sucesso." });
+    } catch (error) {
+        console.error("Erro ao reordenar exercícios:", error);
+        res.status(500).send({ message: "Erro interno ao reordenar exercícios." });
+    }
+});
 
 async function startConsumer(){
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;

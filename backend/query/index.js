@@ -46,7 +46,7 @@ const functions = {
 
             const exerciseToDisplay = {
                 originalId: exercise.id, 
-                order: order,
+                order: exercise.order,
                 name: exercise.name,
                 reps: exercise.reps,
                 sets: exercise.sets
@@ -121,6 +121,26 @@ const functions = {
                 { $set: { exercises: reorderedExercises } }
             )
             console.log(`Query: Exercise ${data.id} in routine ${data.routineId} deleted.`);
+        }
+    },
+
+    ExercisesReordered: async (data) => {
+        const { routineId, orderedIds } = data;
+        const routine = await collection.findOne({ _id: routineId });
+
+        if (routine && Array.isArray(routine.exercises)) {
+            const exercisesMap = new Map(routine.exercises.map(ex => [ex.originalId, ex]));
+            
+            const reorderedExercises = orderedIds.map((id, index) => {
+                const exercise = exercisesMap.get(id);
+                return { ...exercise, order: index + 1 };
+            });
+
+            await collection.updateOne(
+                { _id: routineId },
+                { $set: { exercises: reorderedExercises } }
+            );
+            console.log(`Query: Exercises order updated for routine ${routineId}.`);
         }
     }
 };
