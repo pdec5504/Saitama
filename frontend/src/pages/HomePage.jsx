@@ -9,10 +9,12 @@ import AnimatedPage from '../components/AnimatedPage';
 import { DndContext, closestCenter, useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableRoutineCard } from '../components/SortableRoutineCard';
+import Spinner from '../components/Spinner';
 
 
 function HomePage(){
     const [routines, setRoutines] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [isAddingRoutine, setIsAddingRoutine] = useState(false);
     const [routineToEdit, setRoutineToEdit] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
@@ -23,6 +25,7 @@ function HomePage(){
             const data = res.data || {};
             const routinesArray = Array.isArray(data) ? data : Object.values(data);
             setRoutines(routinesArray)
+            setIsLoading(false);
             return true;
         } catch(error){
             console.error("Error fetching routines:", error);
@@ -32,14 +35,17 @@ function HomePage(){
 
     // call function on first time render
     useEffect(() => {
-        fetchRoutines();
-        const intervalId = setInterval(async () => {
-            const success = await fetchRoutines();
-            if (success) {
-                clearInterval(intervalId);
+        fetchRoutines().then(success => {
+            if (!success) {
+                const intervalId = setInterval(async () => {
+                    const connected = await fetchRoutines();
+                    if (connected) {
+                        clearInterval(intervalId);
+                    }
+                }, 3000);
+                return () => clearInterval(intervalId);
             }
-        }, 3000);
-        return () => clearInterval(intervalId);
+        });
     }, []);
 
     const sensors = useSensors(
@@ -91,6 +97,7 @@ function HomePage(){
 
     return(
     <AnimatedPage>
+        {isLoading && <Spinner/>}
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2>Rotinas</h2>
@@ -101,6 +108,8 @@ function HomePage(){
                     <FaPen/>
                 </button>
             </div>
+
+            {routines.length > 0 && (
             <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
@@ -122,6 +131,13 @@ function HomePage(){
                     ))}
                 </SortableContext>
             </DndContext>
+            )}
+            {!isLoading && routines.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-secondary)', border: '1px dashed var(--color-border)', borderRadius: '8px', marginTop: '20px' }}>
+                    <h3>Nenhuma Rotina Encontrada</h3>
+                    <p>Verifique se o servidor (backend) está em execução ou adicione sua primeira rotina abaixo.</p>
+                </div>
+            )}
 
             <button title='Adicionar Rotina'
                 onClick={() => setIsAddingRoutine(true)}
