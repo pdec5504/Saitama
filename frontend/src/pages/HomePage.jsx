@@ -135,7 +135,7 @@ function HomePage(){
             {!isLoading && routines.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-secondary)', border: '1px dashed var(--color-border)', borderRadius: '8px', marginTop: '20px' }}>
                     <h3>Nenhuma Rotina Encontrada</h3>
-                    <p>Verifique se o servidor (backend) está em execução ou adicione sua primeira rotina abaixo.</p>
+                    <p>Verifique sua conexão ou adicione sua primeira rotina abaixo.</p>
                 </div>
             )}
 
