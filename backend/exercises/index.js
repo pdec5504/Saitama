@@ -1,10 +1,10 @@
 require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const amqp = require('amqplib');
 const { MongoClient } = require('mongodb');
+const axios = require('axios');
 
 
 const app = express();
@@ -30,6 +30,29 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
         return res.status(400).send({ message: "Name and at least one phase are required." });
     }
 
+    let gifUrl = '';
+    try{
+        const options = {
+            method: 'GET',
+            url: `https://${process.env.RAPIDAPI_HOST}/exercises/name/${name.toLowerCase()}`,
+            headers: {
+                'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
+                'X-RapidAPI-Host': process.env.RAPIDAPI_HOST
+            }
+        };
+        const response = await axios.request(options);
+        const exerciseData = response.data.find(ex => ex.name.toLowerCase() === name.toLowerCase());
+        if (exerciseData && exerciseData.gifUrl) {
+            gifUrl = exerciseData.gifUrl;
+            console.log(`Image found to exercise '${name}': ${gifUrl}`);
+        } else {
+            console.log(`No image found to exercise '${name}'.`);
+        }
+    } catch (error) {
+        console.error("Error searching for data from ExerciseDB API:", error.message);
+    }
+    
+
     const order = await collection.countDocuments({ routineId });
 
     const newExercise = {
@@ -37,7 +60,8 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
         name,
         routineId,
         phases,
-        order
+        order,
+        gifUrl
     };
 
     await collection.insertOne(newExercise);
@@ -55,7 +79,8 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
                 name,
                 routineId,
                 phases,
-                order
+                order,
+                gifUrl
             }
         };
 
