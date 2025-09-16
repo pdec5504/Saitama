@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// const routines = {};
+
 let collection; // MongoDB collection
 
 
@@ -19,8 +19,7 @@ const functions = {
         const simpleExercise = {
             id: exercise.id,
             name: exercise.name,
-            reps: exercise.reps,
-            sets: exercise.sets
+            phases: exercise.phases
         };
         await collection.updateOne(
             { _id: exercise.routineId },
@@ -33,8 +32,7 @@ const functions = {
         const updatedExercise = {
             id: exercise.id,
             name: exercise.name,
-            reps: exercise.reps,
-            sets: exercise.sets
+            phases: exercise.phases
         };
         await collection.updateOne(
             { _id: exercise.routineId, "exercises.id": exercise.id },

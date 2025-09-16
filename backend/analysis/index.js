@@ -9,39 +9,48 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// const routinesToAnalyze = {};
 let collection;
 
 const analyseAndClassify = async (routineId) => {
     const routine = await collection.findOne({ _id: routineId});
-    if(!routine) return;
-    let classification = "General Training"; //default
-    let reps = [];
-    if(routine.exercises && routine.exercises.length > 0){
-
-        reps = routine.exercises.map(ex => parseInt(ex.reps, 10));
-        const minReps = Math.min(...reps);
-        const maxReps = Math.max(...reps);
-
-        if(minReps <= 6 && maxReps >= 8){
-        classification = "Hybrid Training (Strength/ Hypertrophy)";
+    if (!routine || !routine.exercises || routine.exercises.length === 0) {
+        return;
     }
-    else{
-        const repsSum = reps.reduce((sum, cur) => sum + cur, 0);
-        const repsAvg = repsSum / reps.length;
+    
+    let classification = "General Training"; //default
+    let repsAvg = 0;
+    
+    const allReps = routine.exercises.flatMap(ex => 
+        (ex.phases || []).map(phase => parseInt(phase.reps, 10))
+    );
+    console.log(allReps)
 
+    if(allReps.length > 0 ){
+        const repsSum = allReps.reduce((sum, current) => sum + current, 0);
+        repsAvg = repsSum / allReps.length;
+
+        // const minReps = Math.min(...reps);
+        // const maxReps = Math.max(...reps);
+        
         if(repsAvg <= 6){
             classification = "Strength Training";
-        } else if(repsAvg >= 8 && repsAvg <= 12){
+        } else if(repsAvg >= 6 && repsAvg <= 12){
             classification = "Hypertrophy Training";
         } else if( repsAvg > 12){
             classification = "Resistance Training";
         } else{
             classification = "Hybrid Training (Strength/ Hypertrophy)";
         }
-    }
+    //     if(minReps <= 6 && maxReps >= 8){
+    //     classification = "Hybrid Training (Strength/ Hypertrophy)";
+    // }
+    // else{
+    //     // const repsSum = reps.reduce((sum, cur) => sum + cur, 0);
+    //     // const repsAvg = repsSum / reps.length;
+
+    // }
     };
-    console.log(`${routineId} Routine Analyses: [${reps.join(', ')}] reps -> Classification: ${classification}`);
+    console.log(`${routineId} Routine Analyses: [${allReps.join(', ')}] reps -> Classification: ${classification}`);
 
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
 
@@ -74,18 +83,11 @@ const analyseAndClassify = async (routineId) => {
 const functions = {
 
     RoutineCreated: async (routine) => {
-        // routinesToAnalyze[routine.id] = { ...routine, exercises: []};
         await collection.insertOne({ _id: routine.id, ...routine, exercises: []});
         console.log(`Analysis: Routine ${routine.id} registred to future analysis.`);
     },
 
     ExerciseAdded: async (exercise) => {
-        // const routine = routinesToAnalyze[exercise.routineId];
-        // if(routine){
-        //     routine.exercises.push(exercise);
-        //     analyseAndClassify(exercise.routineId);
-        // }
-
         await collection.updateOne(
             { _id: exercise.routineId },
             { $push: { exercises: exercise } }
@@ -94,29 +96,16 @@ const functions = {
     },
 
     ExerciseUpdated: async (exercise) => {
-        // const routine = routinesToAnalyze[exercise.routineId];
-        // if(routine){
-        //     const index = routine.exercises.findIndex(ex => ex.id === exercise.id);
-        //     if(index !== -1){
-        //         routine.exercises[index] = exercise;
-        //         analyseAndClassify(exercise.routineId);
-        //     }
-        // }
-
+        // const exerciseData = { ...exercise, id: exercise._id };
+        // delete exerciseData._id;
         await collection.updateOne(
-            { _id: exercise.routineId, "exercises.id": exercise.id },
+            { _id: exercise.routineId, "exercises._id": exercise._id },
             { $set: { "exercises.$": exercise } }
         );
         await analyseAndClassify(exercise.routineId);
     },
 
     ExerciseDeleted: async (data) => {
-        // const routine = routinesToAnalyze[data.routineId];
-        // if (routine){
-        //     routine.exercises = routine.exercises.filter(ex => ex.id !== data.id);
-        //     analyseAndClassify(data.routineId);
-        // }
-
         await collection.updateOne(
             { _id: data.routineId },
             { $pull: { exercises: { id: data.id } } }
@@ -133,7 +122,6 @@ const functions = {
 };
 
 
-
 async function startConsumer(){
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
     try{
@@ -148,13 +136,16 @@ async function startConsumer(){
 
         await channel.bindQueue(q.queue, exchange, '');
 
-        channel.consume(q.queue, (msg) => {
+        channel.consume(q.queue, async (msg) => {
             if(msg.content){
                 const event = JSON.parse(msg.content.toString());
                 console.log(`Consumer (Analysis): Event received - ${event.type}`);
 
-                if(functions[event.type]){
-                    functions[event.type](event.data);
+                if(functions[event.type])
+                    try {
+                    await functions[event.type](event.data);
+                } catch(error){
+                    console.error(`Error processing the event ${event.type}:`, error);
                 }
                 channel.ack(msg);
             }
