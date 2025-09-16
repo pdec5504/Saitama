@@ -56,10 +56,12 @@ function RoutineDetailPage() {
         setRoutine((prevRoutine) => {
             const oldIndex = prevRoutine.exercises.findIndex(ex => ex.originalId === active.id);
             const newIndex = prevRoutine.exercises.findIndex(ex => ex.originalId === over.id);
+
             let reorderedExercises = arrayMove(prevRoutine.exercises, oldIndex, newIndex);
-            reorderedExercises = reorderedExercises.map((exercise, index) => {
-                return { ...exercise, order: index + 1 };
-            });
+            reorderedExercises = reorderedExercises.map((exercise, index) => ({
+                ...exercise,
+                order: index
+            }));
             
             const orderedIds = reorderedExercises.map(ex => ex.originalId);
             axios.post(`http://localhost:4001/routines/${id}/exercises/reorder`, { orderedIds })

@@ -17,7 +17,7 @@ function ExerciseCard({ exercise, isEditMode, onEdit, onDelete, dragHandleProps 
                             <RxDragHandleDots2 size={20} color="var(--color-text-secondary)" />
                         </div>
                     )}
-                    <h4 style={{ margin: 0 }}>{exercise.order+1}. {exercise.name}</h4>
+                    <h4 style={{ margin: 0 }}>{exercise.order + 1}. {exercise.name}</h4>
                 </div>
                 {isEditMode && (
                     <div>
