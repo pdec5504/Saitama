@@ -9,9 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// const base = {};
 let collection;
-
 
 const functions = {
     RoutineCreated: async (routine) => {
@@ -40,7 +38,7 @@ const functions = {
     },
     ExerciseAdded: async (exercise) => {
         const routine = await collection.findOne({ _id: exercise.routineId });
-        //verificação 'Array.isArray' para máxima segurança
+
         if (routine && Array.isArray(routine.exercises)) {
             const order = routine.exercises.length + 1;
 
@@ -48,8 +46,7 @@ const functions = {
                 originalId: exercise.id, 
                 order: exercise.order,
                 name: exercise.name,
-                reps: exercise.reps,
-                sets: exercise.sets
+                phases: exercise.phases
             };
 
             await collection.updateOne(
@@ -63,7 +60,6 @@ const functions = {
     },
     RoutineAnalyzed: async (analysis) => {
         const { routineId, classification } = analysis;
-        // const routine = base[routineId];
         await collection.updateOne(
             { _id: routineId },
             { $set: { classification: classification } }
@@ -96,8 +92,7 @@ const functions = {
                     originalId: exercise.id,
                     order: existingOrder,
                     name: exercise.name,
-                    reps: exercise.reps,
-                    sets: exercise.sets
+                    phases: exercise.phases
                     
                 };
                 await collection.updateOne(

@@ -11,9 +11,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// in-memory storage for exercises
-// const exercisesByRoutineId = {};
-
 let collection;
 
 const functions = {
@@ -26,19 +23,21 @@ const functions = {
 
 app.post('/routines/:routineId/exercises', async (req, res) => {
     const { routineId } = req.params;
-    const { name, reps, sets } = req.body;
+    const { name, phases } = req.body;
     const exerciseId = uuidv4();
 
-    // Adicionado: Contar exercícios existentes para definir a ordem
+    if (!name || !Array.isArray(phases) || phases.length === 0) {
+        return res.status(400).send({ message: "Name and at least one phase are required." });
+    }
+
     const order = await collection.countDocuments({ routineId });
 
     const newExercise = {
         _id: exerciseId,
         name,
-        reps,
-        sets,
         routineId,
-        order // Adicionado: Salvar o campo 'order' na criação
+        phases,
+        order
     };
 
     await collection.insertOne(newExercise);
@@ -54,9 +53,8 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
             data: {
                 id: exerciseId,
                 name,
-                reps,
-                sets,
                 routineId,
+                phases,
                 order
             }
         };
@@ -82,11 +80,15 @@ app.get('/routines/:routineId/exercises', async (req, res) => {
 // edit exercise endpoint
 app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
     const { exerciseId } = req.params;
-    const { name, reps, sets} = req.body;
+    const { name, phases } = req.body;
+
+    if (!name || !Array.isArray(phases) || phases.length === 0) {
+        return res.status(400).send({ message: "Name and at least one phase are required." });
+    }
 
     const result = await collection.updateOne(
         { _id: exerciseId },
-        { $set: { name, reps, sets } }
+        { $set: { name, phases } }
     );
     if(result.matchedCount === 0) return res.status(404).send({ message: 'Exercise not found'});
 
@@ -94,10 +96,9 @@ app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
 
     const eventData = {
         id: updatedExercise._id,
-        name: updatedExercise.name,
-        reps: updatedExercise.reps,
-        sets: updatedExercise.sets,
         routineId: updatedExercise.routineId,
+        name: updatedExercise.name,
+        phases: updatedExercise.phases,
         order: updatedExercise.order
     };
 
