@@ -4,6 +4,16 @@ import toast from 'react-hot-toast';
 import { FaPlus, FaTrash } from "react-icons/fa";
 
 const buttonStyle = {
+    padding: '12px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    color: 'var(--color-text-primary)',
+    fontWeight: 'bold',
+    fontSize: '16px'
+};
+
+const inputStyle = {
     padding: '12px 8px',
     boxSizing: 'border-box',
     background: 'var(--color-background)',
@@ -12,15 +22,6 @@ const buttonStyle = {
     borderRadius: '4px',
     fontSize: '16px',
     width: '100%'
-};
-
-const inputStyle = {
-    padding: '8px',
-    boxSizing: 'border-box',
-    background: 'var(--color-background)',
-    border: '1px solid var(--color-border)',
-    color: 'var(--color-text-primary)',
-    borderRadius: '4px'
 };
 
 function AddExerciseForm({ routineId, onExerciseAdded, onCancel}){
@@ -103,13 +104,13 @@ function AddExerciseForm({ routineId, onExerciseAdded, onCancel}){
                 </div>
             ))}
 
-            <button type="button" onClick={handleAddPhase} style={{ ...buttonStyle, background: 'var(--color-surface)', border: '1px dashed var(--color-border)', cursor: 'pointer' }}>
+            <button type="button" onClick={handleAddPhase} style={{ ...buttonStyle, background: 'var(--color-surface)', border: '1px dashed var(--color-border)' }}>
                 <FaPlus style={{ marginRight: '8px' }} /> Adicionar Fase
             </button>
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                <button type='submit' style={{ ...buttonStyle, background: 'var(--color-primary)', flex: 1, cursor: 'pointer' }}>Adicionar</button>
-                <button type='button' onClick={onCancel} style={{ ...buttonStyle, background: 'var(--color-secondary)', flex: 1, cursor: 'pointer'}}>Cancelar</button>
+                <button type='submit' style={{ ...buttonStyle, background: 'var(--color-primary)', flex: 1 }}>Adicionar</button>
+                <button type='button' onClick={onCancel} style={{ ...buttonStyle, background: 'var(--color-secondary)', flex: 1 }}>Cancelar</button>
             </div>
         </form>
     );

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { FaPlus, FaTrash } from 'react-icons/fa';
 
 const buttonStyle = {
-    padding: '12px 12px',
+   padding: '12px',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
@@ -25,54 +26,86 @@ const inputStyle = {
 
 function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
     const [name, setName] = useState(exercise.name);
-    const [sets, setSets] = useState(exercise.sets);
-    const [reps, setReps] = useState(exercise.reps);
+    const [phases, setPhases] = useState(exercise.phases || [{ sets: '', reps: '', observation: '' }]);
+
+    const handlePhaseChange = (index, event) => {
+        const values = [...phases];
+        values[index][event.target.name] = event.target.value;
+        setPhases(values);
+    };
+
+    const handleAddPhase = () => {
+        setPhases([...phases, { sets: '', reps: '', observation: '' }]);
+    };
+
+    const handleRemovePhase = (index) => {
+        const values = [...phases];
+        if (values.length > 1) {
+            values.splice(index, 1);
+            setPhases(values);
+        }
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const updatedData = { name, sets, reps };
+        if (!name.trim()) {
+            return toast.error("Exercise name required.");
+        }
+        const isValid = phases.every(p => p.sets && p.reps);
+        if (!isValid) {
+            return toast.error("Sets and reps required.");
+        }
 
-        try{
-            await axios.put(`http://localhost:4001/routines/${routineId}/exercises/${exercise.originalId}`, updatedData);
+        try {
+            await axios.put(`http://localhost:4001/routines/${routineId}/exercises/${exercise.originalId}`, {
+                name,
+                phases
+            });
             toast.success('Exercício atualizado com sucesso!');
-            setTimeout(() => {
-                onSave();
-            }, 1000)
-        }catch(error){
+            onSave();
+        } catch (error) {
             console.error("Error updating exercise:", error);
-            toast.error("Não foi possível atualizar o exercício. Tente novamente.");
+            toast.error("Não foi possível atualizar o exercício.");
         }
     };
 
     return (
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <h3 style={{margin: 0, textAlign: 'center'}}>Editar Exercício</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    style={inputStyle}
-                    placeholder='Nome do Exercício'
-                />
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <input value={sets}
-                        onChange={(e) => setSets(e.target.value)}
-                        type='number'
-                        placeholder='Séries'
-                        style={inputStyle}
-                    />
-                    <input value={reps}
-                        onChange={(e) => setReps(e.target.value)}
-                        type='number'
-                        placeholder='Repetições'
-                        style={inputStyle}
-                    />
-                </div>
-            </div>
+            <h3 style={{ margin: 0, textAlign: 'center' }}>Editar Exercício</h3>
+            
+            <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder='Nome do Exercício'
+                style={inputStyle}
+            />
 
-            <div style={{ display: 'flex', gap: '10px' }}>
-                <button type='submit' style={{ ...buttonStyle, backgroundColor: 'var(--color-primary)', flex: 1 }}>Salvar</button>
-                <button type='button' onClick={onCancel} style={{ ...buttonStyle, backgroundColor: 'var(--color-secondary)', flex: 1 }}>Cancelar</button>
+            {phases.map((phase, index) => (
+                <div key={index} style={{ borderLeft: `3px solid var(--color-primary)`, paddingLeft: '15px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <label style={{ color: 'var(--color-text-secondary)', fontWeight: 'bold' }}>Fase {index + 1}</label>
+                        {phases.length > 1 && (
+                            <button type="button" onClick={() => handleRemovePhase(index)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                <FaTrash color="var(--color-secondary)" />
+                            </button>
+                        )}
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <input type="number" name="sets" placeholder="Séries" value={phase.sets} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
+                        <input type="text" name="reps" placeholder="Repetições (ex: 8-12)" value={phase.reps} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
+                        <input type="text" name="observation" placeholder="Observação (opcional)" value={phase.observation} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
+                    </div>
+                </div>
+            ))}
+
+            <button type="button" onClick={handleAddPhase} style={{ ...buttonStyle, background: 'var(--color-surface)', border: '1px dashed var(--color-border)' }}>
+                <FaPlus style={{ marginRight: '8px' }} /> Adicionar Fase
+            </button>
+
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button type='submit' style={{ ...buttonStyle, background: 'var(--color-primary)', flex: 1 }}>Salvar</button>
+                <button type='button' onClick={onCancel} style={{ ...buttonStyle, background: 'var(--color-secondary)', flex: 1 }}>Cancelar</button>
             </div>
         </form>
     );
