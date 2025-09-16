@@ -30,7 +30,10 @@ function ExerciseCard({ exercise, isEditMode, onEdit, onDelete, dragHandleProps 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {(exercise.phases || []).map((phase, index) => (
                     <div key={index} style={{ display: 'flex', justifyContent: 'space-between', background: 'var(--color-background)', padding: '8px 12px', borderRadius: '4px' }}>
-                        <span><strong>Fase {index + 1}:</strong> {phase.sets}x{phase.reps}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {/* <strong style={{ color: 'var(--color-text-secondary)'}}>Fase {index + 1}:</strong> */}
+                            <span>{phase.sets}x{phase.reps}</span>
+                        </div>
                         <span style={{ color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>{phase.observation}</span>
                     </div>
                 ))}
