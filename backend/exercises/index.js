@@ -21,6 +21,31 @@ const functions = {
     }
 };
 
+app.get('/image/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const imageUrl = `https://${process.env.RAPIDAPI_HOST}/image?exerciseId=${id}&resolution=180`;
+        
+        const response = await axios({
+            method: 'GET',
+            url: imageUrl,
+            responseType: 'stream',
+            headers: {
+                'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
+                'X-RapidAPI-Host': process.env.RAPIDAPI_HOST
+            }
+        });
+
+        res.setHeader('Content-Type', 'image/gif');
+        
+        response.data.pipe(res);
+
+    } catch (error) {
+        console.error("Erro ao fazer proxy da imagem:", error.message);
+        res.status(500).send({ message: "Não foi possível carregar a imagem." });
+    }
+});
+
 app.post('/routines/:routineId/exercises', async (req, res) => {
     const { routineId } = req.params;
     const { name, phases } = req.body;
@@ -61,9 +86,9 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
 
         if (bestMatch && bestMatch.id) {
             const exerciseId = bestMatch.id;
-            gifUrl = `https://exercisedb.p.rapidapi.com/image?exerciseId=${exerciseId}&resolution=180`;
+            gifUrl = `http://localhost:4001/image/${exerciseId}`;
             
-            console.log(`URL da imagem construída para '${name}' (ID: ${exerciseId}, Nome: ${bestMatch.name}): ${gifUrl}`);
+            console.log(`URL de proxy construída para '${name}' (ID: ${exerciseId}): ${gifUrl}`);
         } else {
             console.log(`Não foi possível encontrar um exercício correspondente para '${name}' na API.`);
         }
