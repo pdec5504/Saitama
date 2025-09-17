@@ -31,7 +31,10 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
     }
 
     let gifUrl = '';
-    try{
+    try {
+        const searchName = name.toLowerCase();
+        console.log(`Buscando ID para: "${searchName}"`);
+        
         const options = {
             method: 'GET',
             url: `https://${process.env.RAPIDAPI_HOST}/exercises/name/${encodeURIComponent(name.toLowerCase())}`,
@@ -42,19 +45,37 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
         };
         const response = await axios.request(options);
 
-        const exerciseWithGif = response.data.find(ex => ex.gifUrl);
+        let bestMatch = null;
 
-        if (exerciseWithGif) {
-            gifUrl = exerciseWithGif.gifUrl;
-            console.log(`Imagem encontrada para '${name}': ${gifUrl}`);
-        } else {
-            console.log(`Nenhuma imagem encontrada para o exercício '${name}' nos resultados da API.`);
+        if (response.data && response.data.length > 0) {
+            bestMatch = response.data.find(ex => ex.name.toLowerCase() === searchName);
+
+            if (!bestMatch) {
+                const potentialMatches = response.data.filter(ex => ex.name.toLowerCase().includes(searchName));
+                if (potentialMatches.length > 0) {
+                    potentialMatches.sort((a, b) => a.name.length - b.name.length);
+                    bestMatch = potentialMatches[0];
+                }
+            }
         }
-    } catch (error) {
-        if (error.response && error.response.status === 404) {
-             console.log(`Nenhuma imagem encontrada para o exercício '${name}' na API.`);
+
+        if (bestMatch && bestMatch.id) {
+            const exerciseId = bestMatch.id;
+            gifUrl = `https://exercisedb.p.rapidapi.com/image?exerciseId=${exerciseId}&resolution=180`;
+            
+            console.log(`URL da imagem construída para '${name}' (ID: ${exerciseId}, Nome: ${bestMatch.name}): ${gifUrl}`);
         } else {
-            console.error("Erro ao buscar dados da ExerciseDB API:", error.message);
+            console.log(`Não foi possível encontrar um exercício correspondente para '${name}' na API.`);
+        }
+
+    } catch (error) {
+        if (error.response) {
+            console.error("Erro na resposta da API ExerciseDB (status):", error.response.status);
+            console.error("Erro na resposta da API ExerciseDB (data):", JSON.stringify(error.response.data, null, 2));
+        } else if (error.request) {
+            console.error("Erro na requisição para a API ExerciseDB (sem resposta):", error.request);
+        } else {
+            console.error("Erro ao configurar a requisição para a API ExerciseDB:", error.message);
         }
     }
     
