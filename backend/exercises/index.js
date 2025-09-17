@@ -34,22 +34,28 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
     try{
         const options = {
             method: 'GET',
-            url: `https://${process.env.RAPIDAPI_HOST}/exercises/name/${name.toLowerCase()}`,
+            url: `https://${process.env.RAPIDAPI_HOST}/exercises/name/${encodeURIComponent(name.toLowerCase())}`,
             headers: {
                 'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
                 'X-RapidAPI-Host': process.env.RAPIDAPI_HOST
             }
         };
         const response = await axios.request(options);
-        const exerciseData = response.data.find(ex => ex.name.toLowerCase() === name.toLowerCase());
-        if (exerciseData && exerciseData.gifUrl) {
-            gifUrl = exerciseData.gifUrl;
-            console.log(`Image found to exercise '${name}': ${gifUrl}`);
+
+        const exerciseWithGif = response.data.find(ex => ex.gifUrl);
+
+        if (exerciseWithGif) {
+            gifUrl = exerciseWithGif.gifUrl;
+            console.log(`Imagem encontrada para '${name}': ${gifUrl}`);
         } else {
-            console.log(`No image found to exercise '${name}'.`);
+            console.log(`Nenhuma imagem encontrada para o exercício '${name}' nos resultados da API.`);
         }
     } catch (error) {
-        console.error("Error searching for data from ExerciseDB API:", error.message);
+        if (error.response && error.response.status === 404) {
+             console.log(`Nenhuma imagem encontrada para o exercício '${name}' na API.`);
+        } else {
+            console.error("Erro ao buscar dados da ExerciseDB API:", error.message);
+        }
     }
     
 

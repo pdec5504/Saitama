@@ -46,7 +46,8 @@ const functions = {
                 originalId: exercise.id, 
                 order: exercise.order,
                 name: exercise.name,
-                phases: exercise.phases
+                phases: exercise.phases,
+                gifUrl: exercise.gifUrl
             };
 
             await collection.updateOne(
@@ -92,7 +93,8 @@ const functions = {
                     originalId: exercise.id,
                     order: existingOrder,
                     name: exercise.name,
-                    phases: exercise.phases
+                    phases: exercise.phases,
+                    gifUrl: exercise.gifUrl
                     
                 };
                 await collection.updateOne(

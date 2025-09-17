@@ -23,7 +23,7 @@ const analyseAndClassify = async (routineId) => {
     const allReps = routine.exercises.flatMap(ex => 
         (ex.phases || []).map(phase => parseInt(phase.reps, 10))
     );
-    console.log(allReps)
+    // console.log(allReps)
 
     if(allReps.length > 0 ){
         const repsSum = allReps.reduce((sum, current) => sum + current, 0);

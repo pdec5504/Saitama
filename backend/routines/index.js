@@ -17,9 +17,10 @@ let collection; // MongoDB collection
 const functions = {
     ExerciseAdded: async (exercise) => {
         const simpleExercise = {
-            id: exercise.id,
+            id: exercise._id,
             name: exercise.name,
-            phases: exercise.phases
+            phases: exercise.phases,
+            gifUrl: exercise.gifUrl
         };
         await collection.updateOne(
             { _id: exercise.routineId },
@@ -30,9 +31,10 @@ const functions = {
 
     ExerciseUpdated: async (exercise) => {
         const updatedExercise = {
-            id: exercise.id,
+            id: exercise._id,
             name: exercise.name,
-            phases: exercise.phases
+            phases: exercise.phases,
+            gifUrl: exercise.gifUrl
         };
         await collection.updateOne(
             { _id: exercise.routineId, "exercises.id": exercise.id },
