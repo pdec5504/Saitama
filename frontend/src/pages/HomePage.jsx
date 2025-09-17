@@ -97,7 +97,24 @@ function HomePage(){
 
     return(
     <AnimatedPage>
-        {isLoading && <Spinner/>}
+        {isLoading && (
+            <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 2000
+            }}>
+                <div style={{ width: '60px', height: '60px' }}>
+                    <Spinner/>
+                </div>
+            </div>
+        )}
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2>Rotinas</h2>
