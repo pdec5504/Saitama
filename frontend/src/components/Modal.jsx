@@ -1,7 +1,7 @@
 import React from "react";
 import './Modal.css';
 
-function Modal ({ isOpen, onClose, children }) {
+function Modal ({ isOpen, onClose, children, contentClassName = '' }) {
     if (!isOpen) {
         return null
     }
@@ -12,7 +12,7 @@ function Modal ({ isOpen, onClose, children }) {
 
     return(
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={handleContentClick}>
+            <div className={`modal-content ${contentClassName}`} onClick={handleContentClick}>
                 {children}
             </div>
         </div>

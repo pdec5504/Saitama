@@ -167,8 +167,18 @@ function RoutineDetailPage() {
                 )}
             </Modal>
 
-            <Modal isOpen={!!enlargedImageUrl} onClose={() => setEnlargedImageUrl(null)}>
-                <img src={enlargedImageUrl} alt="Enlarged exercise animation" style={{ maxWidth: '90vw', maxHeight: '80vh', borderRadius: '8px' }}/>
+            <Modal isOpen={!!enlargedImageUrl} onClose={() => setEnlargedImageUrl(null)} contentClassName='image-modal'>
+                <img 
+                    src={enlargedImageUrl} 
+                    alt="Enlarged exercise animation" 
+                    style={{ 
+                        display: 'block',
+                        maxHeight: '85vh',
+                        maxWidth: '100%',
+                        borderRadius: '8px',
+                        boxShadow: '0 5px 20px rgba(0, 0, 0, 0.7)' 
+                    }}
+                />
             </Modal>
         </div>
     );

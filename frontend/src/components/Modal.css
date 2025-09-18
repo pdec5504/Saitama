@@ -20,3 +20,12 @@
   width: 90%;
   max-width: 280px; 
 }
+
+.modal-content.image-modal {
+  width: auto;
+  max-width: 90vw;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
