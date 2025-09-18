@@ -86,7 +86,7 @@ const functions = {
     ExerciseUpdated: async (exercise) => {
         const routine = await collection.findOne({ _id: exercise.routineId });
         if (routine){
-            const index = routine.exercises.findIndex(ex => ex.originalId === exercise.id);
+            const index = routine.exercises.findIndex(ex => ex.originalId === exercise._id);
             if(index !== -1){
                 const existingOrder = routine.exercises[index].order;
                 const updatedExercise = {
@@ -98,7 +98,7 @@ const functions = {
                     
                 };
                 await collection.updateOne(
-                    { _id: exercise.routineId, "exercises.originalId": exercise.id },
+                    { _id: exercise.routineId, "exercises.originalId": exercise._id },
                     { $set: { "exercises.$": updatedExercise } }
                 );
                 console.log(`Query: Exercise #${existingOrder} in routine ${exercise.routineId} updated.`);
