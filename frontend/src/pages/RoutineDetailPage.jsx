@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { DndContext, closestCenter, useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableExerciseCard } from '../components/SortableExerciseCard';
+import Spinner from '../components/Spinner';
 
 
 function RoutineDetailPage() {
@@ -18,6 +19,12 @@ function RoutineDetailPage() {
     const [exerciseToEdit, setExerciseToEdit] = useState(null);
     const [isExerciseEditMode, setExerciseEditMode] = useState(false);
     const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
+    const [isEnlargedImageLoading, setIsEnlargedImageLoading] = useState(true);
+
+    const handleImageClick = (imageUrl) => {
+        setIsEnlargedImageLoading(true);
+        setEnlargedImageUrl(imageUrl);
+    }
 
     const fetchRoutine = async () => {
         try{
@@ -168,9 +175,15 @@ function RoutineDetailPage() {
             </Modal>
 
             <Modal isOpen={!!enlargedImageUrl} onClose={() => setEnlargedImageUrl(null)} contentClassName='image-modal'>
+                {isEnlargedImageLoading && (
+                    <div style={{ width: '60px', height: '60px', color: 'white' }}>
+                        <Spinner/>
+                    </div>
+                )}
                 <img 
                     src={enlargedImageUrl} 
                     alt="Enlarged exercise animation" 
+                    onLoad={() => setIsEnlargedImageLoading(false)}
                     style={{ 
                         display: 'block',
                         maxHeight: '85vh',
