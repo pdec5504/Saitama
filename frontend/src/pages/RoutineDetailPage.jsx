@@ -14,10 +14,10 @@ import { SortableExerciseCard } from '../components/SortableExerciseCard';
 function RoutineDetailPage() {
     const [routine, setRoutine] = useState(null);
     const { id } = useParams(); //read the id from URL
-
     const [isAddingExercise, setIsAddingExercise] = useState(false);
     const [exerciseToEdit, setExerciseToEdit] = useState(null);
     const [isExerciseEditMode, setExerciseEditMode] = useState(false);
+    const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
 
     const fetchRoutine = async () => {
         try{
@@ -125,6 +125,7 @@ function RoutineDetailPage() {
                                     isEditMode={isExerciseEditMode}
                                     onEdit={() => setExerciseToEdit(ex)}
                                     onDelete={() => handleDeleteExercise(ex.originalId)}
+                                    onImageClick={() => setEnlargedImageUrl(ex.gifUrl)}
                                 />
                             ))
                         ) : (<p>No exercises added yet.</p>)}
@@ -164,6 +165,10 @@ function RoutineDetailPage() {
                         onCancel={() => setExerciseToEdit(null)}
                     />
                 )}
+            </Modal>
+
+            <Modal isOpen={!!enlargedImageUrl} onClose={() => setEnlargedImageUrl(null)}>
+                <img src={enlargedImageUrl} alt="Enlarged exercise animation" style={{ maxWidth: '90vw', maxHeight: '80vh', borderRadius: '8px' }}/>
             </Modal>
         </div>
     );

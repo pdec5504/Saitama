@@ -3,7 +3,7 @@ import { FaPen, FaTrash } from "react-icons/fa";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import Spinner from "./Spinner";
 
-function ExerciseCard({ exercise, isEditMode, onEdit, onDelete, dragHandleProps }) {
+function ExerciseCard({ exercise, isEditMode, onEdit, onDelete, dragHandleProps, onImageClick }) {
     const [imageLoading, setImageLoading] = useState(true);
     return (
         <div style={{ 
@@ -46,7 +46,9 @@ function ExerciseCard({ exercise, isEditMode, onEdit, onDelete, dragHandleProps 
                 </div>
             </div>
             {exercise.gifUrl && (
-                <div style={{
+                <div 
+                onClick={() => onImageClick(exercise.gifUrl)}
+                style={{
                     minWidth: '100px',
                     width: '100px',
                     height: '100px',
@@ -55,7 +57,8 @@ function ExerciseCard({ exercise, isEditMode, onEdit, onDelete, dragHandleProps 
                     alignItems: 'center',
                     background: '#000',
                     borderRadius: '8px',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    cursor: "pointer"
                 }}>
                     {imageLoading && (
                         <div style={{ width: '30px', height: '30px' }}>
