@@ -43,7 +43,7 @@ const functions = {
             const order = routine.exercises.length + 1;
 
             const exerciseToDisplay = {
-                originalId: exercise.id, 
+                originalId: exercise._id, 
                 order: exercise.order,
                 name: exercise.name,
                 phases: exercise.phases,
@@ -90,7 +90,7 @@ const functions = {
             if(index !== -1){
                 const existingOrder = routine.exercises[index].order;
                 const updatedExercise = {
-                    originalId: exercise.id,
+                    originalId: exercise._id,
                     order: existingOrder,
                     name: exercise.name,
                     phases: exercise.phases,

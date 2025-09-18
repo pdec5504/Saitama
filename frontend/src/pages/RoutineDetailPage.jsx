@@ -30,6 +30,7 @@ function RoutineDetailPage() {
         try{
             const res = await axios.get(`http://localhost:6001/routines/${id}`);
             if (res.data && res.data.exercises) {
+                res.data.exercises = res.data.exercises.filter(ex => ex && ex.originalId);
                 res.data.exercises.sort((a, b) => a.order - b.order);
             }
             setRoutine(res.data)
@@ -61,19 +62,20 @@ function RoutineDetailPage() {
         if (!over || active.id === over.id) return;
 
         setRoutine((prevRoutine) => {
-            const oldIndex = prevRoutine.exercises.findIndex(ex => ex.originalId === active.id);
-            const newIndex = prevRoutine.exercises.findIndex(ex => ex.originalId === over.id);
+            const validExercises = (prevRoutine.exercises || []).filter(ex => ex && ex.originalId);
+            const oldIndex = validExercises.findIndex(ex => ex.originalId === active.id);
+            const newIndex = validExercises.findIndex(ex => ex.originalId === over.id);
 
-            let reorderedExercises = arrayMove(prevRoutine.exercises, oldIndex, newIndex);
+            let reorderedExercises = arrayMove(validExercises, oldIndex, newIndex);
             reorderedExercises = reorderedExercises.map((exercise, index) => ({
                 ...exercise,
                 order: index
             }));
-            
+
             const orderedIds = reorderedExercises.map(ex => ex.originalId);
             axios.post(`http://localhost:4001/routines/${id}/exercises/reorder`, { orderedIds })
                 .catch(() => toast.error("Could not save the new order."));
-                
+
             return { ...prevRoutine, exercises: reorderedExercises };
         });
     }
@@ -102,6 +104,8 @@ function RoutineDetailPage() {
         return <div>Loading...</div>
     }
 
+    const validExercises = (routine.exercises || []).filter(ex => ex && ex.originalId);
+
     return (
         <div>
             <Link to="/"><FaArrowLeft color='var(--color-text-secondary)' size={'25px'} /></Link>
@@ -121,10 +125,10 @@ function RoutineDetailPage() {
             </div>
 
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={routine.exercises.map(ex => ex.originalId)} strategy={verticalListSortingStrategy}>
+                <SortableContext items={validExercises.map(ex => ex.originalId)} strategy={verticalListSortingStrategy}>
                     <div>
-                        {(routine.exercises && routine.exercises.length > 0) ? (
-                            routine.exercises.map(ex => (
+                        {validExercises.length > 0 ? (
+                            validExercises.map(ex => (
                                 <SortableExerciseCard
                                     key={ex.originalId}
                                     id={ex.originalId}
@@ -132,7 +136,7 @@ function RoutineDetailPage() {
                                     isEditMode={isExerciseEditMode}
                                     onEdit={() => setExerciseToEdit(ex)}
                                     onDelete={() => handleDeleteExercise(ex.originalId)}
-                                    onImageClick={() => setEnlargedImageUrl(ex.gifUrl)}
+                                    onImageClick={() => handleImageClick(ex.gifUrl)}
                                 />
                             ))
                         ) : (<p>No exercises added yet.</p>)}

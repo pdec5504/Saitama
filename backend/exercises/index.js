@@ -6,7 +6,6 @@ const amqp = require('amqplib');
 const { MongoClient } = require('mongodb');
 const axios = require('axios');
 
-
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -19,6 +18,53 @@ const functions = {
         await collection.deleteMany({ routineId: id });
         console.log(`Consumer (Exercises): Exercises of routine ${id} deleted.`);
     }
+};
+
+const getExerciseImageUrl = async (exerciseName) => {
+    let gifUrl = '';
+    try {
+        const searchName = exerciseName.toLowerCase();
+        console.log(`Searching for ID for: "${searchName}"`);
+        
+        const options = {
+            method: 'GET',
+            url: `https://${process.env.RAPIDAPI_HOST}/exercises/name/${encodeURIComponent(searchName)}`,
+            headers: {
+                'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
+                'X-RapidAPI-Host': process.env.RAPIDAPI_HOST
+            }
+        };
+        const response = await axios.request(options);
+
+        let bestMatch = null;
+        if (response.data && response.data.length > 0) {
+            bestMatch = response.data.find(ex => ex.name.toLowerCase() === searchName);
+            if (!bestMatch) {
+                const potentialMatches = response.data.filter(ex => ex.name.toLowerCase().includes(searchName));
+                if (potentialMatches.length > 0) {
+                    potentialMatches.sort((a, b) => a.name.length - b.name.length);
+                    bestMatch = potentialMatches[0];
+                }
+            }
+        }
+
+        if (bestMatch && bestMatch.id) {
+            const exerciseApiId = bestMatch.id;
+            gifUrl = `http://localhost:4001/image/${exerciseApiId}`;
+            console.log(`Proxy URL built for '${exerciseName}' (ID: ${exerciseApiId}, Match: '${bestMatch.name}'): ${gifUrl}`);
+        } else {
+            console.log(`Could not find a matching exercise for '${exerciseName}' in the API.`);
+        }
+    } catch (error) {
+        if (error.response) {
+            console.error("Error in ExerciseDB API response (status):", error.response.status);
+        } else if (error.request) {
+            console.error("Error in request to ExerciseDB API (no response).");
+        } else {
+            console.error("Error setting up request to ExerciseDB API:", error.message);
+        }
+    }
+    return gifUrl;
 };
 
 app.get('/image/:id', async (req, res) => {
@@ -55,55 +101,7 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
         return res.status(400).send({ message: "Name and at least one phase are required." });
     }
 
-    let gifUrl = '';
-    try {
-        const searchName = name.toLowerCase();
-        console.log(`Searching for ID for: "${searchName}"`);
-        
-        const options = {
-            method: 'GET',
-            url: `https://${process.env.RAPIDAPI_HOST}/exercises/name/${encodeURIComponent(name.toLowerCase())}`,
-            headers: {
-                'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
-                'X-RapidAPI-Host': process.env.RAPIDAPI_HOST
-            }
-        };
-        const response = await axios.request(options);
-
-        let bestMatch = null;
-
-        if (response.data && response.data.length > 0) {
-            bestMatch = response.data.find(ex => ex.name.toLowerCase() === searchName);
-
-            if (!bestMatch) {
-                const potentialMatches = response.data.filter(ex => ex.name.toLowerCase().includes(searchName));
-                if (potentialMatches.length > 0) {
-                    potentialMatches.sort((a, b) => a.name.length - b.name.length);
-                    bestMatch = potentialMatches[0];
-                }
-            }
-        }
-
-        if (bestMatch && bestMatch.id) {
-            const exerciseId = bestMatch.id;
-            gifUrl = `http://localhost:4001/image/${exerciseId}`;
-            
-            console.log(`Proxy URL built for '${name}' (ID: ${exerciseApiId}): ${gifUrl}`);
-        } else {
-            console.log(`Could not find a matching exercise for '${name}' in the API.`);
-        }
-
-    } catch (error) {
-        if (error.response) {
-            console.error("Error in ExerciseDB API response (status):", error.response.status);
-            console.error("Error in ExerciseDB API response (data):", JSON.stringify(error.response.data, null, 2));
-        } else if (error.request) {
-            console.error("Error in request to ExerciseDB API (no response):", error.request);
-        } else {
-            console.error("Error setting up request to ExerciseDB API:", error.message);
-        }
-    }
-
+    const gifUrl = await getExerciseImageUrl(name);
     const order = await collection.countDocuments({ routineId });
 
     const newExercise = {
@@ -125,14 +123,7 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
 
         const event = {
             type: 'ExerciseAdded',
-            data: {
-                id: exerciseId,
-                name,
-                routineId,
-                phases,
-                order,
-                gifUrl
-            }
+            data: newExercise
         };
 
         await channel.assertExchange(exchange, 'fanout', { durable: false })
@@ -162,9 +153,10 @@ app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
         return res.status(400).send({ message: "Name and at least one phase are required." });
     }
 
+    const gifUrl = await getExerciseImageUrl(name);
     const result = await collection.updateOne(
         { _id: exerciseId },
-        { $set: { name, phases } }
+        { $set: { name, phases, gifUrl } }
     );
     if(result.matchedCount === 0) return res.status(404).send({ message: 'Exercise not found'});
 
@@ -185,7 +177,7 @@ app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
         const exchange = 'event_exchange';
         const event = {
             type: 'ExerciseUpdated',
-            data: eventData
+            data: updatedExercise
         };
         await channel.assertExchange(exchange, 'fanout', { durable: false })
         channel.publish(exchange, '', Buffer.from(JSON.stringify(event)));
