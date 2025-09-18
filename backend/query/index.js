@@ -144,10 +144,6 @@ const functions = {
 
 app.get('/routines', async (req, res) => {
     const routines = await collection.find({}).sort({ order: 1 }).toArray();
-    // const routinesAsObject = routines.reduce((obj, item) => {
-    //     obj[item._id] = item
-    //     return obj;
-    // }, {})
     res.status(200).send(routines);
 });
 
@@ -161,7 +157,7 @@ app.get('/routines/:id', async (req, res) => {
             res.status(404).send({ message: 'Routine not found.'});
         }
     }catch(error){
-        res.status(500).send({message: 'Error searching for routine.'})
+        res.status(500).send({message: 'Error fetching routine.'})
     }
 });
 

@@ -28,8 +28,8 @@ function ExerciseCard({ exercise, isEditMode, onEdit, onDelete, dragHandleProps 
                     </div>
                     {isEditMode && (
                         <div>
-                        <button title="Editar Exercício" onClick={onEdit} style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaPen color="var(--color-text-secondary)" /></button>
-                        <button title="Apagar Exercício" onClick={onDelete} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaTrash color="var(--color-primary)" /></button>
+                        <button title="Edit Exercise" onClick={onEdit} style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaPen color="var(--color-text-secondary)" /></button>
+                        <button title="Delete Exercise" onClick={onDelete} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaTrash color="var(--color-primary)" /></button>
                     </div>
                     )}
                 </div>
@@ -38,7 +38,6 @@ function ExerciseCard({ exercise, isEditMode, onEdit, onDelete, dragHandleProps 
                     {(exercise.phases || []).map((phase, index) => (
                         <div key={index} style={{ display: 'flex', justifyContent: 'space-between', background: 'var(--color-background)', padding: '8px 12px', borderRadius: '4px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                {/* <strong style={{ color: 'var(--color-text-secondary)'}}>Fase {index + 1}:</strong> */}
                                 <span>{phase.sets}x{phase.reps}</span>
                             </div>
                             <span style={{ color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>{phase.observation}</span>
@@ -65,7 +64,7 @@ function ExerciseCard({ exercise, isEditMode, onEdit, onDelete, dragHandleProps 
                     )}
                     <img
                         src={exercise.gifUrl}
-                        alt={`Animação para o exercício ${exercise.name}`}
+                        alt={`Animation for ${exercise.name} exercise`}
                         style={{
                             display: imageLoading ? 'none' : 'block',
                             width: '100%',

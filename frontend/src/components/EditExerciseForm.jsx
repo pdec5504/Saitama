@@ -49,11 +49,11 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
     const handleSubmit = async (event) => {
         event.preventDefault();
         if (!name.trim()) {
-            return toast.error("Exercise name required.");
+            return toast.error("Exercise name is required.");
         }
         const isValid = phases.every(p => p.sets && p.reps);
         if (!isValid) {
-            return toast.error("Sets and reps required.");
+            return toast.error("Sets and reps are required for all phases.");
         }
 
         try {
@@ -61,22 +61,22 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
                 name,
                 phases
             });
-            toast.success('Exercício atualizado com sucesso!');
+            toast.success('Exercise updated successfully!');
             onSave();
         } catch (error) {
             console.error("Error updating exercise:", error);
-            toast.error("Não foi possível atualizar o exercício.");
+            toast.error("Could not update exercise.");
         }
     };
 
     return (
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <h3 style={{ margin: 0, textAlign: 'center' }}>Editar Exercício</h3>
+            <h3 style={{ margin: 0, textAlign: 'center' }}>Edit Exercise</h3>
             
             <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder='Nome do Exercício'
+                placeholder='Exercise Name'
                 style={inputStyle}
             />
 
@@ -91,7 +91,7 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
                 {phases.map((phase, index) => (
                     <div key={index} style={{ borderLeft: `3px solid var(--color-primary)`, paddingLeft: '15px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                            <label style={{ color: 'var(--color-text-secondary)', fontWeight: 'bold' }}>Fase {index + 1}</label>
+                            <label style={{ color: 'var(--color-text-secondary)', fontWeight: 'bold' }}>Phase {index + 1}</label>
                             {phases.length > 1 && (
                                 <button type="button" onClick={() => handleRemovePhase(index)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                                     <FaTrash color="var(--color-secondary)" />
@@ -100,21 +100,21 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
                         </div>
                         
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <input type="number" name="sets" placeholder="Séries" value={phase.sets} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
-                            <input type="text" name="reps" placeholder="Repetições (ex: 8-12)" value={phase.reps} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
-                            <input type="text" name="observation" placeholder="Observação (opcional)" value={phase.observation} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
+                            <input type="number" name="sets" placeholder="Sets" value={phase.sets} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
+                            <input type="text" name="reps" placeholder="Reps (e.g., 8-12)" value={phase.reps} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
+                            <input type="text" name="observation" placeholder="Observation (optional)" value={phase.observation} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
                         </div>
                     </div>
                 ))}
             </div>
 
             <button type="button" onClick={handleAddPhase} style={{ ...buttonStyle, background: 'var(--color-surface)', border: '1px dashed var(--color-border)' }}>
-                <FaPlus style={{ marginRight: '8px' }} /> Adicionar Fase
+                <FaPlus style={{ marginRight: '8px' }} /> Add Phase
             </button>
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                <button type='submit' style={{ ...buttonStyle, background: 'var(--color-primary)', flex: 1 }}>Salvar</button>
-                <button type='button' onClick={onCancel} style={{ ...buttonStyle, background: 'var(--color-secondary)', flex: 1 }}>Cancelar</button>
+                <button type='submit' style={{ ...buttonStyle, background: 'var(--color-primary)', flex: 1 }}>Save</button>
+                <button type='button' onClick={onCancel} style={{ ...buttonStyle, background: 'var(--color-secondary)', flex: 1 }}>Cancel</button>
             </div>
         </form>
     );

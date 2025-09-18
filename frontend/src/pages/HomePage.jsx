@@ -65,7 +65,7 @@ function HomePage(){
                 const orderedIds = newItems.map(item => item._id)
                 axios.post('http://localhost:3001/routines/reorder', {orderedIds})
                 // .then(() => toast.success("Ordem salva com sucesso!"))
-                .catch(() => toast.error("Não foi possível salvar as mudanças. Tente novamente."))
+                .catch(() => toast.error("Could not save changes. Please try again."))
 
                 return newItems;
             });
@@ -87,11 +87,11 @@ function HomePage(){
     const handleDeleteRoutine = async (routineId) => {
         try{
             await axios.delete(`http://localhost:3001/routines/${routineId}`);
-            toast.success('Rotina apagada com sucesso!');
+            toast.success('Routine deleted successfully!');
             fetchRoutines();
         }catch(error) {
             console.error("Error deleting routine:", error);
-            toast.error('Não foi possível apagar a rotina. Tente novamente.');
+            toast.error('Could not delete routine. Please try again.');
         }
     }
 
@@ -117,9 +117,9 @@ function HomePage(){
         )}
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2>Rotinas</h2>
+                <h2>Routines</h2>
                 <button 
-                    title='Ativar Modo de Edição'
+                    title='Toggle Edit Mode'
                     onClick={() => setIsEditMode(!isEditMode)}
                     style={{ padding: '8px 12px', background: isEditMode ? '#e53935' : '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
                     <FaPen/>
@@ -151,12 +151,12 @@ function HomePage(){
             )}
             {!isLoading && routines.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-secondary)', border: '1px dashed var(--color-border)', borderRadius: '8px', marginTop: '20px' }}>
-                    <h3>Nenhuma Rotina Encontrada</h3>
-                    <p>Verifique sua conexão ou adicione sua primeira rotina abaixo.</p>
+                    <h3>No Routines Found</h3>
+                    <p>Check your connection or add your first routine below.</p>
                 </div>
             )}
 
-            <button title='Adicionar Rotina'
+            <button title='Add Routine'
                 onClick={() => setIsAddingRoutine(true)}
                 style={{
                     width: '100%',

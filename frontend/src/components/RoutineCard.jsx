@@ -6,7 +6,7 @@ function RoutineCard({ routine, onDelete, onEdit, isEditMode, isDragging, dragHa
     const handleEditClick = (event) => { event.stopPropagation(); onEdit();}
     const handleDeleteClick = (event) => {
         event.stopPropagation(); 
-        if (window.confirm("Tem certeza que deseja apagar essa rotina?")) { 
+        if (window.confirm("Are you sure you want to delete this routine?")) { 
             onDelete(); 
         }}
 
@@ -52,8 +52,8 @@ function RoutineCard({ routine, onDelete, onEdit, isEditMode, isDragging, dragHa
             </div>
             {isEditMode && (
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <button title="Editar Rotina" onClick={handleEditClick} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}><FaPen color="#555" /></button>
-                    <button title="Apagar Rotina" onClick={handleDeleteClick} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}><FaTrash color="#c0392b" /></button>
+                    <button title="Edit Routine" onClick={handleEditClick} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}><FaPen color="#555" /></button>
+                    <button title="Delete Routine" onClick={handleDeleteClick} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}><FaTrash color="#c0392b" /></button>
                 </div>
             )}
         </div>

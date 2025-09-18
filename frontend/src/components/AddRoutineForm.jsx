@@ -14,14 +14,14 @@ const buttonStyle = {
 
 function AddRoutineForm({ onRoutineAdded, onCancel}) {
     const [name, setName] = useState('')
-    const [weekDay, setWeekDay] = useState('Segunda-feira') //default value
+    const [weekDay, setWeekDay] = useState('Monday') //default value
 
     const handleSubmit = async (event) => {
         event.preventDefault();
 
         if (!name.trim()) {
             // alert("Insira um nome para a rotina!")
-            toast.error("Insira um nome para a rotina!");
+            toast.error("Please enter a name for the routine.");
             return;
         }
 
@@ -30,27 +30,27 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
                 name: name,
                 weekDay: weekDay
             });
-            toast.success("Rotina adicionada com sucesso!")
+            toast.success("Routine added successfully!")
             setTimeout(() => {
                 onRoutineAdded();
             }, 1000)
         } catch(error){
             console.error("Error adding routine:", error);
-            toast.error("Não foi possível adicionar a rotina. Tente novamente.");
+            toast.error("Could not add routine. Please try again.");
         }
     };
 
     return (
             <form onSubmit={handleSubmit}>
-                <h3 style={{ marginTop: 0, textAlign: 'center' }}>Nova Rotina</h3>
+                <h3 style={{ marginTop: 0, textAlign: 'center' }}>New Routine</h3>
                 
                 <div style={{ marginBottom: '10px'}}>
-                    <label htmlFor="routineName" style={{display: 'block', marginBottom: '5px'}}>Nome do Treino</label>
+                    <label htmlFor="routineName" style={{display: 'block', marginBottom: '5px'}}>Workout Name</label>
                     <input type="text"
                     id='routineName'
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder='Exemplo: Treino de Peito e Bíceps'
+                    placeholder='E.g., Chest and Biceps'
                     style={{ width: '100%', 
                             padding: '8px', 
                             boxSizing: 'border-box', 
@@ -61,7 +61,7 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
                             />
                 </div>
                 <div style={{ marginBottom: '15px'}}>
-                    <label htmlFor="weekDay" style={{display: 'block', marginBottom: '5px'}}>Dia da Semana</label>
+                    <label htmlFor="weekDay" style={{display: 'block', marginBottom: '5px'}}>Day of The Week</label>
                     <select id="weekDay"
                     value={weekDay}
                     onChange={(e) => setWeekDay(e.target.value)}
@@ -73,21 +73,21 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
                         color: 'var(--color-text-primary)',
                         borderRadius: '4px'
                         }}>
-                        <option>Segunda-feira</option>
-                        <option>Terça-feira</option>
-                        <option>Quarta-feira</option>
-                        <option>Quinta-feira</option>
-                        <option>Sexta-feira</option>
-                        <option>Sábado</option>
-                        <option>Domingo</option>
+                        <option>Monday</option>
+                        <option>Tuesday</option>
+                        <option>Wednesday</option>
+                        <option>Thursday</option>
+                        <option>Friday</option>
+                        <option>Saturday</option>
+                        <option>Sunday</option>
                     </select>
                 </div>
                 <div style={{ display: 'flex', gap: '10px'}}>
                     <button type='submit' style={{ ...buttonStyle, background: 'var(--color-primary)' }}>
-                        Adicionar
+                        Add
                     </button>
                     <button type='button' onClick={onCancel} style={{...buttonStyle, background: 'var(--color-secondary)' }}>
-                        Cancelar
+                        Cancel
                     </button>
                 </div>
             </form>

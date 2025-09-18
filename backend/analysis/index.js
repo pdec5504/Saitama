@@ -23,14 +23,10 @@ const analyseAndClassify = async (routineId) => {
     const allReps = routine.exercises.flatMap(ex => 
         (ex.phases || []).map(phase => parseInt(phase.reps, 10))
     );
-    // console.log(allReps)
 
     if(allReps.length > 0 ){
         const repsSum = allReps.reduce((sum, current) => sum + current, 0);
         repsAvg = repsSum / allReps.length;
-
-        // const minReps = Math.min(...reps);
-        // const maxReps = Math.max(...reps);
         
         if(repsAvg <= 6){
             classification = "Strength Training";
@@ -41,14 +37,6 @@ const analyseAndClassify = async (routineId) => {
         } else{
             classification = "Hybrid Training (Strength/ Hypertrophy)";
         }
-    //     if(minReps <= 6 && maxReps >= 8){
-    //     classification = "Hybrid Training (Strength/ Hypertrophy)";
-    // }
-    // else{
-    //     // const repsSum = reps.reduce((sum, cur) => sum + cur, 0);
-    //     // const repsAvg = repsSum / reps.length;
-
-    // }
     };
     console.log(`${routineId} Routine Analyses: [${allReps.join(', ')}] reps -> Classification: ${classification}`);
 
@@ -74,7 +62,7 @@ const analyseAndClassify = async (routineId) => {
         await channel.close()
         await connection.close();
     } catch(error){
-        console.error("Error to send analysis event: ", error.message);
+        console.error("Error sending analysis event: ", error.message);
     }
 };
 
@@ -96,8 +84,6 @@ const functions = {
     },
 
     ExerciseUpdated: async (exercise) => {
-        // const exerciseData = { ...exercise, id: exercise._id };
-        // delete exerciseData._id;
         await collection.updateOne(
             { _id: exercise.routineId, "exercises._id": exercise._id },
             { $set: { "exercises.$": exercise } }
@@ -145,7 +131,7 @@ async function startConsumer(){
                     try {
                     await functions[event.type](event.data);
                 } catch(error){
-                    console.error(`Error processing the event ${event.type}:`, error);
+                    console.error(`Error processing ${event.type} event:`, error);
                 }
                 channel.ack(msg);
             }

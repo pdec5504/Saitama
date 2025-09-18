@@ -28,7 +28,7 @@ function RoutineDetailPage() {
             setRoutine(res.data)
             return true;
         } catch(error){
-            console.error("Error searching for routine:", error)
+            console.error("Error fetching routine details:", error)
             setRoutine(null);
             return false;
         }
@@ -65,7 +65,7 @@ function RoutineDetailPage() {
             
             const orderedIds = reorderedExercises.map(ex => ex.originalId);
             axios.post(`http://localhost:4001/routines/${id}/exercises/reorder`, { orderedIds })
-                .catch(() => toast.error("Não foi possível salvar a nova ordem."));
+                .catch(() => toast.error("Could not save the new order."));
                 
             return { ...prevRoutine, exercises: reorderedExercises };
         });
@@ -78,35 +78,35 @@ function RoutineDetailPage() {
   }
     
     const handleDeleteExercise = async (exerciseId) => {
-        if (window.confirm("Tem certeza que quer apagar esse exercício?")) {
+        if (window.confirm("Are you sure you want to delete this exercise?")) {
             try{
                 await axios.delete(`http://localhost:4001/routines/${id}/exercises/${exerciseId}`);
-                toast.success("Exercício apagado com sucesso!");
+                toast.success("Exercise deleted successfully!");
                 setTimeout(() => {
                     fetchRoutine(), 1000
                 })
             }catch(error){
-                toast.error("Não foi possível apagar o exercício. Tente novamente.")
+                toast.error("Could not delete the exercise. Please try again.")
             }
         }
     }
     
     if (!routine) {
-        return <div>Carregando...</div>
+        return <div>Loading...</div>
     }
 
     return (
         <div>
             <Link to="/"><FaArrowLeft color='var(--color-text-secondary)' size={'25px'} /></Link>
             <h2 style={{ marginTop: '20px' }}>{routine.name}</h2>
-            <p><strong>Dia:</strong> {routine.weekDay}</p>
-            <p><strong>Classificação:</strong> <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{routine.classification || 'Aguardando análise'}</span></p>
+            <p><strong>Day:</strong> {routine.weekDay}</p>
+            <p><strong>Classification:</strong> <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{routine.classification || 'Aguardando análise'}</span></p>
             <hr style={{ borderColor: 'var(--color-border)' }} />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h4>Exercícios:</h4>
+                <h4>Exercises:</h4>
                 <button 
-                    title='Editar Exercícios'
+                    title='Edit Exercises'
                     onClick={() => setExerciseEditMode(!isExerciseEditMode)}
                     style={{ padding: '8px 12px', background: isExerciseEditMode ? 'var(--color-primary)' : 'var(--color-secondary)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
                     <FaPen/>
@@ -127,13 +127,13 @@ function RoutineDetailPage() {
                                     onDelete={() => handleDeleteExercise(ex.originalId)}
                                 />
                             ))
-                        ) : (<p>Nenhum exercício adicionado.</p>)}
+                        ) : (<p>No exercises added yet.</p>)}
                     </div>
                 </SortableContext>
             </DndContext>
 
             <button
-                title="Adicionar Exercício"
+                title="Add Exercise"
                 onClick={() => setIsAddingExercise(true)}
                 style={{
                     width: '100%',

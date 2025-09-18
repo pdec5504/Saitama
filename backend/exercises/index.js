@@ -41,8 +41,8 @@ app.get('/image/:id', async (req, res) => {
         response.data.pipe(res);
 
     } catch (error) {
-        console.error("Erro ao fazer proxy da imagem:", error.message);
-        res.status(500).send({ message: "Não foi possível carregar a imagem." });
+        console.error("Error proxying image:", error.message);
+        res.status(500).send({ message: "Could not load image." });
     }
 });
 
@@ -58,7 +58,7 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
     let gifUrl = '';
     try {
         const searchName = name.toLowerCase();
-        console.log(`Buscando ID para: "${searchName}"`);
+        console.log(`Searching for ID for: "${searchName}"`);
         
         const options = {
             method: 'GET',
@@ -88,22 +88,21 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
             const exerciseId = bestMatch.id;
             gifUrl = `http://localhost:4001/image/${exerciseId}`;
             
-            console.log(`URL de proxy construída para '${name}' (ID: ${exerciseId}): ${gifUrl}`);
+            console.log(`Proxy URL built for '${name}' (ID: ${exerciseApiId}): ${gifUrl}`);
         } else {
-            console.log(`Não foi possível encontrar um exercício correspondente para '${name}' na API.`);
+            console.log(`Could not find a matching exercise for '${name}' in the API.`);
         }
 
     } catch (error) {
         if (error.response) {
-            console.error("Erro na resposta da API ExerciseDB (status):", error.response.status);
-            console.error("Erro na resposta da API ExerciseDB (data):", JSON.stringify(error.response.data, null, 2));
+            console.error("Error in ExerciseDB API response (status):", error.response.status);
+            console.error("Error in ExerciseDB API response (data):", JSON.stringify(error.response.data, null, 2));
         } else if (error.request) {
-            console.error("Erro na requisição para a API ExerciseDB (sem resposta):", error.request);
+            console.error("Error in request to ExerciseDB API (no response):", error.request);
         } else {
-            console.error("Erro ao configurar a requisição para a API ExerciseDB:", error.message);
+            console.error("Error setting up request to ExerciseDB API:", error.message);
         }
     }
-    
 
     const order = await collection.countDocuments({ routineId });
 
@@ -142,7 +141,7 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
         await channel.close();
         await connection.close();
      } catch (error){
-        console.error("Error to publish event 'ExerciseAdded' to RabbitMQ:", error);
+        console.error("Error publishing 'ExerciseAdded' event to RabbitMQ:", error);
      }
 
     res.status(201).send(newExercise);
@@ -194,7 +193,7 @@ app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
         await channel.close();
         await connection.close();
     }catch (error){
-        console.error("Error to publish event 'ExerciseUpdated' to RabbitMQ:", error);
+        console.error("Error publishing event 'ExerciseUpdated' to RabbitMQ:", error);
     }
     res.status(200).send(updatedExercise);
 })
@@ -221,7 +220,7 @@ app.delete('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
         await channel.close();
         await connection.close();
     }catch (error){
-        console.error("Error to publish event 'ExerciseDeleted' to RabbitMQ:", error);
+        console.error("Error publishing event 'ExerciseDeleted' to RabbitMQ:", error);
     }
     res.status(204).send();
 })
@@ -231,7 +230,7 @@ app.post('/routines/:routineId/exercises/reorder', async (req, res) => {
     const { orderedIds } = req.body;
 
     if (!orderedIds || !Array.isArray(orderedIds)) {
-        return res.status(400).send({ message: 'Array with ordered IDs required.' });
+        return res.status(400).send({ message: 'Array with ordered IDs is required.' });
     }
 
     try {
@@ -261,10 +260,10 @@ app.post('/routines/:routineId/exercises/reorder', async (req, res) => {
         await channel.close();
         await connection.close();
 
-        res.status(200).send({ message: "Ordem dos exercícios atualizada com sucesso." });
+        res.status(200).send({ message: "Exercises order updated successfully." });
     } catch (error) {
-        console.error("Erro ao reordenar exercícios:", error);
-        res.status(500).send({ message: "Erro interno ao reordenar exercícios." });
+        console.error("Error reordering exercises:", error);
+        res.status(500).send({ message: "Internal error while reordering exercises." });
     }
 });
 
