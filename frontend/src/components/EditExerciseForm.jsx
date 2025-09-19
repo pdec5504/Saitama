@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import apiClient from '../api/apiClient';
 import toast from 'react-hot-toast';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 
@@ -57,7 +58,7 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
         }
 
         try {
-            await axios.put(`http://localhost:4001/routines/${routineId}/exercises/${exercise.originalId}`, {
+            await apiClient.put(`http://localhost:4001/routines/${routineId}/exercises/${exercise.originalId}`, {
                 name,
                 phases
             });

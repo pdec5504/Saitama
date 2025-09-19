@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import apiClient from '../api/apiClient';
 import AddRoutineForm from '../components/AddRoutineForm';
 import EditRoutineForm from '../components/EditRoutineForm';
 import Modal from '../components/Modal';
@@ -22,7 +23,7 @@ function HomePage(){
 
     const fetchRoutines = async () => {
         try{
-            const res = await axios.get('http://localhost:6001/routines');
+            const res = await apiClient.get('http://localhost:6001/routines');
             const data = res.data || {};
             const routinesArray = Array.isArray(data) ? data : Object.values(data);
             setRoutines(routinesArray)
@@ -64,7 +65,7 @@ function HomePage(){
                 const newItems = arrayMove(items, oldIndex, newIndex);
 
                 const orderedIds = newItems.map(item => item._id)
-                axios.post('http://localhost:3001/routines/reorder', {orderedIds})
+                apiClient.post('http://localhost:3001/routines/reorder', {orderedIds})
                 // .then(() => toast.success("Ordem salva com sucesso!"))
                 .catch(() => toast.error("Could not save changes. Please try again."))
 
@@ -87,7 +88,7 @@ function HomePage(){
 
     const handleDeleteRoutine = async (routineId) => {
         try{
-            await axios.delete(`http://localhost:3001/routines/${routineId}`);
+            await apiClient.delete(`http://localhost:3001/routines/${routineId}`);
             toast.success('Routine deleted successfully!');
             fetchRoutines();
         }catch(error) {

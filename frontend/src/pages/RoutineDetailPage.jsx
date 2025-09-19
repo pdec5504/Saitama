@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import apiClient from '../api/apiClient';
 import AddExerciseForm from '../components/AddExerciseForm';
 import EditExerciseForm from '../components/EditExerciseForm';
 import Modal from '../components/Modal';
@@ -28,7 +29,7 @@ function RoutineDetailPage() {
 
     const fetchRoutine = async () => {
         try{
-            const res = await axios.get(`http://localhost:6001/routines/${id}`);
+            const res = await apiClient.get(`http://localhost:6001/routines/${id}`);
             if (res.data && res.data.exercises) {
                 res.data.exercises = res.data.exercises.filter(ex => ex && ex.originalId);
                 res.data.exercises.sort((a, b) => a.order - b.order);
@@ -73,7 +74,7 @@ function RoutineDetailPage() {
             }));
 
             const orderedIds = reorderedExercises.map(ex => ex.originalId);
-            axios.post(`http://localhost:4001/routines/${id}/exercises/reorder`, { orderedIds })
+            apiClient.post(`http://localhost:4001/routines/${id}/exercises/reorder`, { orderedIds })
                 .catch(() => toast.error("Could not save the new order."));
 
             return { ...prevRoutine, exercises: reorderedExercises };
@@ -89,7 +90,7 @@ function RoutineDetailPage() {
     const handleDeleteExercise = async (exerciseId) => {
         if (window.confirm("Are you sure you want to delete this exercise?")) {
             try{
-                await axios.delete(`http://localhost:4001/routines/${id}/exercises/${exerciseId}`);
+                await apiClient.delete(`http://localhost:4001/routines/${id}/exercises/${exerciseId}`);
                 toast.success("Exercise deleted successfully!");
                 setTimeout(() => {
                     fetchRoutine(), 1000

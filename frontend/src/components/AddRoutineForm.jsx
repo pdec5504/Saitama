@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import apiClient from '../api/apiClient';
 import toast from 'react-hot-toast';
 
 const buttonStyle = {
@@ -20,13 +21,12 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
         event.preventDefault();
 
         if (!name.trim()) {
-            // alert("Insira um nome para a rotina!")
             toast.error("Please enter a name for the routine.");
             return;
         }
 
         try{
-            await axios.post('http://localhost:3001/routines', {
+            await apiClient.post('http://localhost:3001/routines', {
                 name: name,
                 weekDay: weekDay
             });

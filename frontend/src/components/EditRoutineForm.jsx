@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import apiClient from '../api/apiClient';
 import toast from 'react-hot-toast';
 
 const buttonStyle = {
@@ -31,7 +32,7 @@ function EditRoutineForm({ routine, onSave, onCancel }){
     const handleSubmit = async (event) => {
         event.preventDefault();
         try{
-            await axios.put(`http://localhost:3001/routines/${routine._id}`, { name, weekDay });
+            await apiClient.put(`http://localhost:3001/routines/${routine._id}`, { name, weekDay });
             toast.success('Routine updated successfully!');
             setTimeout(() => {
                 onSave();
