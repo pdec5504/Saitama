@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"npm run start --prefix routines\" \"npm run start --prefix exercises\" \"npm run start --prefix query\" \"npm run start --prefix analysis\""
+    "dev": "concurrently \"npm run start --prefix routines\" \"npm run start --prefix exercises\" \"npm run start --prefix query\" \"npm run start --prefix analysis\" \"npm run start --prefix auth\""
   },
   "keywords": [],
   "author": "",
