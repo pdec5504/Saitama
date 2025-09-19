@@ -44,11 +44,19 @@ const functions = {
     },
 
     ExerciseDeleted: async (data) => {
+        const routine = await collection.findOne({ _id: data.routineId });
+        if (routine && Array.isArray(routine.exercises)) {
+            const remainingExercises = routine.exercises.filter(ex => ex.id !== data.id);
+            const reorderedExercises = remainingExercises.map((exercise, index) => ({
+                ...exercise,
+                order: index
+            }));
         await collection.updateOne(
             { _id: data.routineId },
             { $pull: { exercises: { id: data.id } } }
-        );
+        )
         console.log(`Consumer (Routines): Exercise ${data.id} deleted from routine ${data.routineId}.`)
+        }
     }
 }
 

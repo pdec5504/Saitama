@@ -111,7 +111,7 @@ const functions = {
         if (routine && Array.isArray(routine.exercises)){
             const remaningExercises = routine.exercises.filter(ex => ex.originalId !== data.id);
             const reorderedExercises = remaningExercises.map((exercise, index) => {
-                return { ...exercise, order: index + 1};
+                return { ...exercise, order: index };
             });
             await collection.updateOne(
                 { _id: data.routineId },
