@@ -108,7 +108,7 @@ function RoutineDetailPage() {
 
     return (
         <div>
-            <Link to="/"><FaArrowLeft color='var(--color-text-secondary)' size={'25px'} /></Link>
+            <Link to="/routines"><FaArrowLeft color='var(--color-text-secondary)' size={'25px'} /></Link>
             <h2 style={{ marginTop: '20px' }}>{routine.name}</h2>
             <p><strong>Day:</strong> {routine.weekDay}</p>
             <p><strong>Classification:</strong> <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{routine.classification || 'Aguardando análise'}</span></p>

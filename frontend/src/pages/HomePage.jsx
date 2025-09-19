@@ -3,13 +3,14 @@ import axios from 'axios';
 import AddRoutineForm from '../components/AddRoutineForm';
 import EditRoutineForm from '../components/EditRoutineForm';
 import Modal from '../components/Modal';
-import { FaPlus, FaPen } from "react-icons/fa";
+import { FaPlus, FaPen, FaSignOutAlt } from "react-icons/fa";
 import toast from 'react-hot-toast';
 import AnimatedPage from '../components/AnimatedPage';
 import { DndContext, closestCenter, useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableRoutineCard } from '../components/SortableRoutineCard';
 import Spinner from '../components/Spinner';
+import { useNavigate } from 'react-router-dom';
 
 
 function HomePage(){
@@ -95,6 +96,14 @@ function HomePage(){
         }
     }
 
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem('token')
+        toast.success('Logged out successfully.')
+        navigate('/');
+    }
+
     return(
     <AnimatedPage>
         {isLoading && (
@@ -123,6 +132,12 @@ function HomePage(){
                     onClick={() => setIsEditMode(!isEditMode)}
                     style={{ padding: '8px 12px', background: isEditMode ? '#e53935' : '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
                     <FaPen/>
+                </button>
+                <button
+                    title='Logout'
+                    onClick={handleLogout}
+                    style={{padding: '8px 12px', background: 'var(--color-secondary)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
+                    <FaSignOutAlt/>
                 </button>
             </div>
 

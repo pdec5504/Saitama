@@ -5,6 +5,7 @@ import RoutineDetailPage from './pages/RoutineDetailPage';
 import { Toaster } from 'react-hot-toast';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   const location = useLocation();
@@ -19,8 +20,21 @@ function App() {
       <Routes location={location} key={location.pathname}>
         <Route path='/' element={<LoginPage/>}/>
         <Route path='/register' element={<RegisterPage/>}/>
-        <Route path='/routines' element={<HomePage/>}/>
-        <Route path='/routines/:id' element={<RoutineDetailPage/>}/>
+        <Route 
+          path='/routines' 
+          element={
+            <ProtectedRoute>
+              <HomePage/>
+            </ProtectedRoute>}
+        />
+        <Route 
+          path='/routines/:id' 
+          element={
+            <ProtectedRoute>
+              <RoutineDetailPage/>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </AnimatePresence>
     </div>
