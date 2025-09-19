@@ -3,6 +3,8 @@ import { AnimatePresence } from 'framer-motion';
 import HomePage from './pages/HomePage';
 import RoutineDetailPage from './pages/RoutineDetailPage';
 import { Toaster } from 'react-hot-toast';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 function App() {
   const location = useLocation();
@@ -15,7 +17,9 @@ function App() {
 
     <AnimatePresence mode='wait'>
       <Routes location={location} key={location.pathname}>
-        <Route path='/' element={<HomePage/>}/>
+        <Route path='/' element={<LoginPage/>}/>
+        <Route path='/register' element={<RegisterPage/>}/>
+        <Route path='/routines' element={<HomePage/>}/>
         <Route path='/routines/:id' element={<RoutineDetailPage/>}/>
       </Routes>
     </AnimatePresence>
