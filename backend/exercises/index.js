@@ -240,7 +240,7 @@ app.delete('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
         const exchange = 'event_exchange';
         const event = {
             type: 'ExerciseDeleted',
-            data: { id: exerciseId, routineId: routineId}
+            data: { id: exerciseId, routineId: routineId , userId: userId}
         };
         await channel.assertExchange(exchange, 'fanout', { durable: false })
         channel.publish(exchange, '', Buffer.from(JSON.stringify(event)));

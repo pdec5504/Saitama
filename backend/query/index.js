@@ -109,17 +109,28 @@ const functions = {
     },
 
     ExerciseDeleted: async (data) => {
-        const routine = await collection.findOne({ _id: data.routineId });
-        if (routine && Array.isArray(routine.exercises)){
-            const remaningExercises = routine.exercises.filter(ex => ex.originalId !== data.id);
-            const reorderedExercises = remaningExercises.map((exercise, index) => {
-                return { ...exercise, order: index };
-            });
-            await collection.updateOne(
-                { _id: data.routineId, userId: data.userId },
-                { $set: { exercises: reorderedExercises } }
-            )
+        // const routine = await collection.findOne({ _id: data.routineId, userId: data.userId });
+        // if (routine && Array.isArray(routine.exercises)){
+        //     const remaningExercises = routine.exercises.filter(ex => ex.originalId !== data.id);
+        //     const reorderedExercises = remaningExercises.map((exercise, index) => {
+        //         return { ...exercise, order: index };
+        //     });
+        //     await collection.updateOne(
+        //         { _id: data.routineId, userId: data.userId },
+        //         { $set: { exercises: reorderedExercises } }
+        //     )
+        //     console.log(`Query: Exercise ${data.id} in routine ${data.routineId} deleted.`);
+        // }
+
+        const result = await collection.updateOne(
+            { _id: data.routineId, userId: data.userId },
+            { $pull: { exercises: { originalId: data.id } } }
+        );
+
+        if (result.modifiedCount > 0) {
             console.log(`Query: Exercise ${data.id} in routine ${data.routineId} deleted.`);
+        } else {
+            console.log(`Query: Could not find routine ${data.routineId} for user ${data.userId} to delete exercise ${data.id}.`);
         }
     },
 

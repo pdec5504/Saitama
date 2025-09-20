@@ -89,14 +89,22 @@ function RoutineDetailPage() {
     
     const handleDeleteExercise = async (exerciseId) => {
         if (window.confirm("Are you sure you want to delete this exercise?")) {
+
+            setRoutine(prevRoutine => ({
+                ...prevRoutine,
+                exercises: prevRoutine.exercises.filter(ex => ex.originalId !== exerciseId)
+            }));
+
             try{
                 await apiClient.delete(`http://localhost:4001/routines/${id}/exercises/${exerciseId}`);
                 toast.success("Exercise deleted successfully!");
-                setTimeout(() => {
-                    fetchRoutine(), 1000
-                })
+                // setTimeout(() => {
+                //     fetchRoutine(), 1000
+                // })
+                fetchRoutine();
             }catch(error){
                 toast.error("Could not delete the exercise. Please try again.")
+                fetchRoutine();
             }
         }
     }
@@ -112,7 +120,7 @@ function RoutineDetailPage() {
             <Link to="/routines"><FaArrowLeft color='var(--color-text-secondary)' size={'25px'} /></Link>
             <h2 style={{ marginTop: '20px' }}>{routine.name}</h2>
             <p><strong>Day:</strong> {routine.weekDay}</p>
-            <p><strong>Classification:</strong> <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{routine.classification || 'Aguardando análise'}</span></p>
+            <p><strong>Classification:</strong> <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{routine.classification || 'Waiting analysis'}</span></p>
             <hr style={{ borderColor: 'var(--color-border)' }} />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
