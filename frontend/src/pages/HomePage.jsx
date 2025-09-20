@@ -134,12 +134,6 @@ function HomePage(){
                     style={{ padding: '8px 12px', background: isEditMode ? '#e53935' : '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
                     <FaPen/>
                 </button>
-                <button
-                    title='Logout'
-                    onClick={handleLogout}
-                    style={{padding: '8px 12px', background: 'var(--color-secondary)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
-                    <FaSignOutAlt/>
-                </button>
             </div>
 
             {routines.length > 0 && (
