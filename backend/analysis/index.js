@@ -71,13 +71,13 @@ const analyseAndClassify = async (routineId) => {
 const functions = {
 
     RoutineCreated: async (routine) => {
-        await collection.insertOne({ _id: routine.id, ...routine, exercises: []});
+        await collection.insertOne({ _id: routine.id, ...routine, exercises: [], userId: routine.userId });
         console.log(`Analysis: Routine ${routine.id} registred to future analysis.`);
     },
 
     ExerciseAdded: async (exercise) => {
         await collection.updateOne(
-            { _id: exercise.routineId },
+            { _id: exercise.routineId, userId: exercise.userId },
             { $push: { exercises: exercise } }
         );
         await analyseAndClassify(exercise.routineId);
@@ -85,7 +85,7 @@ const functions = {
 
     ExerciseUpdated: async (exercise) => {
         await collection.updateOne(
-            { _id: exercise.routineId, "exercises._id": exercise._id },
+            { _id: exercise.routineId, "exercises._id": exercise._id, userId:exercise.userId },
             { $set: { "exercises.$": exercise } }
         );
         await analyseAndClassify(exercise.routineId);
@@ -93,14 +93,14 @@ const functions = {
 
     ExerciseDeleted: async (data) => {
         await collection.updateOne(
-            { _id: data.routineId },
-            { $pull: { exercises: { id: data.id } } }
+            { _id: data.routineId, userId: data.userId },
+            { $pull: { exercises: { _id: data.id } } }
         );
         await analyseAndClassify(data.routineId);
     },
 
     RoutineDeleted: async (data) => {
-        const result = await collection.deleteOne({ _id: data.id });
+        const result = await collection.deleteOne({ _id: data.id, userId: data.userId });
         if(result.deletedCount > 0){
             console.log(`Analysis: Routine ${data.id} data deleted from databse.`);
         }

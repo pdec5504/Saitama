@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const amqp = require('amqplib');
 const { MongoClient } = require('mongodb');
+const authMiddleware = require('./authMiddleware');
 
 const app = express();
 app.use(cors());
@@ -18,23 +19,24 @@ const functions = {
             name: routine.name,
             weekDay: routine.weekDay,
             exercises: [],
-            order: routine.order
+            order: routine.order,
+            userId: routine.userId
         });
-        console.log(`Query: Routine ${routine.id} created.`);
+        console.log(`Query: Routine ${routine.id} created for user ${routine.userId}.`);
        
     },
     RoutinesReordered: async (data) => {
-        const { orderedIds } = data;
+        const { orderedIds, userId } = data;
         const bulkOps = orderedIds.map((id, index) => ({
             updateOne: {
-                filter: { _id: id },
+                filter: { _id: id, userId: userId },
                 update: { $set: { order: index } }
             }
         }));
         if (bulkOps.length > 0) {
             await collection.bulkWrite(bulkOps);
         }
-        console.log("Query: Routines order updated on database.");
+        console.log("Query: Routines order updated for user.");
     },
     ExerciseAdded: async (exercise) => {
         const routine = await collection.findOne({ _id: exercise.routineId });
@@ -51,7 +53,7 @@ const functions = {
             };
 
             await collection.updateOne(
-                { _id: exercise.routineId },
+                { _id: exercise.routineId, userId: exercise.userId },
                 { $push: { exercises: exerciseToDisplay } }
             );
             console.log(`Query: Exercise #${order} (${exercise.name}) added to routine ${exercise.routineId}`);
@@ -71,7 +73,7 @@ const functions = {
 
     RoutineUpdated: async (data) => {
         await collection.updateOne(
-            { _id: data.id },
+            { _id: data.id, userId: data.userId },
             { $set: { name: data.name, weekDay: data.weekDay } }
         );
         console.log(`Query: Routine ${data.id} updated.`);
@@ -79,12 +81,12 @@ const functions = {
     },
 
     RoutineDeleted: async (data) => {
-        await collection.deleteOne({ _id: data.id });
+        await collection.deleteOne({ _id: data.id, userId: data.userId });
         console.log(`Query: Routine ${data.id} deleted.`);
     },
 
     ExerciseUpdated: async (exercise) => {
-        const routine = await collection.findOne({ _id: exercise.routineId });
+        const routine = await collection.findOne({ _id: exercise.routineId, userId: exercise.userId });
         if (routine){
             const index = routine.exercises.findIndex(ex => ex.originalId === exercise._id);
             if(index !== -1){
@@ -98,7 +100,7 @@ const functions = {
                     
                 };
                 await collection.updateOne(
-                    { _id: exercise.routineId, "exercises.originalId": exercise._id },
+                    { _id: exercise.routineId, "exercises.originalId": exercise._id, userId: exercise.userId },
                     { $set: { "exercises.$": updatedExercise } }
                 );
                 console.log(`Query: Exercise #${existingOrder} in routine ${exercise.routineId} updated.`);
@@ -114,7 +116,7 @@ const functions = {
                 return { ...exercise, order: index };
             });
             await collection.updateOne(
-                { _id: data.routineId },
+                { _id: data.routineId, userId: data.userId },
                 { $set: { exercises: reorderedExercises } }
             )
             console.log(`Query: Exercise ${data.id} in routine ${data.routineId} deleted.`);
@@ -122,19 +124,22 @@ const functions = {
     },
 
     ExercisesReordered: async (data) => {
-        const { routineId, orderedIds } = data;
-        const routine = await collection.findOne({ _id: routineId });
+        const { routineId, orderedIds, userId } = data;
+        const routine = await collection.findOne({ _id: routineId, userId: userId });
 
         if (routine && Array.isArray(routine.exercises)) {
             const exercisesMap = new Map(routine.exercises.map(ex => [ex.originalId, ex]));
             
             const reorderedExercises = orderedIds.map((id, index) => {
                 const exercise = exercisesMap.get(id);
-                return { ...exercise, order: index + 1 };
-            });
+                if (exercise) {
+                    return { ...exercise, order: index };
+                }
+                return null;
+            }).filter(Boolean);
 
             await collection.updateOne(
-                { _id: routineId },
+                { _id: routineId, userId: userId },
                 { $set: { exercises: reorderedExercises } }
             );
             console.log(`Query: Exercises order updated for routine ${routineId}.`);
@@ -142,15 +147,15 @@ const functions = {
     }
 };
 
-app.get('/routines', async (req, res) => {
-    const routines = await collection.find({}).sort({ order: 1 }).toArray();
+app.get('/routines', authMiddleware, async (req, res) => {
+    const routines = await collection.find({userId:req.user.id}).sort({ order: 1 }).toArray();
     res.status(200).send(routines);
 });
 
-app.get('/routines/:id', async (req, res) => {
+app.get('/routines/:id', authMiddleware, async (req, res) => {
     const { id } = req.params;
     try{
-        const routine= await collection.findOne({ _id: id });
+        const routine= await collection.findOne({ _id: id, userId: req.user.id });
         if (routine) {
             res.send(routine);
         }else{

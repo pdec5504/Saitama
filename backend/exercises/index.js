@@ -5,17 +5,19 @@ const { v4: uuidv4 } = require('uuid');
 const amqp = require('amqplib');
 const { MongoClient } = require('mongodb');
 const axios = require('axios');
+const authMiddleware = require('./authMiddleware');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-let collection;
+let exercisesCollection;
+let routinesCollection;
 
 const functions = {
     RoutineDeleted: async (data) => {
         const { id } = data;
-        await collection.deleteMany({ routineId: id });
+        await exercisesCollection.deleteMany({ routineId: id });
         console.log(`Consumer (Exercises): Exercises of routine ${id} deleted.`);
     }
 };
@@ -92,17 +94,30 @@ app.get('/image/:id', async (req, res) => {
     }
 });
 
+const checkRoutineOwnership = async (routineId, userId) => {
+    const routine = await routinesCollection.findOne({ _id: routineId, userId: userId });
+    return !!routine;
+}
+
+app.use('/routines/:routineId/exercises', authMiddleware);
+
 app.post('/routines/:routineId/exercises', async (req, res) => {
     const { routineId } = req.params;
     const { name, phases } = req.body;
-    const exerciseId = uuidv4();
+    const userId = req.user.id;
 
+    const isOwner = await checkRoutineOwnership(routineId, userId);
+    if (!isOwner) {
+        return res.status(403).send({ message: "You do not have permission to modify this routine." });
+    }
+
+    const exerciseId = uuidv4();
     if (!name || !Array.isArray(phases) || phases.length === 0) {
         return res.status(400).send({ message: "Name and at least one phase are required." });
     }
 
     const gifUrl = await getExerciseImageUrl(name);
-    const order = await collection.countDocuments({ routineId });
+    const order = await exercisesCollection.countDocuments({ routineId });
 
     const newExercise = {
         _id: exerciseId,
@@ -110,10 +125,11 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
         routineId,
         phases,
         order,
-        gifUrl
+        gifUrl,
+        userId
     };
 
-    await collection.insertOne(newExercise);
+    await exercisesCollection.insertOne(newExercise);
 
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
     try{
@@ -140,34 +156,48 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
 
 app.get('/routines/:routineId/exercises', async (req, res) => {
     const { routineId } = req.params;
-    const exercises = await collection.find({ routineId:routineId }).sort({order: 1}).toArray();
+    const userId = req.user.id;
+
+    const isOwner = await checkRoutineOwnership(routineId, userId);
+    if (!isOwner) {
+        return res.status(403).send({ message: "You do not have permission to view these exercises." });
+    }
+
+    const exercises = await exercisesCollection.find({ routineId:routineId }).sort({order: 1}).toArray();
     res.send(exercises || []);
 });
 
 // edit exercise endpoint
 app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
-    const { exerciseId } = req.params;
+    const { routineId, exerciseId } = req.params;
     const { name, phases } = req.body;
+    const userId = req.user.id;
+
+    const isOwner = await checkRoutineOwnership(routineId, userId);
+    if (!isOwner) {
+        return res.status(403).send({ message: "You do not have permission to modify this routine." });
+    }
 
     if (!name || !Array.isArray(phases) || phases.length === 0) {
         return res.status(400).send({ message: "Name and at least one phase are required." });
     }
 
     const gifUrl = await getExerciseImageUrl(name);
-    const result = await collection.updateOne(
+    const result = await exercisesCollection.updateOne(
         { _id: exerciseId },
         { $set: { name, phases, gifUrl } }
     );
     if(result.matchedCount === 0) return res.status(404).send({ message: 'Exercise not found'});
 
-    const updatedExercise = await collection.findOne({ _id: exerciseId });
+    const updatedExercise = await exercisesCollection.findOne({ _id: exerciseId });
 
     const eventData = {
         id: updatedExercise._id,
         routineId: updatedExercise.routineId,
         name: updatedExercise.name,
         phases: updatedExercise.phases,
-        order: updatedExercise.order
+        order: updatedExercise.order,
+        userId: updatedExercise.userId
     };
 
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
@@ -177,7 +207,7 @@ app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
         const exchange = 'event_exchange';
         const event = {
             type: 'ExerciseUpdated',
-            data: updatedExercise
+            data: eventData
         };
         await channel.assertExchange(exchange, 'fanout', { durable: false })
         channel.publish(exchange, '', Buffer.from(JSON.stringify(event)));
@@ -193,8 +223,14 @@ app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
 //delete exercise endpoint
 app.delete('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
     const { routineId, exerciseId } = req.params;
+    const userId = req.user.id;
 
-    const result = await collection.deleteOne({ _id: exerciseId });
+    const isOwner = await checkRoutineOwnership(routineId, userId);
+    if (!isOwner) {
+        return res.status(403).send({ message: "You do not have permission to modify this routine." });
+    }
+
+    const result = await exercisesCollection.deleteOne({ _id: exerciseId });
     if(result.deletedCount === 0) return res.status(404).send({ message: 'Exercise not found'});
 
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
@@ -220,6 +256,12 @@ app.delete('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
 app.post('/routines/:routineId/exercises/reorder', async (req, res) => {
     const { routineId } = req.params;
     const { orderedIds } = req.body;
+    const userId = req.user.id;
+
+    const isOwner = await checkRoutineOwnership(routineId, userId);
+    if (!isOwner) {
+        return res.status(403).send({ message: "You do not have permission to modify this routine." });
+    }
 
     if (!orderedIds || !Array.isArray(orderedIds)) {
         return res.status(400).send({ message: 'Array with ordered IDs is required.' });
@@ -234,7 +276,7 @@ app.post('/routines/:routineId/exercises/reorder', async (req, res) => {
         }));
 
         if (bulkOps.length > 0) {
-            await collection.bulkWrite(bulkOps);
+            await exercisesCollection.bulkWrite(bulkOps);
         }
 
         const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
@@ -265,7 +307,7 @@ async function startConsumer(){
         const connection = await amqp.connect(rabbitMQUrl);
         const channel = await connection.createChannel();
         const exchange = 'event_exchange';
-        await channel.assertExchange(exchange, 'fanout', { durable:false });
+        await channel.assertExchange(exchange, 'fanout', { durable: false });
         const q = await channel.assertQueue('exercises_events', { durable: true });
         channel.prefetch(1);
         console.log(`Consumer (exercises) waiting for events in queue: ${q.queue}`);
@@ -295,7 +337,8 @@ app.listen(4001, async () => {
         const client = new MongoClient(mongoUrl);
         await client.connect();
         const db = client.db(process.env.MONGO_DB_NAME);
-        collection = db.collection('exercises');
+        exercisesCollection = db.collection('exercises');
+        routinesCollection = db.collection('routines');
         console.log("Connected to MongoDB (Exercises)");
     }catch (error){
         console.error("Error connecting to MongoDB:", error.message);
