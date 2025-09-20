@@ -2,7 +2,7 @@ import { Routes, Route, useLocation, useNavigate, Link } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion';
 import HomePage from './pages/HomePage';
 import RoutineDetailPage from './pages/RoutineDetailPage';
-import { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProtectedRoute from './components/ProtectedRoute';
