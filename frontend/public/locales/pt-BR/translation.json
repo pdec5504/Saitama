@@ -1,0 +1,12 @@
+{
+  "loginTitle": "Entrar",
+  "emailPlaceholder": "E-mail",
+  "passwordPlaceholder": "Senha",
+  "loginButton": "Entrar",
+  "noAccount": "Não tem uma conta? ",
+  "registerLink": "Cadastre-se",
+  "registerTitle": "Cadastrar",
+  "registerButton": "Cadastrar",
+  "hasAccount": "Já tem uma conta? ",
+  "loginLink": "Entrar"
+}

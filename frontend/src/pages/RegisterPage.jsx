@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import apiClient from '../api/apiClient';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import AnimatedPage from '../components/AnimatedPage';
@@ -37,7 +37,7 @@ function RegisterPage() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            await axios.post('http://localhost:8001/register', { email, password });
+            await apiClient.post('http://localhost:8001/register', { email, password });
             toast.success('Registration successful! Please log in.');
             navigate('/'); //redirect to login page
         } catch (error) {

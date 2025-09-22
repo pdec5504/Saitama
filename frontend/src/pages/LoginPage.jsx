@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import axios from 'axios';
+import apiClient from '../api/apiClient';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import AnimatedPage from '../components/AnimatedPage';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const inputStyle = {
     width: '100%',
@@ -29,6 +31,7 @@ const buttonStyle = {
 };
 
 function LoginPage() {
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
@@ -36,7 +39,7 @@ function LoginPage() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8001/login', { email, password });
+            const response = await apiClient.post('http://localhost:8001/login', { email, password });
             localStorage.setItem('token', response.data.token);
             toast.success('Login successful!');
             navigate('/routines');
@@ -49,13 +52,14 @@ function LoginPage() {
     return (
         <AnimatedPage>
             <div style={{ maxWidth: '320px', margin: '60px auto' }}>
-                <h2 style={{ textAlign: 'center' }}>Login</h2>
+                <LanguageSwitcher/>
+                <h2 style={{ textAlign: 'center' }}>{t('loginTitle')}</h2>
                 <form onSubmit={handleSubmit}>
                     <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Email"
+                        placeholder={t('emailPlaceholder')}
                         required
                         style={inputStyle}
                     />
@@ -63,14 +67,14 @@ function LoginPage() {
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Password"
+                        placeholder={t('passwordPlaceholder')}
                         required
                         style={inputStyle}
                     />
-                    <button type="submit" style={buttonStyle}>Login</button>
+                    <button type="submit" style={buttonStyle}>{t('loginButton')}</button>
                 </form>
                 <p style={{ textAlign: 'center', marginTop: '20px' }}>
-                    Don't have an account? <Link to="/register" style={{ color: 'var(--color-primary)' }}>Register</Link>
+                    {t('noAccount')} <Link to="/register" style={{ color: 'var(--color-primary)' }}>{t('registerLink')}</Link>
                 </p>
             </div>
         </AnimatedPage>

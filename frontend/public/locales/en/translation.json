@@ -1,0 +1,12 @@
+{
+  "loginTitle": "Login",
+  "emailPlaceholder": "E-mail",
+  "passwordPlaceholder": "Password",
+  "loginButton": "Login",
+  "noAccount": "Don't have an account? ",
+  "registerLink": "Register",
+  "registerTitle": "Register",
+  "registerButton": "Register",
+  "hasAccount": "Already have an account? ",
+  "loginLink": "Login"
+}
