@@ -80,12 +80,6 @@ function HomePage(){
         setIsAddingRoutine(false);
     }
 
-    const handleRoutineAdded = () => {
-        fetchRoutines();
-        setIsAddingRoutine(false);
-    };
-
-
     const handleDeleteRoutine = async (routineId) => {
         try{
             await apiClient.delete(`http://localhost:3001/routines/${routineId}`);

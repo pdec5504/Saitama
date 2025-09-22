@@ -1,9 +1,8 @@
-// src/pages/RegisterPage.jsx
-
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import AnimatedPage from '../components/AnimatedPage';
 
 const inputStyle = {
     width: '100%',
@@ -48,31 +47,33 @@ function RegisterPage() {
     };
 
     return (
-        <div style={{ maxWidth: '320px', margin: '60px auto' }}>
-            <h2 style={{ textAlign: 'center' }}>Register</h2>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
-                    required
-                    style={inputStyle}
-                />
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    required
-                    style={inputStyle}
-                />
-                <button type="submit" style={buttonStyle}>Register</button>
-            </form>
-            <p style={{ textAlign: 'center', marginTop: '20px' }}>
-                Already have an account? <Link to="/" style={{ color: 'var(--color-primary)' }}>Login</Link>
-            </p>
-        </div>
+        <AnimatedPage>
+            <div style={{ maxWidth: '320px', margin: '60px auto' }}>
+                <h2 style={{ textAlign: 'center' }}>Register</h2>
+                <form onSubmit={handleSubmit}>
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Email"
+                        required
+                        style={inputStyle}
+                    />
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Password"
+                        required
+                        style={inputStyle}
+                    />
+                    <button type="submit" style={buttonStyle}>Register</button>
+                </form>
+                <p style={{ textAlign: 'center', marginTop: '20px' }}>
+                    Already have an account? <Link to="/" style={{ color: 'var(--color-primary)' }}>Login</Link>
+                </p>
+            </div>
+        </AnimatedPage>
     );
 }
 
