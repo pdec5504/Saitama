@@ -4,7 +4,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import AnimatedPage from '../components/AnimatedPage';
 import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const inputStyle = {
     width: '100%',
@@ -52,7 +51,6 @@ function LoginPage() {
     return (
         <AnimatedPage>
             <div style={{ maxWidth: '320px', margin: '60px auto' }}>
-                <LanguageSwitcher/>
                 <h2 style={{ textAlign: 'center' }}>{t('loginTitle')}</h2>
                 <form onSubmit={handleSubmit}>
                     <input

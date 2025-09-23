@@ -8,12 +8,12 @@ import RegisterPage from './pages/RegisterPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 function App() {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-
   const isAuthenticated = !!localStorage.getItem('token');
 
   const handleLogout = () => {
@@ -31,6 +31,8 @@ function App() {
           <h1>{t('appTitle')}</h1>
         </Link>
 
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <LanguageSwitcher />
         {isAuthenticated && (
           <button 
               title={t('logoutButton')}
@@ -46,6 +48,7 @@ function App() {
               <FaSignOutAlt/>
           </button>
         )}
+      </div>
       </div>
       <hr style={{ marginBottom: '20px', borderColor: 'var(--color-border)'}} />
 
