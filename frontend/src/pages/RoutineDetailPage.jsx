@@ -116,6 +116,11 @@ function RoutineDetailPage() {
             setExerciseToDelete(null);
         }
     }
+
+    const getClassificationKey = (classification) => {
+        if (!classification) return null;
+        return `classifications.${classification.replace(/ /g, '_').replace(/[()]/g, '')}`;
+    };
     
     if (!routine) {
         return <div style={{ width: '30px', height: '30px' }}><Spinner /></div>
@@ -127,8 +132,12 @@ function RoutineDetailPage() {
         <div>
             <Link to="/routines"><FaArrowLeft color='var(--color-text-secondary)' size={'25px'} /></Link>
             <h2 style={{ marginTop: '20px' }}>{routine.name}</h2>
-            <p><strong>{t('dayLabel')}:</strong> {routine.weekDay}</p>
-            <p><strong>{t('classificationLabel')}:</strong> <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{routine.classification || t('analysisPending')}</span></p>
+            <p><strong>{t('dayLabel')}:</strong> {routine.weekDay ? t(`weekDays.${routine.weekDay}`) : ''}</p>
+            <p><strong>{t('classificationLabel')}: </strong> 
+                <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>
+                    {routine.classification ? t(getClassificationKey(routine.classification)) : t('analysisPending')}
+                </span>
+            </p>
             <hr style={{ borderColor: 'var(--color-border)' }} />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

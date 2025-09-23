@@ -76,5 +76,12 @@
     "requiredSetsAndReps": "Séries e repetições são obrigatórias para todas as fases.",
     "requiredRoutineName": "Por favor, insira um nome para a rotina.",
     "logoutSuccess": "Logout bem-sucedido!"
+  },
+   "classifications": {
+    "Strength_Training": "Treino de Força",
+    "Hypertrophy_Training": "Treino de Hipertrofia",
+    "Resistance_Training": "Treino de Resistência",
+    "Hybrid_Training_Strength_Hypertrophy": "Treino Híbrido (Força/Hipertrofia)",
+    "General_Training": "Treino Geral"
   }
 }

@@ -76,5 +76,12 @@
     "requiredSetsAndReps": "Sets and reps are required for all phases.",
     "requiredRoutineName": "Please enter a name for the routine.",
     "logoutSuccess": "Logged out successfully!"
+  },
+  "classifications": {
+    "Strength_Training": "Strength Training",
+    "Hypertrophy_Training": "Hypertrophy Training",
+    "Resistance_Training": "Resistance Training",
+    "Hybrid_Training_Strength_Hypertrophy": "Hybrid Training (Strength/Hypertrophy)",
+    "General_Training": "General Training"
   }
 }

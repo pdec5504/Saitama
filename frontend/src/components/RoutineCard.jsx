@@ -20,7 +20,9 @@ function RoutineCard({ routine, onDelete, onEdit, isEditMode, isDragging, dragHa
     const cardTextContent = (
         <>
             <h3>{routine.name}</h3>
-            <p style={{ margin: 0, color: 'var(--color-text-secondary)' }}>{routine.weekDay}</p>
+            <p style={{ margin: 0, color: 'var(--color-text-secondary)' }}>
+                {routine.weekDay ? t(`weekDays.${routine.weekDay}`) : ''}
+            </p>
         </>
     );
 
