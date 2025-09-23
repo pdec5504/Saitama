@@ -17,6 +17,7 @@ i18n
     backend: {
       loadPath: '/locales/{{lng}}/translation.json', 
     },
+    debugger: true,
     nonExplicitSupportedLngs: true,
     react: {
       useSuspense: true, 

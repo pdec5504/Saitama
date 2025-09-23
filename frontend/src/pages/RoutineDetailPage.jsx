@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
 import apiClient from '../api/apiClient';
 import AddExerciseForm from '../components/AddExerciseForm';
 import EditExerciseForm from '../components/EditExerciseForm';
@@ -75,7 +74,7 @@ function RoutineDetailPage() {
 
             const orderedIds = reorderedExercises.map(ex => ex.originalId);
             apiClient.post(`http://localhost:4001/routines/${id}/exercises/reorder`, { orderedIds })
-                .catch(() => toast.error("Could not save the new order."));
+                .catch(() => toast.error(t('toasts.orderSaveFailedExercises')));
 
             return { ...prevRoutine, exercises: reorderedExercises };
         });
@@ -88,7 +87,7 @@ function RoutineDetailPage() {
   }
     
     const handleDeleteExercise = async (exerciseId) => {
-        if (window.confirm("Are you sure you want to delete this exercise?")) {
+        if (window.confirm(t('deleteExerciseConfirm'))) {
 
             setRoutine(prevRoutine => ({
                 ...prevRoutine,
@@ -97,13 +96,13 @@ function RoutineDetailPage() {
 
             try{
                 await apiClient.delete(`http://localhost:4001/routines/${id}/exercises/${exerciseId}`);
-                toast.success("Exercise deleted successfully!");
+                toast.success(t('toasts.exerciseDeleted'));
                 // setTimeout(() => {
                 //     fetchRoutine(), 1000
                 // })
                 fetchRoutine();
             }catch(error){
-                toast.error("Could not delete the exercise. Please try again.")
+                toast.error(t('toasts.exerciseDeleteFailed'))
                 fetchRoutine();
             }
         }
@@ -119,14 +118,14 @@ function RoutineDetailPage() {
         <div>
             <Link to="/routines"><FaArrowLeft color='var(--color-text-secondary)' size={'25px'} /></Link>
             <h2 style={{ marginTop: '20px' }}>{routine.name}</h2>
-            <p><strong>Day:</strong> {routine.weekDay}</p>
-            <p><strong>Classification:</strong> <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{routine.classification || 'Waiting analysis'}</span></p>
+            <p><strong>{t('dayLabel')}:</strong> {routine.weekDay}</p>
+            <p><strong>{t('classificationLabel')}:</strong> <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{routine.classification || t('analysisPending')}</span></p>
             <hr style={{ borderColor: 'var(--color-border)' }} />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h4>Exercises:</h4>
+                <h4>{t('exercisesTitle')}:</h4>
                 <button 
-                    title='Edit Exercises'
+                    title={t('editExercisesButton')}
                     onClick={() => setExerciseEditMode(!isExerciseEditMode)}
                     style={{ padding: '8px 12px', background: isExerciseEditMode ? 'var(--color-primary)' : 'var(--color-secondary)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
                     <FaPen/>
@@ -148,13 +147,13 @@ function RoutineDetailPage() {
                                     onImageClick={() => handleImageClick(ex.gifUrl)}
                                 />
                             ))
-                        ) : (<p>No exercises added yet.</p>)}
+                        ) : (<p>{t('noExercisesYet')}</p>)}
                     </div>
                 </SortableContext>
             </DndContext>
 
             <button
-                title="Add Exercise"
+                title={t('addExerciseButton')}
                 onClick={() => setIsAddingExercise(true)}
                 style={{
                     width: '100%',

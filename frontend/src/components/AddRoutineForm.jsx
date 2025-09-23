@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import apiClient from '../api/apiClient';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const buttonStyle = {
     flex: 1,
@@ -16,12 +17,13 @@ const buttonStyle = {
 function AddRoutineForm({ onRoutineAdded, onCancel}) {
     const [name, setName] = useState('')
     const [weekDay, setWeekDay] = useState('Monday') //default value
+    const { t } = useTranslation();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
 
         if (!name.trim()) {
-            toast.error("Please enter a name for the routine.");
+            toast.error(t('toasts.requiredRoutineName'));
             return;
         }
 
@@ -36,21 +38,21 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
             }, 1000)
         } catch(error){
             console.error("Error adding routine:", error);
-            toast.error("Could not add routine. Please try again.");
+            toast.error(t('toasts.routineAddFailed'));
         }
     };
 
     return (
             <form onSubmit={handleSubmit}>
-                <h3 style={{ marginTop: 0, textAlign: 'center' }}>New Routine</h3>
+                <h3 style={{ marginTop: 0, textAlign: 'center' }}>{t('newRoutineTitle')}</h3>
                 
                 <div style={{ marginBottom: '10px'}}>
-                    <label htmlFor="routineName" style={{display: 'block', marginBottom: '5px'}}>Workout Name</label>
+                    <label htmlFor="routineName" style={{display: 'block', marginBottom: '5px'}}>{t('workoutNameLabel')}</label>
                     <input type="text"
                     id='routineName'
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder='E.g., Chest and Biceps'
+                    placeholder={t('workoutNamePlaceholder')}
                     style={{ width: '100%', 
                             padding: '8px', 
                             boxSizing: 'border-box', 
@@ -61,7 +63,7 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
                             />
                 </div>
                 <div style={{ marginBottom: '15px'}}>
-                    <label htmlFor="weekDay" style={{display: 'block', marginBottom: '5px'}}>Day of The Week</label>
+                    <label htmlFor="weekDay" style={{display: 'block', marginBottom: '5px'}}>{t('dayOfWeekLabel')}</label>
                     <select id="weekDay"
                     value={weekDay}
                     onChange={(e) => setWeekDay(e.target.value)}
@@ -73,21 +75,21 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
                         color: 'var(--color-text-primary)',
                         borderRadius: '4px'
                         }}>
-                        <option>Monday</option>
-                        <option>Tuesday</option>
-                        <option>Wednesday</option>
-                        <option>Thursday</option>
-                        <option>Friday</option>
-                        <option>Saturday</option>
-                        <option>Sunday</option>
+                        <option value="Monday">{t('weekDays.Monday')}</option>
+                        <option value="Tuesday">{t('weekDays.Tuesday')}</option>
+                        <option value="Wednesday">{t('weekDays.Wednesday')}</option>
+                        <option value="Thursday">{t('weekDays.Thursday')}</option>
+                        <option value="Friday">{t('weekDays.Friday')}</option>
+                        <option value="Saturday">{t('weekDays.Saturday')}</option>
+                        <option value="Sunday">{t('weekDays.Sunday')}</option>
                     </select>
                 </div>
                 <div style={{ display: 'flex', gap: '10px'}}>
                     <button type='submit' style={{ ...buttonStyle, background: 'var(--color-primary)' }}>
-                        Add
+                        {t('addButton')}
                     </button>
                     <button type='button' onClick={onCancel} style={{...buttonStyle, background: 'var(--color-secondary)' }}>
-                        Cancel
+                        {t('cancelButton')}
                     </button>
                 </div>
             </form>

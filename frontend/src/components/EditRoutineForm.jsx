@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import axios from 'axios';
 import apiClient from '../api/apiClient';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const buttonStyle = {
     flex: 1,
@@ -28,27 +28,28 @@ const inputStyle = {
 function EditRoutineForm({ routine, onSave, onCancel }){
     const [name, setName] = useState(routine.name);
     const [weekDay, setWeekDay] = useState(routine.weekDay);
+    const { t } = useTranslation();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         try{
             await apiClient.put(`http://localhost:3001/routines/${routine._id}`, { name, weekDay });
-            toast.success('Routine updated successfully!');
+            toast.success(t('toasts.routineUpdated'));
             setTimeout(() => {
                 onSave();
             }, 1000)
         }catch(error){
             console.error("Error updating routine:", error);
-            toast.error("Could not update routine. Please try again.");
+            toast.error(t('toasts.routineUpdateFailed'));
         }
     };
 
     return (
         <form onSubmit={handleSubmit}>
-            <h3 style={{ marginTop: 0, textAlign: 'center' }}>Edit Routine</h3>
+            <h3 style={{ marginTop: 0, textAlign: 'center' }}>{t('editRoutineTitle')}</h3>
 
             <div style={{ marginBottom: '10px' }}>
-                    <label htmlFor="routineName" style={{ display: 'block', marginBottom: '5px' }}>Workout Name</label>
+                    <label htmlFor="routineName" style={{ display: 'block', marginBottom: '5px' }}>{t('workoutNameLabel')}</label>
                     <input type="text"
                         id='routineName'
                         value={name}
@@ -57,30 +58,30 @@ function EditRoutineForm({ routine, onSave, onCancel }){
                     />
                 </div>
                 <div style={{ marginBottom: '15px' }}>    
-                    <label htmlFor="weekDay" style={{ display: 'block', marginBottom: '5px' }}>Day of The Week</label>
+                    <label htmlFor="weekDay" style={{ display: 'block', marginBottom: '5px' }}>{t('dayOfWeekLabel')}</label>
                     <select
                         id="weekDay"
                         value={weekDay}
                         onChange={(e) => setWeekDay(e.target.value)}
                         style={inputStyle}
                     >
-                        <option>Monday</option>
-                        <option>Tuesday</option>
-                        <option>Wednesday</option>
-                        <option>Thursday</option>
-                        <option>Friday</option>
-                        <option>Saturday</option>
-                        <option>Sunday</option>
+                        <option value="Monday">{t('weekDays.Monday')}</option>
+                        <option value="Tuesday">{t('weekDays.Tuesday')}</option>
+                        <option value="Wednesday">{t('weekDays.Wednesday')}</option>
+                        <option value="Thursday">{t('weekDays.Thursday')}</option>
+                        <option value="Friday">{t('weekDays.Friday')}</option>
+                        <option value="Saturday">{t('weekDays.Saturday')}</option>
+                        <option value="Sunday">{t('weekDays.Sunday')}</option>
                     </select>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
                     <button type='submit'
                             style={{ ...buttonStyle, background: 'var(--color-primary)' }}>
-                        Save
+                        {t('saveButton')}
                     </button>
                     <button type='button' onClick={onCancel}
                             style={{ ...buttonStyle, background: 'var(--color-secondary)' }}>
-                        Cancel
+                        {t('cancelButton')}
                     </button>
                 </div>
         </form>

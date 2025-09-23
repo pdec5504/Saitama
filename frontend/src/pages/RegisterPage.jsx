@@ -38,24 +38,24 @@ function RegisterPage() {
         event.preventDefault();
         try {
             await apiClient.post('http://localhost:8001/register', { email, password });
-            toast.success('Registration successful! Please log in.');
+            toast.success(t('toasts.registrationSuccess'));
             navigate('/'); //redirect to login page
         } catch (error) {
             console.error("Registration error:", error);
-            toast.error(error.response?.data?.message || "Registration failed. Please try again.");
+            toast.error(error.response?.data?.message || t('toasts.registrationFailed'));
         }
     };
 
     return (
         <AnimatedPage>
             <div style={{ maxWidth: '320px', margin: '60px auto' }}>
-                <h2 style={{ textAlign: 'center' }}>Register</h2>
+                <h2 style={{ textAlign: 'center' }}>{t('registerTitle')}</h2>
                 <form onSubmit={handleSubmit}>
                     <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Email"
+                        placeholder={t('emailPlaceholder')}
                         required
                         style={inputStyle}
                     />
@@ -63,14 +63,14 @@ function RegisterPage() {
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Password"
+                        placeholder={t('passwordPlaceholder')}
                         required
                         style={inputStyle}
                     />
-                    <button type="submit" style={buttonStyle}>Register</button>
+                    <button type="submit" style={buttonStyle}>{t('registerButton')}</button>
                 </form>
                 <p style={{ textAlign: 'center', marginTop: '20px' }}>
-                    Already have an account? <Link to="/" style={{ color: 'var(--color-primary)' }}>Login</Link>
+                    {t('hasAccount')} <Link to="/" style={{ color: 'var(--color-primary)' }}>{t('loginLink')}</Link>
                 </p>
             </div>
         </AnimatedPage>

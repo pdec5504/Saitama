@@ -7,8 +7,10 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { FaSignOutAlt } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 function App() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -16,7 +18,7 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    toast.success('Logged out successfully!');
+    toast.success(t('toasts.logoutSuccess'));
     navigate('/');
   };
 
@@ -26,12 +28,12 @@ function App() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Link to={isAuthenticated ? "/routines" : "/"} style={{ textDecoration: 'none', color: 'inherit' }}>
-          <h1>Saitama Workout App</h1>
+          <h1>{t('appTitle')}</h1>
         </Link>
 
         {isAuthenticated && (
           <button 
-              title='Logout'
+              title={t('logoutButton')}
               onClick={handleLogout}
               style={{ 
                 padding: '8px 12px', 

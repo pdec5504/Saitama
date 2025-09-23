@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import axios from 'axios';
 import apiClient from '../api/apiClient';
 import toast from 'react-hot-toast';
 import { FaPlus, FaTrash } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 const buttonStyle = {
    padding: '12px',
@@ -26,6 +26,7 @@ const inputStyle = {
 };
 
 function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
+    const { t } = useTranslation();
     const [name, setName] = useState(exercise.name);
     const [phases, setPhases] = useState(exercise.phases || [{ sets: '', reps: '', observation: '' }]);
 
@@ -50,11 +51,11 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
     const handleSubmit = async (event) => {
         event.preventDefault();
         if (!name.trim()) {
-            return toast.error("Exercise name is required.");
+            return toast.error(t('toasts.requiredExerciseName'));
         }
         const isValid = phases.every(p => p.sets && p.reps);
         if (!isValid) {
-            return toast.error("Sets and reps are required for all phases.");
+            return toast.error(t('toasts.requiredSetsAndReps'));
         }
 
         try {
@@ -62,22 +63,22 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
                 name,
                 phases
             });
-            toast.success('Exercise updated successfully!');
+            toast.success(t('toasts.exerciseUpdated'));
             onSave();
         } catch (error) {
             console.error("Error updating exercise:", error);
-            toast.error("Could not update exercise.");
+            toast.error(t('toasts.exerciseUpdateFailed'));
         }
     };
 
     return (
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <h3 style={{ margin: 0, textAlign: 'center' }}>Edit Exercise</h3>
+            <h3 style={{ margin: 0, textAlign: 'center' }}>{t('editExerciseTitle')}</h3>
             
             <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder='Exercise Name'
+                placeholder={t('exerciseNamePlaceholder')}
                 style={inputStyle}
             />
 
@@ -92,7 +93,7 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
                 {phases.map((phase, index) => (
                     <div key={index} style={{ borderLeft: `3px solid var(--color-primary)`, paddingLeft: '15px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                            <label style={{ color: 'var(--color-text-secondary)', fontWeight: 'bold' }}>Phase {index + 1}</label>
+                            <label style={{ color: 'var(--color-text-secondary)', fontWeight: 'bold' }}>{t('phaseLabel')} {index + 1}</label>
                             {phases.length > 1 && (
                                 <button type="button" onClick={() => handleRemovePhase(index)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                                     <FaTrash color="var(--color-secondary)" />
@@ -101,21 +102,21 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
                         </div>
                         
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <input type="number" name="sets" placeholder="Sets" value={phase.sets} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
-                            <input type="text" name="reps" placeholder="Reps (e.g., 8-12)" value={phase.reps} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
-                            <input type="text" name="observation" placeholder="Observation (optional)" value={phase.observation} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
+                            <input type="number" name="sets" placeholder={t('setsPlaceholder')} value={phase.sets} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
+                            <input type="text" name="reps" placeholder={t('repsPlaceholder')} value={phase.reps} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
+                            <input type="text" name="observation" placeholder={t('observationPlaceholder')} value={phase.observation} onChange={e => handlePhaseChange(index, e)} style={inputStyle} />
                         </div>
                     </div>
                 ))}
             </div>
 
             <button type="button" onClick={handleAddPhase} style={{ ...buttonStyle, background: 'var(--color-surface)', border: '1px dashed var(--color-border)' }}>
-                <FaPlus style={{ marginRight: '8px' }} /> Add Phase
+                <FaPlus style={{ marginRight: '8px' }} /> {t('addPhaseButton')}
             </button>
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                <button type='submit' style={{ ...buttonStyle, background: 'var(--color-primary)', flex: 1 }}>Save</button>
-                <button type='button' onClick={onCancel} style={{ ...buttonStyle, background: 'var(--color-secondary)', flex: 1 }}>Cancel</button>
+                <button type='submit' style={{ ...buttonStyle, background: 'var(--color-primary)', flex: 1 }}>{t('saveButton')}</button>
+                <button type='button' onClick={onCancel} style={{ ...buttonStyle, background: 'var(--color-secondary)', flex: 1 }}>{t('cancelButton')}</button>
             </div>
         </form>
     );

@@ -11,7 +11,7 @@ import { DndContext, closestCenter, useSensor, useSensors, PointerSensor, Keyboa
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableRoutineCard } from '../components/SortableRoutineCard';
 import Spinner from '../components/Spinner';
-import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 
 function HomePage(){
@@ -20,6 +20,7 @@ function HomePage(){
     const [isAddingRoutine, setIsAddingRoutine] = useState(false);
     const [routineToEdit, setRoutineToEdit] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    const { t } = useTranslation();
 
     const fetchRoutines = async () => {
         try{
@@ -67,7 +68,7 @@ function HomePage(){
                 const orderedIds = newItems.map(item => item._id)
                 apiClient.post('http://localhost:3001/routines/reorder', {orderedIds})
                 // .then(() => toast.success("Ordem salva com sucesso!"))
-                .catch(() => toast.error("Could not save changes. Please try again."))
+                .catch(() => toast.error(t('toasts.orderSaveFailed')))
 
                 return newItems;
             });
@@ -81,13 +82,15 @@ function HomePage(){
     }
 
     const handleDeleteRoutine = async (routineId) => {
-        try{
-            await apiClient.delete(`http://localhost:3001/routines/${routineId}`);
-            toast.success('Routine deleted successfully!');
-            fetchRoutines();
-        }catch(error) {
-            console.error("Error deleting routine:", error);
-            toast.error('Could not delete routine. Please try again.');
+        if (window.confirm(t('deleteRoutineConfirm'))){
+            try{
+                await apiClient.delete(`http://localhost:3001/routines/${routineId}`);
+                toast.success(t('toasts.routineDeleted'));
+                fetchRoutines();
+            }catch(error) {
+                console.error("Error deleting routine:", error);
+                toast.error(t('toasts.routineDeleteFailed'));
+            }
         }
     }
 
@@ -113,9 +116,9 @@ function HomePage(){
         )}
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2>Routines</h2>
+                <h2>{t('routinesTitle')}</h2>
                 <button 
-                    title='Toggle Edit Mode'
+                    title={t('editModeButton')}
                     onClick={() => setIsEditMode(!isEditMode)}
                     style={{ padding: '8px 12px', background: isEditMode ? '#e53935' : '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
                     <FaPen/>
@@ -147,8 +150,8 @@ function HomePage(){
             )}
             {!isLoading && routines.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-secondary)', border: '1px dashed var(--color-border)', borderRadius: '8px', marginTop: '20px' }}>
-                    <h3>No Routines Found</h3>
-                    <p>Check your connection or add your first routine below.</p>
+                    <h3>{t('noRoutinesFound')}</h3>
+                    <p>{t('noRoutinesMessage')}</p>
                 </div>
             )}
 

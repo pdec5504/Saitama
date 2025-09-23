@@ -41,11 +41,11 @@ function LoginPage() {
         try {
             const response = await apiClient.post('http://localhost:8001/login', { email, password });
             localStorage.setItem('token', response.data.token);
-            toast.success('Login successful!');
+            toast.success(t('toasts.loginSuccess'));
             navigate('/routines');
         } catch (error) {
             console.error("Login error:", error);
-            toast.error(error.response?.data?.message || "Login failed. Please check your credentials.");
+            toast.error(error.response?.data?.message || t('toasts.loginFailed'));
         }
     }
 
