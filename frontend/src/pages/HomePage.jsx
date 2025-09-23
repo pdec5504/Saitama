@@ -13,6 +13,16 @@ import { SortableRoutineCard } from '../components/SortableRoutineCard';
 import Spinner from '../components/Spinner';
 import { useTranslation } from 'react-i18next';
 
+const confirmationButtonStyle = {
+    flex: 1,
+    padding: '10px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    color: 'var(--color-text-primary)',
+    fontWeight: 'bold',
+    fontSize: '16px'
+};
 
 function HomePage(){
     const [routines, setRoutines] = useState([]);
@@ -21,6 +31,7 @@ function HomePage(){
     const [routineToEdit, setRoutineToEdit] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const { t } = useTranslation();
+    const [routineToDelete, setRoutineToDelete] = useState(null);
 
     const fetchRoutines = async () => {
         try{
@@ -81,6 +92,10 @@ function HomePage(){
         setIsAddingRoutine(false);
     }
 
+    const handleDeleteClick = (routineId) => {
+        setRoutineToDelete(routineId);
+    };
+
     const handleDeleteRoutine = async (routineId) => {
         if (window.confirm(t('deleteRoutineConfirm'))){
             try{
@@ -91,6 +106,21 @@ function HomePage(){
                 console.error("Error deleting routine:", error);
                 toast.error(t('toasts.routineDeleteFailed'));
             }
+        }
+    }
+
+    const confirmDeleteRoutine = async () => {
+        if (!routineToDelete) return;
+
+        try{
+            await apiClient.delete(`http://localhost:3001/routines/${routineToDelete}`);
+            toast.success(t('toasts.routineDeleted'));
+            setRoutineToDelete(null); 
+            fetchRoutines();
+        }catch(error) {
+            console.error("Error deleting routine:", error);
+            toast.error(t('toasts.routineDeleteFailed'));
+            setRoutineToDelete(null);
         }
     }
 
@@ -140,7 +170,7 @@ function HomePage(){
                             key={routine._id}
                             id={routine._id}
                             routine={routine}
-                            onDelete={() => handleDeleteRoutine(routine._id)}
+                            onDelete={() => handleDeleteClick(routine._id)}
                             onEdit={() => setRoutineToEdit(routine)}
                             isEditMode={isEditMode}
                         /> 
@@ -155,7 +185,7 @@ function HomePage(){
                 </div>
             )}
 
-            <button title='Add Routine'
+            <button title={t('addRoutineButton')}
                 onClick={() => setIsAddingRoutine(true)}
                 style={{
                     width: '100%',
@@ -186,6 +216,23 @@ function HomePage(){
                     onCancel={() => setRoutineToEdit(null)}
                 />
             )}
+        </Modal>
+        <Modal isOpen={!!routineToDelete} onClose={() => setRoutineToDelete(null)}>
+            <div style={{ textAlign: 'center' }}>
+                <h3 style={{ marginTop: 0 }}>{t('deleteRoutineConfirm')}</h3>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                    <button 
+                        onClick={confirmDeleteRoutine} 
+                        style={{ ...confirmationButtonStyle, background: 'var(--color-primary)' }}>
+                        {t('deleteButtonLabel', 'Delete')} {/* Adicione 'Delete' como fallback */}
+                    </button>
+                    <button 
+                        onClick={() => setRoutineToDelete(null)} 
+                        style={{ ...confirmationButtonStyle, background: 'var(--color-secondary)' }}>
+                        {t('cancelButton')}
+                    </button>
+                </div>
+            </div>
         </Modal>
     </AnimatedPage>
     );

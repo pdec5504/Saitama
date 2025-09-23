@@ -10,9 +10,11 @@ import { DndContext, closestCenter, useSensor, useSensors, PointerSensor, Keyboa
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableExerciseCard } from '../components/SortableExerciseCard';
 import Spinner from '../components/Spinner';
+import { useTranslation } from 'react-i18next';
 
 
 function RoutineDetailPage() {
+    const { t } = useTranslation();
     const [routine, setRoutine] = useState(null);
     const { id } = useParams(); //read the id from URL
     const [isAddingExercise, setIsAddingExercise] = useState(false);

@@ -3,6 +3,7 @@ import apiClient from '../api/apiClient';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import AnimatedPage from '../components/AnimatedPage';
+import { useTranslation } from 'react-i18next';
 
 const inputStyle = {
     width: '100%',
@@ -33,6 +34,7 @@ function RegisterPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const handleSubmit = async (event) => {
         event.preventDefault();

@@ -16,7 +16,7 @@ function LanguageSwitcher() {
 
   return (
     <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-      <button style={buttonStyle} onClick={() => i18n.changeLanguage('pt-BR')}>
+      <button style={buttonStyle} onClick={() => i18n.changeLanguage('pt')}>
         PT-BR
       </button>
       <button style={buttonStyle} onClick={() => i18n.changeLanguage('en')}>
