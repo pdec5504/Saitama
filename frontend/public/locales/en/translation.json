@@ -36,6 +36,8 @@
   "exerciseNamePlaceholder": "Exercise Name (e.g., Bench Press)",
   "phaseLabel": "Phase",
   "deleteButtonLabel": "Delete",
+  "deleteRoutineLabel": "Delete Routine",
+  "deleteExerciseTitle": "Delete Exercise",
   "setsPlaceholder": "Sets",
   "repsPlaceholder": "Reps (e.g., 8-12)",
   "observationPlaceholder": "Observation (optional)",

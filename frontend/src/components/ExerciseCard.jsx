@@ -2,8 +2,10 @@ import { useState } from "react";
 import { FaPen, FaTrash } from "react-icons/fa";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import Spinner from "./Spinner";
+import { useTranslation } from "react-i18next";
 
 function ExerciseCard({ exercise, isEditMode, onEdit, onDelete, dragHandleProps, onImageClick }) {
+    const { t } = useTranslation();
     const [imageLoading, setImageLoading] = useState(true);
     return (
         <div style={{ 
@@ -28,8 +30,8 @@ function ExerciseCard({ exercise, isEditMode, onEdit, onDelete, dragHandleProps,
                     </div>
                     {isEditMode && (
                         <div>
-                        <button title="Edit Exercise" onClick={onEdit} style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaPen color="var(--color-text-secondary)" /></button>
-                        <button title="Delete Exercise" onClick={onDelete} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaTrash color="var(--color-primary)" /></button>
+                        <button title={t('editExerciseTitle')} onClick={onEdit} style={{ marginRight: '5px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaPen color="var(--color-text-secondary)" /></button>
+                        <button title={t('deleteExerciseTitle')} onClick={onDelete} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}><FaTrash color="var(--color-primary)" /></button>
                     </div>
                     )}
                 </div>

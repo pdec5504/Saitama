@@ -36,6 +36,8 @@
   "exerciseNamePlaceholder": "Nome do Exercício (Ex: Supino)",
   "phaseLabel": "Fase",
   "deleteButtonLabel": "Apagar",
+  "deleteRoutineLabel": "Apagar Rotina",
+  "deleteExerciseTitle": "Apagar Exercício",
   "setsPlaceholder": "Séries",
   "repsPlaceholder": "Reps (Ex: 8-12)",
   "observationPlaceholder": "Observação (opcional)",

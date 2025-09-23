@@ -12,6 +12,16 @@ import { SortableExerciseCard } from '../components/SortableExerciseCard';
 import Spinner from '../components/Spinner';
 import { useTranslation } from 'react-i18next';
 
+const confirmationButtonStyle = {
+    flex: 1,
+    padding: '10px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    color: 'var(--color-text-primary)',
+    fontWeight: 'bold',
+    fontSize: '16px'
+};
 
 function RoutineDetailPage() {
     const { t } = useTranslation();
@@ -22,6 +32,7 @@ function RoutineDetailPage() {
     const [isExerciseEditMode, setExerciseEditMode] = useState(false);
     const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
     const [isEnlargedImageLoading, setIsEnlargedImageLoading] = useState(true);
+    const [exerciseToDelete, setExerciseToDelete] = useState(null);
 
     const handleImageClick = (imageUrl) => {
         setIsEnlargedImageLoading(true);
@@ -87,31 +98,27 @@ function RoutineDetailPage() {
     setExerciseToEdit(null);
     setIsAddingExercise(false);
   }
-    
-    const handleDeleteExercise = async (exerciseId) => {
-        if (window.confirm(t('deleteExerciseConfirm'))) {
 
-            setRoutine(prevRoutine => ({
-                ...prevRoutine,
-                exercises: prevRoutine.exercises.filter(ex => ex.originalId !== exerciseId)
-            }));
+  const handleDeleteClick = (exerciseId) => {
+        setExerciseToDelete(exerciseId);
+    };
 
-            try{
-                await apiClient.delete(`http://localhost:4001/routines/${id}/exercises/${exerciseId}`);
-                toast.success(t('toasts.exerciseDeleted'));
-                // setTimeout(() => {
-                //     fetchRoutine(), 1000
-                // })
-                fetchRoutine();
-            }catch(error){
-                toast.error(t('toasts.exerciseDeleteFailed'))
-                fetchRoutine();
-            }
+    const confirmDeleteExercise = async () => {
+        if (!exerciseToDelete) return;
+        
+        try{
+            await apiClient.delete(`http://localhost:4001/routines/${id}/exercises/${exerciseToDelete}`);
+            toast.success(t("toasts.exerciseDeleted"));
+            setExerciseToDelete(null);
+            fetchRoutine();
+        }catch(error){
+            toast.error(t("toasts.exerciseDeleteFailed"));
+            setExerciseToDelete(null);
         }
     }
     
     if (!routine) {
-        return <div>Loading...</div>
+        return <div style={{textAlign: 'center'}}><Spinner /></div>
     }
 
     const validExercises = (routine.exercises || []).filter(ex => ex && ex.originalId);
@@ -145,7 +152,7 @@ function RoutineDetailPage() {
                                     exercise={ex}
                                     isEditMode={isExerciseEditMode}
                                     onEdit={() => setExerciseToEdit(ex)}
-                                    onDelete={() => handleDeleteExercise(ex.originalId)}
+                                    onDelete={() => handleDeleteClick(ex.originalId)}
                                     onImageClick={() => handleImageClick(ex.gifUrl)}
                                 />
                             ))
@@ -186,6 +193,24 @@ function RoutineDetailPage() {
                         onCancel={() => setExerciseToEdit(null)}
                     />
                 )}
+            </Modal>
+
+            <Modal isOpen={!!exerciseToDelete} onClose={() => setExerciseToDelete(null)}>
+                <div style={{ textAlign: 'center' }}>
+                    <h3 style={{ marginTop: 0 }}>{t('deleteExerciseConfirm')}</h3>
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                        <button 
+                            onClick={confirmDeleteExercise} 
+                            style={{ ...confirmationButtonStyle, background: 'var(--color-primary)' }}>
+                            {t('deleteButtonLabel', 'Delete')}
+                        </button>
+                        <button 
+                            onClick={() => setExerciseToDelete(null)} 
+                            style={{ ...confirmationButtonStyle, background: 'var(--color-secondary)' }}>
+                            {t('cancelButton')}
+                        </button>
+                    </div>
+                </div>
             </Modal>
 
             <Modal isOpen={!!enlargedImageUrl} onClose={() => setEnlargedImageUrl(null)} contentClassName='image-modal'>

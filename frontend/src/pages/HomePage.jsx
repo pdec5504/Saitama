@@ -96,19 +96,6 @@ function HomePage(){
         setRoutineToDelete(routineId);
     };
 
-    const handleDeleteRoutine = async (routineId) => {
-        if (window.confirm(t('deleteRoutineConfirm'))){
-            try{
-                await apiClient.delete(`http://localhost:3001/routines/${routineId}`);
-                toast.success(t('toasts.routineDeleted'));
-                fetchRoutines();
-            }catch(error) {
-                console.error("Error deleting routine:", error);
-                toast.error(t('toasts.routineDeleteFailed'));
-            }
-        }
-    }
-
     const confirmDeleteRoutine = async () => {
         if (!routineToDelete) return;
 
@@ -224,7 +211,7 @@ function HomePage(){
                     <button 
                         onClick={confirmDeleteRoutine} 
                         style={{ ...confirmationButtonStyle, background: 'var(--color-primary)' }}>
-                        {t('deleteButtonLabel', 'Delete')} {/* Adicione 'Delete' como fallback */}
+                        {t('deleteButtonLabel', 'Delete')}
                     </button>
                     <button 
                         onClick={() => setRoutineToDelete(null)} 
