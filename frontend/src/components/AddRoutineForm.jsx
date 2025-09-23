@@ -32,7 +32,7 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
                 name: name,
                 weekDay: weekDay
             });
-            toast.success("Routine added successfully!")
+            toast.success(t('toasts.routineAdded'))
             setTimeout(() => {
                 onRoutineAdded();
             }, 1000)

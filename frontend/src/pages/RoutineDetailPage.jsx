@@ -118,7 +118,7 @@ function RoutineDetailPage() {
     }
     
     if (!routine) {
-        return <div style={{textAlign: 'center'}}><Spinner /></div>
+        return <div style={{ width: '30px', height: '30px' }}><Spinner /></div>
     }
 
     const validExercises = (routine.exercises || []).filter(ex => ex && ex.originalId);
