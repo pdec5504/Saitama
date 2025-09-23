@@ -171,15 +171,9 @@ app.get('/routines/:routineId/exercises', async (req, res) => {
 app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
     const { routineId, exerciseId } = req.params;
     const { name, phases } = req.body;
-    const userId = req.user.id;
 
-    const isOwner = await checkRoutineOwnership(routineId, userId);
-    if (!isOwner) {
+    if (!await checkRoutineOwnership(routineId, req.user.id)) {
         return res.status(403).send({ message: "You do not have permission to modify this routine." });
-    }
-
-    if (!name || !Array.isArray(phases) || phases.length === 0) {
-        return res.status(400).send({ message: "Name and at least one phase are required." });
     }
 
     const gifUrl = await getExerciseImageUrl(name);
@@ -191,24 +185,17 @@ app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
 
     const updatedExercise = await exercisesCollection.findOne({ _id: exerciseId });
 
-    const eventData = {
-        id: updatedExercise._id,
-        routineId: updatedExercise.routineId,
-        name: updatedExercise.name,
-        phases: updatedExercise.phases,
-        order: updatedExercise.order,
-        userId: updatedExercise.userId
-    };
-
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
     try{
         const connection = await amqp.connect(rabbitMQUrl);
         const channel = await connection.createChannel();
         const exchange = 'event_exchange';
+        
         const event = {
             type: 'ExerciseUpdated',
-            data: eventData
+            data: updatedExercise 
         };
+
         await channel.assertExchange(exchange, 'fanout', { durable: false })
         channel.publish(exchange, '', Buffer.from(JSON.stringify(event)));
         console.log(`Publisher (Exercises): Event [${event.type}] sent to RabbitMQ.`);

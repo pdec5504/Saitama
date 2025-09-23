@@ -86,26 +86,23 @@ const functions = {
     },
 
     ExerciseUpdated: async (exercise) => {
-        const routine = await collection.findOne({ _id: exercise.routineId, userId: exercise.userId });
-        if (routine){
-            const index = routine.exercises.findIndex(ex => ex.originalId === exercise._id);
-            if(index !== -1){
-                const existingOrder = routine.exercises[index].order;
-                const updatedExercise = {
-                    originalId: exercise._id,
-                    order: existingOrder,
-                    name: exercise.name,
-                    phases: exercise.phases,
-                    gifUrl: exercise.gifUrl
-                    
-                };
-                await collection.updateOne(
-                    { _id: exercise.routineId, "exercises.originalId": exercise._id, userId: exercise.userId },
-                    { $set: { "exercises.$": updatedExercise } }
-                );
-                console.log(`Query: Exercise #${existingOrder} in routine ${exercise.routineId} updated.`);
-            }
-        }
+        const updatedExerciseSubdocument = {
+            originalId: exercise._id,
+            order: exercise.order,
+            name: exercise.name,
+            phases: exercise.phases,
+            gifUrl: exercise.gifUrl
+        };
+
+        await collection.updateOne(
+            { 
+                _id: exercise.routineId, 
+                userId: exercise.userId, 
+                "exercises.originalId": exercise._id 
+            },
+            { $set: { "exercises.$": updatedExerciseSubdocument } }
+        );
+        console.log(`Query: Exercise ${exercise._id} in routine ${exercise.routineId} updated.`);
     },
 
     ExerciseDeleted: async (data) => {

@@ -38,7 +38,7 @@ const functions = {
             gifUrl: exercise.gifUrl
         };
         await collection.updateOne(
-            { _id: exercise.routineId, "exercises.id": exercise._id },
+            { _id: exercise.routineId, userId: exercise.userId, "exercises.id": exercise._id },
             { $set: { "exercises.$": updatedExercise}}
         );
         console.log(`Consumer (Routines): Exercise ${exercise.id} updated in routine ${exercise.routineId}.`)
