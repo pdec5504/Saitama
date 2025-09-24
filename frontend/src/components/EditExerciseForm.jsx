@@ -64,7 +64,9 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
                 phases
             });
             toast.success(t('toasts.exerciseUpdated'));
-            onSave();
+            setTimeout(() => {
+                onSave();
+            }, 1000)
         } catch (error) {
             console.error("Error updating exercise:", error);
             toast.error(t('toasts.exerciseUpdateFailed'));
