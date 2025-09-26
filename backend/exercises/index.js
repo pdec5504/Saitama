@@ -6,10 +6,21 @@ const amqp = require('amqplib');
 const { MongoClient } = require('mongodb');
 const axios = require('axios');
 const authMiddleware = require('./authMiddleware');
+// const cheerio = require('cheerio');
+const stringSimilarity = require('string-similarity');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// const dictionaryPath = path.join(__dirname, 'exercise-dictionary.json');
+// let exerciseDictionary = {};
+// if (fs.existsSync(dictionaryPath)) {
+//     exerciseDictionary = JSON.parse(fs.readFileSync(dictionaryPath, 'utf8'));
+//     console.log(`Exercise dictionary loaded with ${Object.keys(exerciseDictionary).length} entries.`);
+// } else {
+//     console.error("Error: exercise-dictionary.json not found. Please run 'npm run seed' first.");
+// }
 
 let exercisesCollection;
 let routinesCollection;
@@ -22,51 +33,155 @@ const functions = {
     }
 };
 
-const getExerciseImageUrl = async (exerciseName) => {
-    let gifUrl = '';
-    try {
-        const searchName = exerciseName.toLowerCase();
-        console.log(`Searching for ID for: "${searchName}"`);
+const exerciseTranslations = {
+    'supino': 'bench press',
+    'supino reto': 'barbell bench press',
+    'supino inclinado': 'incline dumbbell press',
+    'agachamento': 'squat',
+    'levantamento terra': 'deadlift',
+    'terra':'deadlift',
+    'remada curvada': 'bent over row',
+    'puxada alta': 'lat pulldown',
+    'desenvolvimento': 'overhead press',
+    'rosca direta': 'barbell curl',
+    'triceps testa': 'skull crusher',
+    'leg press': 'leg press',
+    'rosca martelo': 'hammer curl',
+    'remada serrote': 'dumbbell row'
+};
+
+// const getEnglishExerciseNameFromMuscleWiki = async (portugueseName) => {
+//     try {
+//         console.log(`Searching MuscleWiki for: "${portugueseName}"`);
+//         const { data } = await axios.get('https://musclewiki.com/pt-br/');
+//         const $ = cheerio.load(data);
+
+//         const exerciseLinks = {};
         
+//         // CORREÇÃO FINAL: Seletor atualizado para a estrutura mais recente do site.
+//         $('div.exact_item a').each((i, el) => {
+//             const name = $(el).find('h3').text().trim().toLowerCase();
+//             const link = $(el).attr('href');
+//             if (name && link) {
+//                 exerciseLinks[name] = link;
+//             }
+//         });
+
+//         const portugueseExerciseNames = Object.keys(exerciseLinks);
+//         if (portugueseExerciseNames.length === 0) {
+//             console.log('Could not find exercise names on MuscleWiki. The website structure may have changed.');
+//             return portugueseName; // Fallback
+//         }
+
+//         const bestMatch = stringSimilarity.findBestMatch(portugueseName.toLowerCase(), portugueseExerciseNames);
+
+//         if (bestMatch.bestMatch.rating > 0.5) {
+//             const matchedName = bestMatch.bestMatch.target;
+//             const exerciseUrl = exerciseLinks[matchedName];
+//             const englishName = exerciseUrl.split('/').pop().replace(/-/g, ' ');
+//             console.log(`Found match on MuscleWiki: "${matchedName}". English name: "${englishName}"`);
+//             return englishName;
+//         } else {
+//             console.log(`No confident match found on MuscleWiki for "${portugueseName}".`);
+//             return portugueseName;
+//         }
+
+//     } catch (error) {
+//         console.error('Error scraping MuscleWiki:', error.message);
+//         return portugueseName;
+//     }
+// };
+
+// const findExerciseGif = async (exerciseName) => {
+//     let gifUrl = '';
+//     try {
+//         const englishName = await getEnglishExerciseNameFromMuscleWiki(exerciseName);
+//         const searchName = englishName.toLowerCase();
+        
+//         const options = {
+//             method: 'GET',
+//             url: `https://${process.env.RAPIDAPI_HOST}/exercises/name/${encodeURIComponent(searchName)}`,
+//             headers: {
+//                 'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
+//                 'X-RapidAPI-Host': process.env.RAPIDAPI_HOST
+//             }
+//         };
+//         const response = await axios.request(options);
+
+//         let bestMatch = null;
+//         if (response.data && response.data.length > 0) {
+//             bestMatch = response.data.find(ex => ex.name.toLowerCase() === searchName);
+//             if (!bestMatch) {
+//                 bestMatch = response.data[0]; // Pega o primeiro resultado como fallback
+//             }
+//         }
+
+//         if (bestMatch && bestMatch.id) {
+//             gifUrl = `http://localhost:4001/image/${bestMatch.id}`;
+//             console.log(`Found GIF for '${exerciseName}' (searched as '${searchName}')`);
+//         } else {
+//             console.log(`Could not find a matching GIF for '${exerciseName}'.`);
+//         }
+//     } catch (error) {
+//         console.error("Error fetching exercise GIF:", error.message);
+//     }
+//     return gifUrl;
+// };
+
+const findExerciseGif = async (exerciseName) => {
+    const lowerExerciseName = exerciseName.toLowerCase();
+    let searchName = lowerExerciseName; // Por defeito, pesquisamos com o termo original
+
+    // 1. Encontra a melhor correspondência dentro das chaves do nosso dicionário
+    const dictionaryKeys = Object.keys(exerciseTranslations);
+    const bestMatchInDict = stringSimilarity.findBestMatch(lowerExerciseName, dictionaryKeys);
+
+    // Se encontrarmos uma correspondência com mais de 50% de confiança, usamos a tradução
+    if (bestMatchInDict.bestMatch.rating > 0.5) {
+        const matchedKey = bestMatchInDict.bestMatch.target;
+        searchName = exerciseTranslations[matchedKey];
+        console.log(`Found similar match in dictionary for "${exerciseName}": "${matchedKey}". Translating to "${searchName}".`);
+    } else {
+        console.log(`No confident match in local dictionary for "${exerciseName}". Searching with original term.`);
+    }
+
+    // 2. Agora, usa o 'searchName' determinado para consultar a API
+    try {
         const options = {
             method: 'GET',
             url: `https://${process.env.RAPIDAPI_HOST}/exercises/name/${encodeURIComponent(searchName)}`,
-            headers: {
-                'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
-                'X-RapidAPI-Host': process.env.RAPIDAPI_HOST
-            }
+            headers: { 'X-RapidAPI-Key': process.env.RAPIDAPI_KEY, 'X-RapidAPI-Host': process.env.RAPIDAPI_HOST },
+            params: { limit: '10' }
         };
         const response = await axios.request(options);
+        const results = response.data;
 
-        let bestMatch = null;
-        if (response.data && response.data.length > 0) {
-            bestMatch = response.data.find(ex => ex.name.toLowerCase() === searchName);
-            if (!bestMatch) {
-                const potentialMatches = response.data.filter(ex => ex.name.toLowerCase().includes(searchName));
-                if (potentialMatches.length > 0) {
-                    potentialMatches.sort((a, b) => a.name.length - b.name.length);
-                    bestMatch = potentialMatches[0];
-                }
+        if (!results || results.length === 0) {
+            console.log(`No results found from API for "${searchName}".`);
+            return '';
+        }
+
+        // 3. Compara o termo de busca (agora em inglês) com os resultados da API
+        const resultNames = results.map(r => r.name);
+        const bestMatchInApi = stringSimilarity.findBestMatch(searchName, resultNames);
+        
+        if (bestMatchInApi.bestMatch.rating > 0.4) {
+            const matchedName = bestMatchInApi.bestMatch.target;
+            const exerciseData = results.find(r => r.name === matchedName);
+            if (exerciseData) {
+                const gifUrl = `http://localhost:4001/image/${exerciseData.id}`;
+                console.log(`Found best API match: "${matchedName}" (Rating: ${bestMatchInApi.bestMatch.rating.toFixed(2)}).`);
+                return gifUrl;
             }
         }
+        
+        console.log(`No confident match found for "${exerciseName}" in API results.`);
+        return '';
 
-        if (bestMatch && bestMatch.id) {
-            const exerciseApiId = bestMatch.id;
-            gifUrl = `http://localhost:4001/image/${exerciseApiId}`;
-            console.log(`Proxy URL built for '${exerciseName}' (ID: ${exerciseApiId}, Match: '${bestMatch.name}'): ${gifUrl}`);
-        } else {
-            console.log(`Could not find a matching exercise for '${exerciseName}' in the API.`);
-        }
     } catch (error) {
-        if (error.response) {
-            console.error("Error in ExerciseDB API response (status):", error.response.status);
-        } else if (error.request) {
-            console.error("Error in request to ExerciseDB API (no response).");
-        } else {
-            console.error("Error setting up request to ExerciseDB API:", error.message);
-        }
+        console.error("Error fetching exercise GIF:", error.message);
+        return '';
     }
-    return gifUrl;
 };
 
 app.get('/image/:id', async (req, res) => {
@@ -85,9 +200,7 @@ app.get('/image/:id', async (req, res) => {
         });
 
         res.setHeader('Content-Type', 'image/gif');
-        
         response.data.pipe(res);
-
     } catch (error) {
         console.error("Error proxying image:", error.message);
         res.status(500).send({ message: "Could not load image." });
@@ -116,7 +229,7 @@ app.post('/routines/:routineId/exercises', async (req, res) => {
         return res.status(400).send({ message: "Name and at least one phase are required." });
     }
 
-    const gifUrl = await getExerciseImageUrl(name);
+    const gifUrl = await findExerciseGif(name);
     const order = await exercisesCollection.countDocuments({ routineId });
 
     const newExercise = {
@@ -176,7 +289,7 @@ app.put('/routines/:routineId/exercises/:exerciseId', async (req, res) => {
         return res.status(403).send({ message: "You do not have permission to modify this routine." });
     }
 
-    const gifUrl = await getExerciseImageUrl(name);
+    const gifUrl = await findExerciseGif(name);
     const result = await exercisesCollection.updateOne(
         { _id: exerciseId },
         { $set: { name, phases, gifUrl } }
