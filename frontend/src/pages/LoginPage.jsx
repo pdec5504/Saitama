@@ -29,7 +29,7 @@ const buttonStyle = {
     background: 'var(--color-primary)'
 };
 
-function LoginPage() {
+function LoginPage({ setIsAuthenticated }) {
     const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -40,6 +40,7 @@ function LoginPage() {
         try {
             const response = await apiClient.post('http://localhost:8001/login', { email, password });
             localStorage.setItem('token', response.data.token);
+            setIsAuthenticated(true);
             toast.success(t('toasts.loginSuccess'));
             navigate('/routines');
         } catch (error) {

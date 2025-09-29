@@ -9,18 +9,33 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import { useState, useEffect } from 'react';
 
 function App() {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const isAuthenticated = !!localStorage.getItem('token');
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+
+  useEffect(() => {
+    const checkAuth = () => {
+      setIsAuthenticated(!!localStorage.getItem('token'));
+    }
+    checkAuth();
+    window.addEventListener('storage', checkAuth);
+    return () => {
+      window.removeEventListener('storage', checkAuth)
+    }
+  }, [location]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    setIsAuthenticated(false);
     toast.success(t('toasts.logoutSuccess'));
     navigate('/');
   };
+
+  const showLogoutButton = isAuthenticated && location.pathname !== '/' && location.pathname !== '/register';
 
   return(
     <div style={{ maxWidth: '800px', margin: '20px auto', padding: '0 20px'}}>
@@ -33,7 +48,7 @@ function App() {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         <LanguageSwitcher />
-        {isAuthenticated && (
+        {showLogoutButton && (
           <button 
               title={t('logoutButton')}
               onClick={handleLogout}
@@ -54,7 +69,7 @@ function App() {
 
     <AnimatePresence mode='wait'>
       <Routes location={location} key={location.pathname}>
-        <Route path='/' element={<LoginPage/>}/>
+        <Route path='/' element={<LoginPage setIsAuthenticated={setIsAuthenticated}/>}/>
         <Route path='/register' element={<RegisterPage/>}/>
         <Route 
           path='/routines' 
