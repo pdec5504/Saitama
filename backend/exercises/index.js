@@ -24,15 +24,6 @@ if (fs.existsSync(dictionaryPath)) {
     console.error("Error: exercise-dictionary.json not found. This file is required to run the application.");
 }
 
-// const dictionaryPath = path.join(__dirname, 'exercise-dictionary.json');
-// let exerciseDictionary = {};
-// if (fs.existsSync(dictionaryPath)) {
-//     exerciseDictionary = JSON.parse(fs.readFileSync(dictionaryPath, 'utf8'));
-//     console.log(`Exercise dictionary loaded with ${Object.keys(exerciseDictionary).length} entries.`);
-// } else {
-//     console.error("Error: exercise-dictionary.json not found. Please run 'npm run seed' first.");
-// }
-
 let exercisesCollection;
 let routinesCollection;
 
@@ -43,101 +34,6 @@ const functions = {
         console.log(`Consumer (Exercises): Exercises of routine ${id} deleted.`);
     }
 };
-
-// const exerciseTranslations = {
-//     'supino': 'bench press',
-//     'supino reto': 'barbell bench press',
-//     'supino inclinado': 'incline dumbbell press',
-//     'agachamento': 'squat',
-//     'levantamento terra': 'deadlift',
-//     'terra':'deadlift',
-//     'remada curvada': 'bent over row',
-//     'puxada alta': 'lat pulldown',
-//     'desenvolvimento': 'overhead press',
-//     'rosca direta': 'barbell curl',
-//     'triceps testa': 'skull crusher',
-//     'leg press': 'leg press',
-//     'rosca martelo': 'hammer curl',
-//     'remada serrote': 'dumbbell row'
-// };
-
-// const getEnglishExerciseNameFromMuscleWiki = async (portugueseName) => {
-//     try {
-//         console.log(`Searching MuscleWiki for: "${portugueseName}"`);
-//         const { data } = await axios.get('https://musclewiki.com/pt-br/');
-//         const $ = cheerio.load(data);
-
-//         const exerciseLinks = {};
-        
-//         // CORREÇÃO FINAL: Seletor atualizado para a estrutura mais recente do site.
-//         $('div.exact_item a').each((i, el) => {
-//             const name = $(el).find('h3').text().trim().toLowerCase();
-//             const link = $(el).attr('href');
-//             if (name && link) {
-//                 exerciseLinks[name] = link;
-//             }
-//         });
-
-//         const portugueseExerciseNames = Object.keys(exerciseLinks);
-//         if (portugueseExerciseNames.length === 0) {
-//             console.log('Could not find exercise names on MuscleWiki. The website structure may have changed.');
-//             return portugueseName; // Fallback
-//         }
-
-//         const bestMatch = stringSimilarity.findBestMatch(portugueseName.toLowerCase(), portugueseExerciseNames);
-
-//         if (bestMatch.bestMatch.rating > 0.5) {
-//             const matchedName = bestMatch.bestMatch.target;
-//             const exerciseUrl = exerciseLinks[matchedName];
-//             const englishName = exerciseUrl.split('/').pop().replace(/-/g, ' ');
-//             console.log(`Found match on MuscleWiki: "${matchedName}". English name: "${englishName}"`);
-//             return englishName;
-//         } else {
-//             console.log(`No confident match found on MuscleWiki for "${portugueseName}".`);
-//             return portugueseName;
-//         }
-
-//     } catch (error) {
-//         console.error('Error scraping MuscleWiki:', error.message);
-//         return portugueseName;
-//     }
-// };
-
-// const findExerciseGif = async (exerciseName) => {
-//     let gifUrl = '';
-//     try {
-//         const englishName = await getEnglishExerciseNameFromMuscleWiki(exerciseName);
-//         const searchName = englishName.toLowerCase();
-        
-//         const options = {
-//             method: 'GET',
-//             url: `https://${process.env.RAPIDAPI_HOST}/exercises/name/${encodeURIComponent(searchName)}`,
-//             headers: {
-//                 'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
-//                 'X-RapidAPI-Host': process.env.RAPIDAPI_HOST
-//             }
-//         };
-//         const response = await axios.request(options);
-
-//         let bestMatch = null;
-//         if (response.data && response.data.length > 0) {
-//             bestMatch = response.data.find(ex => ex.name.toLowerCase() === searchName);
-//             if (!bestMatch) {
-//                 bestMatch = response.data[0]; // Pega o primeiro resultado como fallback
-//             }
-//         }
-
-//         if (bestMatch && bestMatch.id) {
-//             gifUrl = `http://localhost:4001/image/${bestMatch.id}`;
-//             console.log(`Found GIF for '${exerciseName}' (searched as '${searchName}')`);
-//         } else {
-//             console.log(`Could not find a matching GIF for '${exerciseName}'.`);
-//         }
-//     } catch (error) {
-//         console.error("Error fetching exercise GIF:", error.message);
-//     }
-//     return gifUrl;
-// };
 
 const findExerciseGif = async (exerciseName) => {
     const lowerExerciseName = exerciseName.toLowerCase();
