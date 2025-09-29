@@ -106,19 +106,6 @@ const functions = {
     },
 
     ExerciseDeleted: async (data) => {
-        // const routine = await collection.findOne({ _id: data.routineId, userId: data.userId });
-        // if (routine && Array.isArray(routine.exercises)){
-        //     const remaningExercises = routine.exercises.filter(ex => ex.originalId !== data.id);
-        //     const reorderedExercises = remaningExercises.map((exercise, index) => {
-        //         return { ...exercise, order: index };
-        //     });
-        //     await collection.updateOne(
-        //         { _id: data.routineId, userId: data.userId },
-        //         { $set: { exercises: reorderedExercises } }
-        //     )
-        //     console.log(`Query: Exercise ${data.id} in routine ${data.routineId} deleted.`);
-        // }
-
         const result = await collection.updateOne(
             { _id: data.routineId, userId: data.userId },
             { $pull: { exercises: { originalId: data.id } } }
@@ -178,38 +165,56 @@ app.get('/routines/:id', authMiddleware, async (req, res) => {
 async function startConsumer(){
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
 
-    try{
-        const connection = await amqp.connect(rabbitMQUrl);
-        const channel = await connection.createChannel();
-        const exchange = 'event_exchange';
+    const connectAndConsume = async () => {
+        try{
+            const connection = await amqp.connect(rabbitMQUrl);
+            console.log('Consumer (Query): Connected to RabbitMQ.');
 
-        await channel.assertExchange(exchange, 'fanout', { durable:false})
+            connection.on('error', (err) => {
+                console.error('Consumer (Query): RabbitMQ connection error.', err);
+                setTimeout(connectAndConsume, 5000);
+            });
 
-        const q = await channel.assertQueue('query_events', { durable: true})
-        channel.prefetch(1);
-        console.log(`Consumer (Query) waiting for events in queue: ${q.queue}`);
+            connection.on('close', () => {
+                console.error('Consumer (Query): RabbitMQ connection closed. Reconnecting...');
+                setTimeout(connectAndConsume, 5000);
+            });
 
-        await channel.bindQueue(q.queue, exchange, '');
+            const channel = await connection.createChannel();
+            const exchange = 'event_exchange';
 
-        channel.consume(q.queue, async (msg) => {
-            if(msg.content){
-                const event = JSON.parse(msg.content.toString());
-                console.log(`Consumer (Query): Event received - ${event.type}`)
+            await channel.assertExchange(exchange, 'fanout', { durable:false})
 
-                if(functions[event.type]){
-                    try{
-                        await functions[event.type](event.data)
-                    } catch(error){
-                        console.error(`Error processing event ${event.type}:`, error);
+            const q = await channel.assertQueue('query_events', { durable: true})
+            channel.prefetch(1);
+            console.log(`Consumer (Query) waiting for events in queue: ${q.queue}`);
+
+            await channel.bindQueue(q.queue, exchange, '');
+
+            channel.consume(q.queue, async (msg) => {
+                if(msg.content){
+                    const event = JSON.parse(msg.content.toString());
+                    console.log(`Consumer (Query): Event received - ${event.type}`)
+
+                    if(functions[event.type]){
+                        try{
+                            await functions[event.type](event.data)
+                        } catch(error){
+                            console.error(`Error processing event ${event.type}:`, error);
+                        }
+                        
                     }
-                    
+                    channel.ack(msg);
                 }
-                channel.ack(msg);
-            }
-        });
-    } catch(error){
-        console.error('Error in Consumer (Query):', error);
-    }
+            });
+        } catch(error){
+            console.error('Error in Consumer (Query):', error.message);
+            console.log('Retrying RabbitMQ connection in 5 seconds...');
+            setTimeout(connectAndConsume, 5000);
+        }
+    };
+
+    connectAndConsume();
 }
 
 

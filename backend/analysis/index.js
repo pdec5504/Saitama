@@ -110,35 +110,53 @@ const functions = {
 
 async function startConsumer(){
     const rabbitMQUrl = `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`;
-    try{
-        const connection = await amqp.connect(rabbitMQUrl);
-        const channel = await connection.createChannel();
-        const exchange = "event_exchange";
+    const connectAndConsume = async () => {
+        try{
+            const connection = await amqp.connect(rabbitMQUrl);
+            console.log('Consumer (Analysis): Connected to RabbitMQ.');
 
-        await channel.assertExchange(exchange, 'fanout', { durable:false });
-        const q = await channel.assertQueue('analysis_event', { durable: true });
-        channel.prefetch(1);
-        console.log(`Consumer (Analysis): Waiting for messages in queue: ${q.queue}`);
+            connection.on('error', (err) => {
+                console.error('Consumer (Analysis): RabbitMQ connection error.', err);
+                setTimeout(connectAndConsume, 5000);
+            });
 
-        await channel.bindQueue(q.queue, exchange, '');
+            connection.on('close', () => {
+                console.error('Consumer (Analysis): RabbitMQ connection closed. Reconnecting...');
+                setTimeout(connectAndConsume, 5000);
+            });
 
-        channel.consume(q.queue, async (msg) => {
-            if(msg.content){
-                const event = JSON.parse(msg.content.toString());
-                console.log(`Consumer (Analysis): Event received - ${event.type}`);
+            const channel = await connection.createChannel();
+            const exchange = "event_exchange";
 
-                if(functions[event.type])
-                    try {
-                    await functions[event.type](event.data);
-                } catch(error){
-                    console.error(`Error processing ${event.type} event:`, error);
+            await channel.assertExchange(exchange, 'fanout', { durable:false });
+            const q = await channel.assertQueue('analysis_event', { durable: true });
+            channel.prefetch(1);
+            console.log(`Consumer (Analysis): Waiting for messages in queue: ${q.queue}`);
+
+            await channel.bindQueue(q.queue, exchange, '');
+
+            channel.consume(q.queue, async (msg) => {
+                if(msg.content){
+                    const event = JSON.parse(msg.content.toString());
+                    console.log(`Consumer (Analysis): Event received - ${event.type}`);
+
+                    if(functions[event.type])
+                        try {
+                        await functions[event.type](event.data);
+                    } catch(error){
+                        console.error(`Error processing ${event.type} event:`, error);
+                    }
+                    channel.ack(msg);
                 }
-                channel.ack(msg);
-            }
-        });
-    }catch(error){
-        console.error("Error in Consumer (Analysis):", error.message);
-    }
+            });
+        }catch(error){
+            console.error("Error in Consumer (Analysis):", error.message);
+            console.log('Retrying RabbitMQ connection in 5 seconds...');
+            setTimeout(connectAndConsume, 5000);
+        }
+    };
+
+    connectAndConsume();
 
 }
 
