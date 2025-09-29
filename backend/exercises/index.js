@@ -6,8 +6,8 @@ const amqp = require('amqplib');
 const { MongoClient } = require('mongodb');
 const axios = require('axios');
 const authMiddleware = require('./authMiddleware');
-// const cheerio = require('cheerio');
 const stringSimilarity = require('string-similarity');
+const exerciseTranslations = require('./translations');
 
 const app = express();
 app.use(express.json());
@@ -33,22 +33,22 @@ const functions = {
     }
 };
 
-const exerciseTranslations = {
-    'supino': 'bench press',
-    'supino reto': 'barbell bench press',
-    'supino inclinado': 'incline dumbbell press',
-    'agachamento': 'squat',
-    'levantamento terra': 'deadlift',
-    'terra':'deadlift',
-    'remada curvada': 'bent over row',
-    'puxada alta': 'lat pulldown',
-    'desenvolvimento': 'overhead press',
-    'rosca direta': 'barbell curl',
-    'triceps testa': 'skull crusher',
-    'leg press': 'leg press',
-    'rosca martelo': 'hammer curl',
-    'remada serrote': 'dumbbell row'
-};
+// const exerciseTranslations = {
+//     'supino': 'bench press',
+//     'supino reto': 'barbell bench press',
+//     'supino inclinado': 'incline dumbbell press',
+//     'agachamento': 'squat',
+//     'levantamento terra': 'deadlift',
+//     'terra':'deadlift',
+//     'remada curvada': 'bent over row',
+//     'puxada alta': 'lat pulldown',
+//     'desenvolvimento': 'overhead press',
+//     'rosca direta': 'barbell curl',
+//     'triceps testa': 'skull crusher',
+//     'leg press': 'leg press',
+//     'rosca martelo': 'hammer curl',
+//     'remada serrote': 'dumbbell row'
+// };
 
 // const getEnglishExerciseNameFromMuscleWiki = async (portugueseName) => {
 //     try {
@@ -130,13 +130,11 @@ const exerciseTranslations = {
 
 const findExerciseGif = async (exerciseName) => {
     const lowerExerciseName = exerciseName.toLowerCase();
-    let searchName = lowerExerciseName; // Por defeito, pesquisamos com o termo original
+    let searchName = lowerExerciseName; 
 
-    // 1. Encontra a melhor correspondência dentro das chaves do nosso dicionário
     const dictionaryKeys = Object.keys(exerciseTranslations);
     const bestMatchInDict = stringSimilarity.findBestMatch(lowerExerciseName, dictionaryKeys);
 
-    // Se encontrarmos uma correspondência com mais de 50% de confiança, usamos a tradução
     if (bestMatchInDict.bestMatch.rating > 0.5) {
         const matchedKey = bestMatchInDict.bestMatch.target;
         searchName = exerciseTranslations[matchedKey];
@@ -145,7 +143,6 @@ const findExerciseGif = async (exerciseName) => {
         console.log(`No confident match in local dictionary for "${exerciseName}". Searching with original term.`);
     }
 
-    // 2. Agora, usa o 'searchName' determinado para consultar a API
     try {
         const options = {
             method: 'GET',
@@ -161,7 +158,6 @@ const findExerciseGif = async (exerciseName) => {
             return '';
         }
 
-        // 3. Compara o termo de busca (agora em inglês) com os resultados da API
         const resultNames = results.map(r => r.name);
         const bestMatchInApi = stringSimilarity.findBestMatch(searchName, resultNames);
         
