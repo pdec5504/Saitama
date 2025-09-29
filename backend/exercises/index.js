@@ -7,11 +7,22 @@ const { MongoClient } = require('mongodb');
 const axios = require('axios');
 const authMiddleware = require('./authMiddleware');
 const stringSimilarity = require('string-similarity');
-const exerciseTranslations = require('./translations');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+const dictionaryPath = path.join(__dirname, 'exercise-dictionary.json');
+let exerciseTranslations = {};
+if (fs.existsSync(dictionaryPath)) {
+    const fileContent = fs.readFileSync(dictionaryPath, 'utf8');
+    exerciseTranslations = JSON.parse(fileContent);
+    console.log(`Exercise dictionary loaded with ${Object.keys(exerciseTranslations).length} entries.`);
+} else {
+    console.error("Error: exercise-dictionary.json not found. This file is required to run the application.");
+}
 
 // const dictionaryPath = path.join(__dirname, 'exercise-dictionary.json');
 // let exerciseDictionary = {};
