@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: exercises-service
+spec:
+  selector:
+    app: exercises-service
+  ports:
+    - protocol: TCP
+      port: 4001
+      targetPort: 4001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: exercises-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: exercises-service
+  template:
+    metadata:
+      labels:
+        app: exercises-service
+    spec:
+      containers:
+        - name: exercises-service
+          image: pdec5504/exercises-service:latest 
+          ports:
+            - containerPort: 4001
+          envFrom:
+            - secretRef:
+                name: saitama-secrets
+          env:
+            - name: MONGO_HOST
+              value: "mongodb-service"
+            - name: RABBITMQ_HOST
+              value: "rabbitmq-service"
