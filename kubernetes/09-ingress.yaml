@@ -6,46 +6,46 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
-    - host: localhost # change to current domain
+    - host: localhost
       http:
         paths:
           - path: /api/auth(/|$)(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific 
             backend:
               service:
                 name: auth-service
                 port:
                   number: 8001
           - path: /api/routines(/|$)(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: routines-service
                 port:
                   number: 3001
           - path: /api/exercises(/|$)(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: exercises-service
                 port:
                   number: 4001
           - path: /api/query(/|$)(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: query-service
                 port:
                   number: 6001
           - path: /api/analysis(/|$)(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: analysis-service
                 port:
                   number: 7001
-          - path: /(.*)
-            pathType: Prefix
+          - path: /()(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: frontend-service
