@@ -36,18 +36,18 @@ const functions = {
 };
 
 const findExerciseGif = async (exerciseName) => {
-    const lowerExerciseName = exerciseName.toLowerCase();
-    let searchName = lowerExerciseName; 
+    const normalizedExerciseName = exerciseName.toLowerCase().replace(/ *\([^)]*\) */g, "").trim();
+    let searchName = normalizedExerciseName;
 
     const dictionaryKeys = Object.keys(exerciseTranslations);
-    const bestMatchInDict = stringSimilarity.findBestMatch(lowerExerciseName, dictionaryKeys);
+    const bestMatchInDict = stringSimilarity.findBestMatch(searchName, dictionaryKeys);
 
-    if (bestMatchInDict.bestMatch.rating > 0.5) {
+    if (bestMatchInDict.bestMatch.rating > 0.7) {
         const matchedKey = bestMatchInDict.bestMatch.target;
         searchName = exerciseTranslations[matchedKey];
-        console.log(`Found similar match in dictionary for "${exerciseName}": "${matchedKey}". Translating to "${searchName}".`);
+        console.log(`Match encontrado no dicionário para "${exerciseName}": "${matchedKey}". Traduzindo para "${searchName}".`);
     } else {
-        console.log(`No confident match in local dictionary for "${exerciseName}". Searching with original term.`);
+        console.log(`Nenhum match encontrado no dicionário para "${exerciseName}". Usando o termo original na busca.`);
     }
 
     try {
@@ -61,28 +61,48 @@ const findExerciseGif = async (exerciseName) => {
         const results = response.data;
 
         if (!results || results.length === 0) {
-            console.log(`No results found from API for "${searchName}".`);
+            console.log(`Nenhum resultado encontrado na API para "${searchName}".`);
             return '';
         }
 
-        const resultNames = results.map(r => r.name);
-        const bestMatchInApi = stringSimilarity.findBestMatch(searchName, resultNames);
-        
-        if (bestMatchInApi.bestMatch.rating > 0.4) {
-            const matchedName = bestMatchInApi.bestMatch.target;
-            const exerciseData = results.find(r => r.name === matchedName);
-            if (exerciseData) {
-                const gifUrl = `http://localhost:4001/image/${exerciseData.id}`;
-                console.log(`Found best API match: "${matchedName}" (Rating: ${bestMatchInApi.bestMatch.rating.toFixed(2)}).`);
-                return gifUrl;
+        const lowerSearchName = searchName.toLowerCase();
+        let bestMatch = null;
+        let bestScore = -1;
+
+        results.forEach(result => {
+            const lowerResultName = result.name.toLowerCase();
+            let score = 0;
+
+            if (lowerResultName === lowerSearchName) {
+                score = 10;
             }
+            else if (lowerResultName.startsWith(lowerSearchName)) {
+                score = 9 - ((lowerResultName.length - lowerSearchName.length) * 0.01);
+            }
+            else if (lowerResultName.includes(lowerSearchName)) {
+                score = 5;
+            }
+            else {
+                score = stringSimilarity.compareTwoStrings(lowerSearchName, lowerResultName);
+            }
+            
+            if (score > bestScore) {
+                bestScore = score;
+                bestMatch = result;
+            }
+        });
+
+        if (bestMatch && bestScore >= 5) {
+            const gifUrl = `http://localhost:4001/image/${bestMatch.id}`;
+            console.log(`Melhor match da API encontrado: "${bestMatch.name}" (Pontuação: ${bestScore.toFixed(2)}).`);
+            return gifUrl;
         }
-        
-        console.log(`No confident match found for "${exerciseName}" in API results.`);
+
+        console.log(`Nenhum match confiável encontrado para "${exerciseName}" nos resultados da API.`);
         return '';
 
     } catch (error) {
-        console.error("Error fetching exercise GIF:", error.message);
+        console.error("Erro ao buscar GIF do exercício:", error.message);
         return '';
     }
 };
