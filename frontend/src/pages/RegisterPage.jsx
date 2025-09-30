@@ -39,7 +39,7 @@ function RegisterPage() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            await apiClient.post('http://localhost:8001/register', { email, password });
+            await apiClient.post('/api/auth/register', { email, password });
             toast.success(t('toasts.registrationSuccess'));
             navigate('/'); //redirect to login page
         } catch (error) {

@@ -38,7 +38,7 @@ function LoginPage({ setIsAuthenticated }) {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const response = await apiClient.post('http://localhost:8001/login', { email, password });
+            const response = await apiClient.post('/api/auth/login', { email, password });
             localStorage.setItem('token', response.data.token);
             setIsAuthenticated(true);
             toast.success(t('toasts.loginSuccess'));

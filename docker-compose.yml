@@ -1,0 +1,158 @@
+# version: '3.8'
+
+services:
+  # Microsserviços do Backend
+  auth-service:
+    build:
+      context: ./backend/auth
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_DB_NAME=${MONGO_DB_NAME}
+      - JWT_KEY=${JWT_KEY}
+    networks:
+      - saitama-net
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  routines-service:
+    build:
+      context: ./backend/routines
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_DB_NAME=${MONGO_DB_NAME}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - JWT_KEY=${JWT_KEY}
+    networks:
+      - saitama-net
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  exercises-service:
+    build:
+      context: ./backend/exercises
+      dockerfile: Dockerfile
+    ports:
+      - "4001:4001"
+    environment:
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_DB_NAME=${MONGO_DB_NAME}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - JWT_KEY=${JWT_KEY}
+      - RAPIDAPI_KEY=${RAPIDAPI_KEY}
+      - RAPIDAPI_HOST=${RAPIDAPI_HOST}
+    networks:
+      - saitama-net
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  query-service:
+    build:
+      context: ./backend/query
+      dockerfile: Dockerfile
+    ports:
+      - "6001:6001"
+    environment:
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_DB_NAME=${MONGO_DB_NAME}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - JWT_KEY=${JWT_KEY}
+    networks:
+      - saitama-net
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  analysis-service:
+    build:
+      context: ./backend/analysis
+      dockerfile: Dockerfile
+    ports:
+      - "7001:7001"
+    environment:
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_DB_NAME=${MONGO_DB_NAME}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+    networks:
+      - saitama-net
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  # Frontend
+  frontend-service:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - saitama-net
+    depends_on:
+      - auth-service
+      - routines-service
+      - exercises-service
+      - query-service
+
+  # MongoDB and RabbitMQ
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - saitama-net
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    networks:
+      - saitama-net
+
+volumes:
+  mongo-data:
+
+networks:
+  saitama-net:
+    driver: bridge

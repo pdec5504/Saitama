@@ -33,7 +33,7 @@ function EditRoutineForm({ routine, onSave, onCancel }){
     const handleSubmit = async (event) => {
         event.preventDefault();
         try{
-            await apiClient.put(`http://localhost:3001/routines/${routine._id}`, { name, weekDay });
+            await apiClient.put(`/api/routines/routines/${routine._id}`, { name, weekDay });
             toast.success(t('toasts.routineUpdated'));
             setTimeout(() => {
                 onSave();

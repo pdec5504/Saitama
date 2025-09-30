@@ -28,7 +28,7 @@ function AddRoutineForm({ onRoutineAdded, onCancel}) {
         }
 
         try{
-            await apiClient.post('http://localhost:3001/routines', {
+            await apiClient.post('/api/routines/routines', {
                 name: name,
                 weekDay: weekDay
             });

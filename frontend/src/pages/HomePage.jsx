@@ -35,7 +35,7 @@ function HomePage(){
 
     const fetchRoutines = async () => {
         try{
-            const res = await apiClient.get('http://localhost:6001/routines');
+            const res = await apiClient.get('/api/query/routines');
             const data = res.data || {};
             const routinesArray = Array.isArray(data) ? data : Object.values(data);
             setRoutines(routinesArray)
@@ -77,7 +77,7 @@ function HomePage(){
                 const newItems = arrayMove(items, oldIndex, newIndex);
 
                 const orderedIds = newItems.map(item => item._id)
-                apiClient.post('http://localhost:3001/routines/reorder', {orderedIds})
+                apiClient.post('/api/routines/routines/reorder', {orderedIds})
                 // .then(() => toast.success("Ordem salva com sucesso!"))
                 .catch(() => toast.error(t('toasts.orderSaveFailed')))
 
@@ -100,7 +100,7 @@ function HomePage(){
         if (!routineToDelete) return;
 
         try{
-            await apiClient.delete(`http://localhost:3001/routines/${routineToDelete}`);
+            await apiClient.delete(`/api/routines/routines/${routineToDelete}`);
             toast.success(t('toasts.routineDeleted'));
             setRoutineToDelete(null); 
             fetchRoutines();

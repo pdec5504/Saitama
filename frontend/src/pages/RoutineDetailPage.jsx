@@ -41,7 +41,7 @@ function RoutineDetailPage() {
 
     const fetchRoutine = async () => {
         try{
-            const res = await apiClient.get(`http://localhost:6001/routines/${id}`);
+            const res = await apiClient.get(`/api/query/routines/${id}`);
             if (res.data && res.data.exercises) {
                 res.data.exercises = res.data.exercises.filter(ex => ex && ex.originalId);
                 res.data.exercises.sort((a, b) => a.order - b.order);
@@ -86,7 +86,7 @@ function RoutineDetailPage() {
             }));
 
             const orderedIds = reorderedExercises.map(ex => ex.originalId);
-            apiClient.post(`http://localhost:4001/routines/${id}/exercises/reorder`, { orderedIds })
+            apiClient.post(`/api/exercises/routines/${id}/exercises/reorder`, { orderedIds })
                 .catch(() => toast.error(t('toasts.orderSaveFailedExercises')));
 
             return { ...prevRoutine, exercises: reorderedExercises };
@@ -107,7 +107,7 @@ function RoutineDetailPage() {
         if (!exerciseToDelete) return;
         
         try{
-            await apiClient.delete(`http://localhost:4001/routines/${id}/exercises/${exerciseToDelete}`);
+            await apiClient.delete(`/api/exercises/routines/${id}/exercises/${exerciseToDelete}`);
             toast.success(t("toasts.exerciseDeleted"));
             setExerciseToDelete(null);
             fetchRoutine();
@@ -187,7 +187,7 @@ function RoutineDetailPage() {
             
             <Modal isOpen={isAddingExercise} onClose={() => setIsAddingExercise(false)}>
                 <AddExerciseForm
-                    routineId={routine._id}
+                    routineId={id}
                     onExerciseAdded={handleUpdateAndCloseForms}
                     onCancel={() => setIsAddingExercise(false)}
                 />

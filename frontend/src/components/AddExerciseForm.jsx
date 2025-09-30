@@ -62,7 +62,7 @@ function AddExerciseForm({ routineId, onExerciseAdded, onCancel}){
         }
 
         try{
-            await apiClient.post(`http://localhost:4001/routines/${routineId}/exercises`, {
+            await apiClient.post(`/api/exercises/routines/${routineId}/exercises`, {
                 name,
                 phases
             });

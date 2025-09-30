@@ -78,6 +78,7 @@ app.post('/login', async (req, res) => {
 
 app.listen(8001, async () => {
     console.log("Authentication server is running on port 8001");
+    console.log(`[DEBUG] Attempting to connect to MongoDB host: '${process.env.MONGO_HOST}'`);
 
     try {
         const encodedPassword = encodeURIComponent(process.env.MONGO_PASSWORD);

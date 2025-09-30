@@ -59,7 +59,7 @@ function EditExerciseForm({ exercise, routineId, onSave, onCancel }){
         }
 
         try {
-            await apiClient.put(`http://localhost:4001/routines/${routineId}/exercises/${exercise.originalId}`, {
+            await apiClient.put(`/api/exercises/routines/${routineId}/exercises/${exercise.originalId}`, {
                 name,
                 phases
             });
