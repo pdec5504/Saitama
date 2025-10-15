@@ -93,7 +93,7 @@ const findExerciseGif = async (exerciseName) => {
         });
 
         if (bestMatch && bestScore >= 5) {
-            const gifUrl = `http://localhost:4001/image/${bestMatch.id}`;
+            const gifUrl = `/api/exercises/image/${bestMatch.id}`;
             console.log(`Melhor match da API encontrado: "${bestMatch.name}" (Pontuação: ${bestScore.toFixed(2)}).`);
             return gifUrl;
         }
